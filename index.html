@@ -460,7 +460,80 @@
       padding: 0;
     }
     .slideshow-dots button.active { background: #f7d44a; }
+
+    /* ===== Intro WOW — entrata estetica della home (JS-gated) ===== */
+    .cogu-intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #1e1b1a;
+      display: grid;
+      place-items: center;
+      will-change: transform;
+    }
+    .cogu-intro-mark { text-align: center; padding: 0 24px; }
+    .cogu-intro-brand {
+      display: block;
+      font-size: clamp(3rem, 13vw, 7.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      background: linear-gradient(135deg, #e0533f 0%, #bc2f2f 55%, #8b1e1e 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .cogu-intro-tag {
+      display: block;
+      margin-top: 16px;
+      color: #c2b9ab;
+      font-weight: 600;
+      font-size: clamp(0.78rem, 2.4vw, 1.05rem);
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+    }
+    .cogu-intro-rule {
+      display: block;
+      height: 3px;
+      width: min(280px, 62vw);
+      margin: 24px auto 0;
+      background: #f7d44a;
+      border-radius: 3px;
+      transform: scaleX(0);
+      transform-origin: center;
+    }
+    /* Stati iniziali dell'hero: applicati SOLO durante l'intro (classe aggiunta
+       da JS solo se non c'è reduced-motion). Senza JS l'hero resta visibile. */
+    html.cogu-intro .hero-badge,
+    html.cogu-intro .hero-content h1,
+    html.cogu-intro .hero-lead,
+    html.cogu-intro .hero-desc,
+    html.cogu-intro .hero-stats,
+    html.cogu-intro .hero-content > .btn-primary,
+    html.cogu-intro .ai-warning,
+    html.cogu-intro .hero-visual,
+    html.cogu-intro .hero > .container:last-child > div {
+      opacity: 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cogu-intro-overlay { display: none !important; }
+    }
   </style>
+
+  <!-- Intro: arma lo stato nascosto PRIMA del primo paint (no FOUC), con failsafe -->
+  <script>
+    (function () {
+      try {
+        var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (rm) return; // niente intro: l'hero resta visibile
+        var d = document.documentElement;
+        d.classList.add('cogu-intro');
+        window.__coguReveal = function () { d.classList.remove('cogu-intro'); };
+        // Se il modulo anime.js non parte (CDN bloccata / browser vecchio), rivela comunque.
+        window.__coguFailsafe = setTimeout(window.__coguReveal, 3000);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
 
@@ -820,6 +893,105 @@
   }
   function cogUSlideshow(delta) {
     cogUSlideshowGoto(cogUSlideIndex + delta);
+  }
+</script>
+
+<!-- ===== Intro WOW con anime.js (estetica, progressive enhancement) ===== -->
+<script type="module">
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce) {
+    try {
+      const { createTimeline, animate, stagger, utils } =
+        await import('https://cdn.jsdelivr.net/npm/animejs/+esm');
+
+      // Sipario
+      const overlay = document.createElement('div');
+      overlay.className = 'cogu-intro-overlay';
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.innerHTML =
+        '<div class="cogu-intro-mark">' +
+        '<span class="cogu-intro-brand">COG U</span>' +
+        '<span class="cogu-intro-tag">Sindacato del Cognitariato</span>' +
+        '<span class="cogu-intro-rule"></span>' +
+        '</div>';
+      document.body.appendChild(overlay);
+
+      // Titolo: split in parole preservando lo <span> della keyword
+      const h1 = document.querySelector('.hero-content h1');
+      const words = [];
+      if (h1) {
+        const frag = document.createDocumentFragment();
+        Array.from(h1.childNodes).forEach((node) => {
+          if (node.nodeType === 3) {
+            node.textContent.split(/(\s+)/).forEach((tok) => {
+              if (tok === '' ) return;
+              if (/^\s+$/.test(tok)) { frag.appendChild(document.createTextNode(tok)); return; }
+              const w = document.createElement('span');
+              w.className = 'cogu-w';
+              w.style.display = 'inline-block';
+              w.textContent = tok;
+              frag.appendChild(w);
+              words.push(w);
+            });
+          } else if (node.nodeType === 1) {
+            node.style.display = 'inline-block';
+            frag.appendChild(node);
+            words.push(node);
+          } else {
+            frag.appendChild(node);
+          }
+        });
+        h1.innerHTML = '';
+        h1.appendChild(frag);
+        utils.set(h1, { opacity: 1 });
+        utils.set(words, { opacity: 0 });
+      }
+
+      const startFloat = () => {
+        animate('.hero-visual', {
+          translateY: [0, -10],
+          loop: true,
+          alternate: true,
+          duration: 2600,
+          ease: 'inOutSine',
+        });
+      };
+
+      const cleanup = () => {
+        if (window.__coguFailsafe) clearTimeout(window.__coguFailsafe);
+        if (window.__coguReveal) window.__coguReveal();
+        overlay.remove();
+        startFloat();
+      };
+
+      const tl = createTimeline({
+        defaults: { ease: 'outExpo', duration: 720 },
+        onComplete: cleanup,
+      });
+
+      tl
+        // Sipario: wordmark, tagline, riga gialla che si traccia
+        .add('.cogu-intro-brand', { opacity: [0, 1], translateY: [30, 0], duration: 780 })
+        .add('.cogu-intro-tag',   { opacity: [0, 1], translateY: [14, 0] }, '-=500')
+        .add('.cogu-intro-rule',  { scaleX: [0, 1], duration: 640 }, '-=430')
+        // Wipe verso l'alto che rivela l'hero
+        .add('.cogu-intro-overlay', { translateY: ['0%', '-105%'], duration: 900, ease: 'inOutQuart' }, '+=260')
+        // Cascata dell'hero (parte mentre il sipario sale)
+        .add('.hero-badge', { opacity: [0, 1], scale: [0.82, 1], translateY: [12, 0] }, '-=560')
+        .add(words.length ? words : '.hero-content h1',
+             { opacity: [0, 1], translateY: [32, 0], duration: 760, delay: stagger(42) }, '-=470')
+        .add('.hero-lead',  { opacity: [0, 1], translateY: [16, 0] }, '-=520')
+        .add('.hero-desc',  { opacity: [0, 1], translateY: [16, 0] }, '-=560')
+        .add('.hero-stats', { opacity: [0, 1], translateY: [16, 0] }, '-=560')
+        .add('.hero-content > .btn-primary',
+             { opacity: [0, 1], scale: [0.9, 1], translateY: [10, 0], ease: 'outBack' }, '-=520')
+        .add('.ai-warning', { opacity: [0, 1], translateY: [16, 0] }, '-=560')
+        .add('.hero > .container:last-child > div', { opacity: [0, 1], translateY: [12, 0] }, '-=600')
+        .add('.hero-visual', { opacity: [0, 1], scale: [0.9, 1], translateY: [18, 0], duration: 860, ease: 'outExpo' }, '-=940');
+    } catch (e) {
+      // Qualsiasi errore (import CDN, API): rivela comunque l'hero.
+      if (window.__coguReveal) window.__coguReveal();
+    }
   }
 </script>
 </body>

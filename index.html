@@ -419,6 +419,40 @@
       .grid-2col { grid-template-columns: 1fr !important; }
     }
 
+    /* Video & Interviste */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 32px;
+    }
+    .video-card {
+      background: white;
+      border-radius: 28px;
+      padding: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+      border: 1px solid #e7e0d4;
+    }
+    .video-embed {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #000;
+    }
+    .video-embed iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .video-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 16px 4px 4px;
+    }
+
     /* visually-hidden helper for a11y */
     .sr-only {
       position: absolute !important;
@@ -636,6 +670,7 @@
         <li><a href="#legal">Assistenza Legale</a></li>
         <li><a href="#strike">Sciopero &amp; Picchetto</a></li>
         <li><a href="#advocacy">Advocacy</a></li>
+        <li><a href="#video">Video &amp; Interviste</a></li>
         <li><a href="#membership">Membership</a></li>
         <li><a href="#merch">T‑Shirts &amp; Merch</a></li>
       </ul>
@@ -801,6 +836,30 @@
           <i class="fas fa-address-book card-icon" aria-hidden="true"></i>
           <h3>Rubrica rappresentanti</h3>
           <p>Contatta direttamente eurodeputat3 e politici, consiglieri municipali e regionali con template predefiniti.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="video">
+    <div class="container">
+      <h2 class="section-title">Video &amp; Interviste <i class="fas fa-video" aria-hidden="true"></i></h2>
+      <p class="section-sub">Voci dal cognitariato: interviste, testimonianze e contenuti brevi sulla lotta contro lo sfruttamento algoritmico.</p>
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="video-embed">
+            <iframe src="https://www.youtube-nocookie.com/embed/xphrQ11NviI" title="COG U — Video 1" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
+        </div>
+        <div class="video-card">
+          <div class="video-embed">
+            <iframe src="https://www.youtube-nocookie.com/embed/IGKsa9LyRfs" title="COG U — Video 2" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
+        </div>
+        <div class="video-card">
+          <div class="video-embed">
+            <iframe src="https://www.youtube-nocookie.com/embed/oT-w31xlPs4" title="COG U — Video 3" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
         </div>
       </div>
     </div>

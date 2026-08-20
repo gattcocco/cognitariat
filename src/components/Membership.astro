@@ -76,12 +76,16 @@ const tiers = [
           body: JSON.stringify({ tier }),
         });
         const data = await res.json();
-        if (data.url) {
+        if (res.ok && data.url) {
           window.location.href = data.url;
         } else {
-          throw new Error(data.error ?? 'Errore imprevisto');
+          // Es. 409 "hai già un'iscrizione attiva": mostrare il messaggio specifico del
+          // server, non un generico "riprova" che confonderebbe in quel caso.
+          alert(data.error ?? 'Non siamo riusciti ad avviare il pagamento. Riprova tra poco o scrivici a cognitariatz@proton.me');
+          btn.disabled = false;
+          btn.textContent = 'Iscriviti';
         }
-      } catch (err) {
+      } catch {
         alert('Non siamo riusciti ad avviare il pagamento. Riprova tra poco o scrivici a cognitariatz@proton.me');
         btn.disabled = false;
         btn.textContent = 'Iscriviti';

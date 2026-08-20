@@ -1,0 +1,29 @@
+{
+  "name": "cognitariat",
+  "type": "module",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "wrangler pages dev -- npm run dev:astro",
+    "dev:astro": "astro dev",
+    "build": "astro build",
+    "preview": "wrangler pages dev ./dist",
+    "astro": "astro",
+    "check": "astro check",
+    "check:functions": "tsc --noEmit -p functions/tsconfig.json",
+    "check:all": "npm run check && npm run check:functions"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "astro": "^7.2.4",
+    "stripe": "^17.3.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@cloudflare/workers-types": "^5.20260815.1",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.124.0"
+  }
+}

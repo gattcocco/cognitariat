@@ -1,0 +1,121 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "COG U · Sindacato del Cognitariato",
+  description = "COG U — il primo sindacato online in Italia. E' al 100% con i/le cognitari/e GenZ e Millennial minacciat3 dall'AI: agitazione, sciopero, contrattazione collettiva contro lo sfruttamento algoritmico di precari/e.",
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>{title}</title>
+
+  <meta name="description" content={description}>
+  <meta name="theme-color" content="#bc2f2f">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="COG U · Sindacato del Cognitariato">
+  <meta property="og:description" content="Difenditi dall'AI con il sindacato del cognitariato che non teme il capitale digitale.">
+  <meta property="og:locale" content="it_IT">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="COG U · Sindacato del Cognitariato">
+  <meta name="twitter:description" content="Agisci sull'AI. Tutela legale, contrattazione collettiva, sciopero, advocacy e governance.">
+
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "COG U — Cognitive Workers Union",
+    "alternateName": "Sindacato del Cognitariato",
+    "description": "Progetto/PRD di un sindacato online per il cognitariato italiano: tutela legale, contrattazione collettiva, sciopero digitale e advocacy contro lo sfruttamento algoritmico del lavoro cognitivo.",
+    "url": "https://cognitariatzone.org/",
+    "logo": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23bc2f2f'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Inter,sans-serif' font-size='34' font-weight='800' fill='%23fefcf5' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E",
+    "slogan": "Agisci sull'AI",
+    "areaServed": { "@type": "AdministrativeArea", "name": "Italia" },
+    "knowsAbout": ["Intelligenza artificiale e lavoro", "Contrattazione collettiva", "Lavoro cognitivo precario", "Diritti del lavoro digitale"],
+    "sameAs": [
+      "https://github.com/gattcocco/cognitariat",
+      "https://gattcocco.github.io/mappa-e-contenuti/"
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Fasce di iscrizione COG U",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "name": "Tessera Solidarietà",
+          "description": "Per disoccupat@, student@ e stagist@. Accesso completo a tutte le funzioni sindacali.",
+          "price": "10",
+          "priceCurrency": "EUR",
+          "priceSpecification": { "@type": "UnitPriceSpecification", "price": "10", "priceCurrency": "EUR", "billingDuration": "P1Y" }
+        },
+        {
+          "@type": "Offer",
+          "name": "Tessera Precariə",
+          "description": "Per contratti a termine, collaborazioni e partite IVA.",
+          "price": "20",
+          "priceCurrency": "EUR",
+          "priceSpecification": { "@type": "UnitPriceSpecification", "price": "20", "priceCurrency": "EUR", "billingDuration": "P1Y" }
+        },
+        {
+          "@type": "Offer",
+          "name": "Tessera Stabile",
+          "description": "Per lavoratori a tempo indeterminato, a sostegno del fondo comune.",
+          "price": "30",
+          "priceCurrency": "EUR",
+          "priceSpecification": { "@type": "UnitPriceSpecification", "price": "30", "priceCurrency": "EUR", "billingDuration": "P1Y" }
+        }
+      ]
+    }
+  })} />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23bc2f2f'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Inter,sans-serif' font-size='34' font-weight='800' fill='%23fefcf5' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <script is:inline>
+    (function () {
+      try {
+        var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (rm) return; // niente intro: l'hero resta visibile
+        var d = document.documentElement;
+        d.classList.add('cogu-intro');
+        window.__coguReveal = function () { d.classList.remove('cogu-intro'); };
+        // Se il modulo anime.js non parte (CDN bloccata / browser vecchio), rivela comunque.
+        window.__coguFailsafe = setTimeout(window.__coguReveal, 3000);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <slot />
+
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener('click', function (this: HTMLAnchorElement, e: Event) {
+        const hash = this.getAttribute('href');
+        if (hash && hash.length > 1 && hash.startsWith('#')) {
+          const target = document.querySelector(hash);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

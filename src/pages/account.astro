@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+<BaseLayout title="Area membro — COG U">
+  <Header />
+  <main class="container" style="padding: 60px 0;">
+    <div id="account-loading" style="text-align:center;">Carico la tua tessera…</div>
+
+    <div id="account-signed-out" style="display:none; text-align:center;">
+      <p>Devi accedere per vedere la tua tessera.</p>
+      <a class="btn-primary" href="/#membership" style="margin-top: 16px;">Vai all'iscrizione</a>
+    </div>
+
+    <div id="account-content" style="display:none;">
+      <div class="member-card">
+        <div class="member-card-tier" id="mc-tier">—</div>
+        <span class="member-card-status" id="mc-status">—</span>
+        <dl>
+          <dt>Iscritto/a come</dt><dd id="mc-name">—</dd>
+          <dt>Email</dt><dd id="mc-email">—</dd>
+          <dt>Rinnovo</dt><dd id="mc-renewal">—</dd>
+        </dl>
+      </div>
+
+      <div class="account-actions">
+        <button class="btn-outline" type="button" id="btn-portal">
+          <i class="fas fa-credit-card" aria-hidden="true"></i> Gestisci abbonamento / fattura
+        </button>
+        <button class="btn-outline" type="button" id="btn-logout">
+          <i class="fas fa-right-from-bracket" aria-hidden="true"></i> Esci
+        </button>
+        <button type="button" id="btn-delete" style="background:none; border:none; color:#8b1e1e; text-decoration:underline; cursor:pointer; font-size:0.85rem; margin-top: 8px;">
+          Elimina il mio account e i miei dati
+        </button>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  import { supabase } from '../lib/supabase-browser';
+  import { TIER_LABELS } from '../lib/tiers';
+
+  const STATUS_LABELS: Record<string, string> = {
+    pending: 'Iscrizione avviata, in attesa di pagamento',
+    payment_pending: 'Pagamento in corso di conferma',
+    active: 'Attiva',
+    past_due: 'Pagamento non riuscito — verifica il metodo di pagamento',
+    expired: 'Scaduta',
+    canceled: 'Annullata',
+  };
+
+  async function init() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const loading = document.getElementById('account-loading')!;
+
+    if (!session) {
+      loading.style.display = 'none';
+      document.getElementById('account-signed-out')!.style.display = 'block';
+      return;
+    }
+
+    const [{ data: profile }, { data: membership }] = await Promise.all([
+      supabase.from('member_profiles').select('full_name').eq('id', session.user.id).single(),
+      supabase.from('memberships').select('tier, status, current_period_end').eq('user_id', session.user.id).single(),
+    ]);
+
+    loading.style.display = 'none';
+    document.getElementById('account-content')!.style.display = 'block';
+
+    const tierValue = membership?.tier as string | null | undefined;
+    document.getElementById('mc-tier')!.textContent = tierValue ? (TIER_LABELS[tierValue as keyof typeof TIER_LABELS] ?? tierValue) : 'Nessuna fascia attiva';
+    document.getElementById('mc-status')!.textContent = STATUS_LABELS[membership?.status ?? 'pending'];
+    document.getElementById('mc-name')!.textContent = profile?.full_name || session.user.email || '—';
+    document.getElementById('mc-email')!.textContent = session.user.email ?? '—';
+    document.getElementById('mc-renewal')!.textContent = membership?.current_period_end ?? '—';
+
+    document.getElementById('btn-portal')!.addEventListener('click', async () => {
+      const res = await fetch('/api/portal', {
+        method: 'POST',
+        headers: { authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert(data.error ?? 'Nessun abbonamento da gestire ancora.');
+    });
+
+    document.getElementById('btn-logout')!.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    });
+
+    document.getElementById('btn-delete')!.addEventListener('click', async () => {
+      const ok = confirm('Sicura/o? L\'account, la tessera e l\'abbonamento verranno cancellati definitivamente.');
+      if (!ok) return;
+      await fetch('/api/account-delete', {
+        method: 'POST',
+        headers: { authorization: `Bearer ${session.access_token}` },
+      });
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    });
+  }
+
+  init();
+</script>

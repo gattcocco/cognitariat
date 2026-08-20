@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Accesso — COG U">
+  <main class="container" style="padding: 80px 0; text-align: center;">
+    <p id="callback-message">Accesso in corso…</p>
+  </main>
+</BaseLayout>
+
+<script>
+  import { supabase } from '../../lib/supabase-browser';
+
+  const messageEl = document.getElementById('callback-message')!;
+
+  async function run() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (error || !session) {
+      messageEl.textContent = 'Il link non è valido o è scaduto. Torna alla home e richiedine uno nuovo.';
+      return;
+    }
+
+    // Nota: member_profiles viene creato dal trigger DB al momento della conferma email
+    // (supabase/migrations/0001_member_profiles.sql), non da qui — il client non scrive
+    // mai dati di profilo durante il callback.
+
+    const params = new URLSearchParams(location.search);
+    const tier = params.get('tier');
+
+    if (tier) {
+      messageEl.textContent = 'Accesso riuscito, ti portiamo al pagamento…';
+      try {
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ tier }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+      } catch {
+        // fallback: manda comunque all'area membro
+      }
+    }
+
+    window.location.href = '/account';
+  }
+
+  run();
+</script>

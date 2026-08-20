@@ -1,0 +1,91 @@
+---
+import MembershipSignup from './MembershipSignup.astro';
+
+const tiers = [
+  { id: 'solidarieta', icon: 'fa-hand-holding-heart', title: 'Solidarietà', desc: "Disoccupat@, studentə, stagista. Accesso completo a tutte le funzioni sindacali.", price: 10 },
+  { id: 'precaria', icon: 'fa-briefcase', title: 'Precariə', desc: 'Contratto a termine, Collaborazioni, Partite IVA. La forza del cognitariato flessibile.', price: 20 },
+  { id: 'stabile', icon: 'fa-building', title: 'Stabile', desc: 'Tempo indeterminato, reddito continuativo. Sostieni il fondo comune.', price: 30 },
+];
+---
+<section id="membership">
+  <div class="container">
+    <h2 class="section-title">Iscrizione &amp; Benefit <i class="fas fa-id-card" aria-hidden="true"></i></h2>
+    <p class="section-sub">Tesseramento digitale, assistenza concreta e piattaforma di lotta. Scegli la fascia in base alla tua condizione lavorativa.</p>
+    <div class="cards-grid">
+      {tiers.map((t) => (
+        <div class="card">
+          <div class="card-icon"><i class={`fas ${t.icon}`} aria-hidden="true"></i></div>
+          <h3>{t.title}</h3>
+          <p>{t.desc}</p>
+          <div class="price-tier" style="margin-top: 20px;"><span class="price">€{t.price} <small>/anno</small></span></div>
+          <div class="tier-card-cta">
+            <button class="btn-primary" type="button" data-tier-button={t.id} style="width:100%; justify-content:center;">
+              Iscriviti
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+    <ul class="member-list">
+      <li><i class="fas fa-check-circle" aria-hidden="true"></i> Tessera sindacale digitale con QR</li>
+      <li><i class="fas fa-gavel" aria-hidden="true"></i> Consulenza contratti + AI clausole tossiche</li>
+      <li><i class="fas fa-people-arrows" aria-hidden="true"></i> Azione collettiva e fondo sciopero</li>
+      <li><i class="fas fa-chalkboard-user" aria-hidden="true"></i> Assemblee e voto digitale</li>
+      <li><i class="fas fa-percent" aria-hidden="true"></i> Sconti network di reciproca</li>
+    </ul>
+
+    <div style="margin-top: 48px;">
+      <MembershipSignup />
+    </div>
+  </div>
+</section>
+
+<script>
+  import { supabase } from '../lib/supabase-browser';
+
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-tier-button]');
+
+  async function updateButtonsForAuthState() {
+    const { data: { session } } = await supabase.auth.getSession();
+    buttons.forEach((btn) => {
+      btn.textContent = session ? 'Iscriviti' : 'Accedi per iscriverti';
+    });
+  }
+  updateButtonsForAuthState();
+  supabase.auth.onAuthStateChange(() => updateButtonsForAuthState());
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const tier = btn.dataset.tierButton!;
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        document.dispatchEvent(new CustomEvent('cogu:select-tier', { detail: tier }));
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Un attimo…';
+      try {
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ tier }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error(data.error ?? 'Errore imprevisto');
+        }
+      } catch (err) {
+        alert('Non siamo riusciti ad avviare il pagamento. Riprova tra poco o scrivici a cognitariatz@proton.me');
+        btn.disabled = false;
+        btn.textContent = 'Iscriviti';
+      }
+    });
+  });
+</script>

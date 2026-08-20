@@ -21,6 +21,7 @@ import Footer from '../components/Footer.astro';
           <dt>Iscritto/a come</dt><dd id="mc-name">—</dd>
           <dt>Email</dt><dd id="mc-email">—</dd>
           <dt>Rinnovo</dt><dd id="mc-renewal">—</dd>
+        <dt>Informativa privacy</dt><dd id="mc-privacy">—</dd>
         </dl>
       </div>
 
@@ -31,9 +32,14 @@ import Footer from '../components/Footer.astro';
         <button class="btn-outline" type="button" id="btn-logout">
           <i class="fas fa-right-from-bracket" aria-hidden="true"></i> Esci
         </button>
-        <button type="button" id="btn-delete" style="background:none; border:none; color:#8b1e1e; text-decoration:underline; cursor:pointer; font-size:0.85rem; margin-top: 8px;">
-          Elimina il mio account e i miei dati
-        </button>
+        <!--
+          La cancellazione automatica è disabilitata di proposito finché la retention
+          matrix non è definita (piano §6) — vedi functions/api/account-delete.ts.
+          Nel frattempo si passa da una richiesta via email, non da self-service.
+        -->
+        <a href="mailto:cognitariatz@proton.me?subject=Richiesta%20cancellazione%20account" style="font-size:0.85rem; margin-top: 8px; color:#8b1e1e;">
+          Richiedi la cancellazione del tuo account
+        </a>
       </div>
     </div>
   </main>
@@ -63,9 +69,16 @@ import Footer from '../components/Footer.astro';
       return;
     }
 
-    const [{ data: profile }, { data: membership }] = await Promise.all([
+    const [{ data: profile }, { data: membership }, { data: acceptance }] = await Promise.all([
       supabase.from('member_profiles').select('full_name').eq('id', session.user.id).single(),
       supabase.from('memberships').select('tier, status, current_period_end').eq('user_id', session.user.id).single(),
+      supabase
+        .from('privacy_acceptances')
+        .select('version, accepted_at')
+        .eq('user_id', session.user.id)
+        .order('accepted_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
 
     loading.style.display = 'none';
@@ -77,6 +90,9 @@ import Footer from '../components/Footer.astro';
     document.getElementById('mc-name')!.textContent = profile?.full_name || session.user.email || '—';
     document.getElementById('mc-email')!.textContent = session.user.email ?? '—';
     document.getElementById('mc-renewal')!.textContent = membership?.current_period_end ?? '—';
+    document.getElementById('mc-privacy')!.textContent = acceptance
+      ? `accettata il ${new Date(acceptance.accepted_at).toLocaleDateString('it-IT')} (versione ${acceptance.version})`
+      : '—';
 
     document.getElementById('btn-portal')!.addEventListener('click', async () => {
       const res = await fetch('/api/portal', {
@@ -89,17 +105,6 @@ import Footer from '../components/Footer.astro';
     });
 
     document.getElementById('btn-logout')!.addEventListener('click', async () => {
-      await supabase.auth.signOut();
-      window.location.href = '/';
-    });
-
-    document.getElementById('btn-delete')!.addEventListener('click', async () => {
-      const ok = confirm('Sicura/o? L\'account, la tessera e l\'abbonamento verranno cancellati definitivamente.');
-      if (!ok) return;
-      await fetch('/api/account-delete', {
-        method: 'POST',
-        headers: { authorization: `Bearer ${session.access_token}` },
-      });
       await supabase.auth.signOut();
       window.location.href = '/';
     });

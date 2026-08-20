@@ -1,42 +1,22 @@
-import { requireUser, getSupabaseAdmin, type RuntimeEnv } from '../../src/lib/supabase-server';
-import { getStripe } from '../../src/lib/stripe';
+import type { RuntimeEnv } from '../../src/lib/supabase-server';
 
-// PROVVISORIO: cancella l'abbonamento Stripe e rimuove profilo/membership/utente Supabase.
-// Il piano (§6, retention matrix) segnala che questo comportamento va confermato con chi
-// segue la contabilità del cliente — potrebbe servire anonimizzare invece di cancellare
-// del tutto, se alcuni riferimenti servono per la tracciabilità fiscale. Non trattare
-// questa implementazione come definitiva finché la retention matrix non è definita.
-export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
-  const { request, env } = context;
-
-  const user = await requireUser(env, request);
-  if (!user) {
-    return new Response(JSON.stringify({ error: 'Non autenticato.' }), { status: 401 });
-  }
-
-  const admin = getSupabaseAdmin(env);
-  const { data: membership } = await admin
-    .from('memberships')
-    .select('stripe_subscription_id')
-    .eq('user_id', user.id)
-    .single();
-
-  if (membership?.stripe_subscription_id) {
-    const stripe = getStripe(env);
-    try {
-      await stripe.subscriptions.cancel(membership.stripe_subscription_id);
-    } catch {
-      // Se l'abbonamento è già cancellato/inesistente su Stripe, procediamo comunque
-      // con la cancellazione dei dati locali: non deve bloccare il diritto alla cancellazione.
-    }
-  }
-
-  await admin.from('memberships').delete().eq('user_id', user.id);
-  await admin.from('member_profiles').delete().eq('id', user.id);
-  await admin.auth.admin.deleteUser(user.id);
-
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: { 'content-type': 'application/json' },
-  });
+// DISABILITATO DI PROPOSITO (piano §6, review consulente): la versione precedente
+// cancellava membership/profilo/utente Supabase anche quando la cancellazione
+// dell'abbonamento su Stripe falliva (errore intercettato e ignorato) — rischio concreto
+// di un account cancellato localmente con una subscription Stripe ancora attiva e
+// addebitante, e senza più il mapping per ritrovarla. Finché la retention matrix non è
+// definita (cosa si cancella subito, cosa si anonimizza, cosa va conservato per obblighi
+// contabili) questo endpoint non deve eseguire alcuna cancellazione reale.
+//
+// Il bottone "Elimina il mio account e i miei dati" in src/pages/account.astro è stato
+// scollegato da questa route e sostituito con una richiesta via email, finché questa
+// funzione non viene reimplementata con la logica corretta (fallire l'intera richiesta
+// se la cancellazione su Stripe fallisce, non procedere comunque con i dati locali).
+export const onRequestPost: PagesFunction<RuntimeEnv> = async () => {
+  return new Response(
+    JSON.stringify({
+      error: 'La cancellazione automatica dell\'account non è ancora disponibile. Scrivi a cognitariatz@proton.me per richiederla.',
+    }),
+    { status: 501, headers: { 'content-type': 'application/json' } }
+  );
 };

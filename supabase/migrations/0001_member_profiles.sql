@@ -1,12 +1,15 @@
--- Profilo del membro: nome e consenso privacy. Nessun dato di membership/billing qui
--- (vedi 0002_memberships.sql) — separazione voluta per rendere il confine di sicurezza
--- strutturale (RLS + GRANT a livello di tabella) invece che affidato a GRANT per colonna.
+-- Profilo del membro: solo il nome, unico dato non sensibile e modificabile dal titolare.
+-- La prova di accettazione dell'informativa privacy vive altrove (privacy_acceptances,
+-- vedi 0005): non va mai messa in una tabella con UPDATE concesso al client, altrimenti
+-- l'utente potrebbe riscrivere la propria "prova" di consenso a posteriori.
+--
+-- Nessun dato di membership/billing qui (vedi 0002_memberships.sql) — separazione voluta
+-- per rendere il confine di sicurezza strutturale (RLS + GRANT a livello di tabella)
+-- invece che affidato a GRANT per colonna.
 
 create table if not exists public.member_profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   full_name text,
-  consent_privacy_at timestamptz,
-  consent_version text,
   created_at timestamptz not null default now()
 );
 
@@ -25,9 +28,10 @@ grant select, update on public.member_profiles to authenticated;
 
 -- Crea il profilo SOLO quando l'email viene confermata (click sul magic link), non
 -- all'insert immediato di auth.users: signInWithOtp() su un indirizzo nuovo crea la riga
--- auth.users subito, ma la persona potrebbe non cliccare mai il link. full_name/
--- consent_version/consent_privacy_at arrivano da options.data passato al signup (vedi
--- src/components/MembershipSignup.astro) e restano in raw_user_meta_data fino a qui.
+-- auth.users subito, ma la persona potrebbe non cliccare mai il link. full_name arriva da
+-- options.data passato al signup (vedi src/components/MembershipSignup.astro) e resta in
+-- raw_user_meta_data fino a qui — dato non sensibile, va bene fidarsi del client per questo.
+-- La funzione viene estesa in 0005_privacy_acceptances.sql per scrivere anche lì.
 create or replace function public.handle_user_confirmed()
 returns trigger
 language plpgsql
@@ -35,13 +39,8 @@ security definer set search_path = public
 as $$
 begin
   if old.email_confirmed_at is null and new.email_confirmed_at is not null then
-    insert into public.member_profiles (id, full_name, consent_privacy_at, consent_version)
-    values (
-      new.id,
-      new.raw_user_meta_data ->> 'full_name',
-      coalesce((new.raw_user_meta_data ->> 'privacy_seen_at')::timestamptz, now()),
-      new.raw_user_meta_data ->> 'privacy_version'
-    )
+    insert into public.member_profiles (id, full_name)
+    values (new.id, new.raw_user_meta_data ->> 'full_name')
     on conflict (id) do nothing;
   end if;
   return new;

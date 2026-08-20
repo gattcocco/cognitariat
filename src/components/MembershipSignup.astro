@@ -48,7 +48,6 @@
 
 <script>
   import { supabase } from '../lib/supabase-browser';
-  import { PRIVACY_POLICY_VERSION } from '../lib/consent';
 
   const form = document.getElementById('signup-form') as HTMLFormElement;
   const tierInput = document.getElementById('signup-tier') as HTMLInputElement;
@@ -102,16 +101,15 @@
     const redirectTo = new URL('/auth/callback', location.origin);
     if (tier) redirectTo.searchParams.set('tier', tier);
 
+    // full_name è l'unico dato non sensibile che arriva dal client: la prova di
+    // accettazione dell'informativa (versione + timestamp) è determinata lato server dal
+    // trigger DB alla conferma email, non da qui — vedi supabase/migrations/0005_privacy_acceptances.sql.
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         captchaToken,
         emailRedirectTo: redirectTo.toString(),
-        data: {
-          full_name: fullName,
-          privacy_version: PRIVACY_POLICY_VERSION,
-          privacy_seen_at: new Date().toISOString(),
-        },
+        data: { full_name: fullName },
       },
     });
 

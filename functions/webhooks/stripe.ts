@@ -1,4 +1,5 @@
 import type Stripe from 'stripe';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin, type RuntimeEnv } from '../../src/lib/supabase-server';
 import { getStripe, isMembershipTier } from '../../src/lib/stripe';
 
@@ -25,13 +26,19 @@ function periodEndDate(subscription: Stripe.Subscription): string {
   return new Date(subscription.current_period_end * 1000).toISOString().slice(0, 10);
 }
 
+/** Lancia se la query Supabase è fallita: nessun upsert deve poter fallire in silenzio dentro il webhook. */
+function assertOk<T>({ error }: { data: T; error: { message: string } | null }): void {
+  if (error) throw new Error(`Supabase write failed: ${error.message}`);
+}
+
 // Unico punto che marca un utente come iscritto pagante: non fidarsi mai del redirect
 // di ritorno dal browser dopo Stripe Checkout, solo di questo webhook firmato.
 //
-// Idempotente (Stripe può consegnare lo stesso evento più volte) e order-independent
-// (Stripe non garantisce l'ordine di consegna: invoice.paid può arrivare prima di
-// checkout.session.completed). Ogni handler recupera da sé i dati che gli servono invece
-// di assumere che un evento precedente sia già passato.
+// Idempotente e a prova di fallimento parziale: stripe_events.status passa da
+// 'processing' a 'processed' SOLO se l'intero handler completa senza errori. Se una
+// scrittura Supabase fallisce a metà, l'evento resta 'processing'/'failed' (mai
+// 'processed'), quindi un retry di Stripe rielabora l'evento da capo invece di trovare
+// una riga già "vista" e rispondere 200 senza aver applicato l'aggiornamento.
 export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
   const { request, env } = context;
   const stripe = getStripe(env);
@@ -52,102 +59,134 @@ export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
     return new Response('Invalid signature', { status: 400 });
   }
 
-  const { error: dupeError } = await admin
+  const { data: existingEvent, error: lookupError } = await admin
     .from('stripe_events')
-    .insert({ event_id: event.id, event_type: event.type });
+    .select('status')
+    .eq('event_id', event.id)
+    .maybeSingle();
 
-  if (dupeError) {
-    // 23505 = unique_violation: evento già processato, non rifare nulla.
-    if (dupeError.code === '23505') {
-      return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
-    }
-    // Errore diverso (es. DB temporaneamente non raggiungibile): rispondere errore così
-    // Stripe riprova più tardi, invece di processare senza garanzia di idempotenza.
-    return new Response('Could not record event', { status: 500 });
+  if (lookupError) {
+    // DB non raggiungibile: rispondere errore così Stripe riprova più tardi.
+    return new Response('Could not check event status', { status: 500 });
   }
 
+  if (existingEvent?.status === 'processed') {
+    return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
+  }
+
+  // Prima consegna di questo event_id, oppure un retry di un evento rimasto 'processing'/
+  // 'failed' (mai arrivato a 'processed'): in entrambi i casi va (ri)elaborato.
+  assertOk(
+    await admin
+      .from('stripe_events')
+      .upsert({ event_id: event.id, event_type: event.type, status: 'processing' }, { onConflict: 'event_id' })
+  );
+
+  try {
+    await handleEvent(admin, stripe, event);
+
+    assertOk(
+      await admin
+        .from('stripe_events')
+        .update({ status: 'processed', processed_at: new Date().toISOString() })
+        .eq('event_id', event.id)
+    );
+
+    return new Response(JSON.stringify({ received: true }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
+  } catch (err) {
+    // Best-effort: se anche questo update fallisce, l'evento resta 'processing' e verrà
+    // comunque rielaborato al prossimo retry (non finisce mai 'processed' per errore).
+    await admin.from('stripe_events').update({ status: 'failed' }).eq('event_id', event.id);
+    return new Response('Webhook handler failed', { status: 500 });
+  }
+};
+
+async function handleEvent(admin: SupabaseClient, stripe: Stripe, event: Stripe.Event): Promise<void> {
   async function upsertFromSubscription(subscription: Stripe.Subscription, statusOverride?: MembershipStatus) {
     const userId = subscription.metadata?.supabase_user_id;
     const tier = subscription.metadata?.tier;
     if (!userId || !tier || !isMembershipTier(tier)) return;
 
-    await admin.from('memberships').upsert(
-      {
-        user_id: userId,
-        tier,
-        status: statusOverride ?? mapStripeStatus(subscription.status),
-        current_period_end: periodEndDate(subscription),
-        stripe_customer_id: subscription.customer as string,
-        stripe_subscription_id: subscription.id,
-      },
-      { onConflict: 'user_id' }
+    assertOk(
+      await admin.from('memberships').upsert(
+        {
+          user_id: userId,
+          tier,
+          status: statusOverride ?? mapStripeStatus(subscription.status),
+          current_period_end: periodEndDate(subscription),
+          stripe_customer_id: subscription.customer as string,
+          stripe_subscription_id: subscription.id,
+        },
+        { onConflict: 'user_id' }
+      )
     );
   }
 
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
-      if (session.mode !== 'subscription' || !session.subscription) break; // merch (mode: 'payment'): niente da fare qui
+      if (session.mode !== 'subscription' || !session.subscription) return; // merch (mode: 'payment'): niente da fare qui
 
       const userId = session.metadata?.supabase_user_id;
       const tier = session.metadata?.tier;
-      if (!userId || !tier || !isMembershipTier(tier)) break;
+      if (!userId || !tier || !isMembershipTier(tier)) return;
 
       // Non sovrascrivere uno stato più avanzato se invoice.paid è già arrivato prima
       // (ordine non garantito): aggiorniamo qui solo se la riga è ancora 'pending'.
-      const { data: existing } = await admin
+      const { data: existing, error: selectError } = await admin
         .from('memberships')
         .select('status')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
+      if (selectError) throw new Error(`Supabase read failed: ${selectError.message}`);
 
       const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
 
-      await admin.from('memberships').upsert(
-        {
-          user_id: userId,
-          tier,
-          status: !existing || existing.status === 'pending' ? 'payment_pending' : existing.status,
-          current_period_end: periodEndDate(subscription),
-          stripe_customer_id: session.customer as string,
-          stripe_subscription_id: session.subscription as string,
-        },
-        { onConflict: 'user_id' }
+      assertOk(
+        await admin.from('memberships').upsert(
+          {
+            user_id: userId,
+            tier,
+            status: !existing || existing.status === 'pending' ? 'payment_pending' : existing.status,
+            current_period_end: periodEndDate(subscription),
+            stripe_customer_id: session.customer as string,
+            stripe_subscription_id: session.subscription as string,
+          },
+          { onConflict: 'user_id' }
+        )
       );
-      break;
+      return;
     }
 
     case 'invoice.paid': {
       const invoice = event.data.object as Stripe.Invoice;
-      if (!invoice.subscription) break;
+      if (!invoice.subscription) return;
       const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
       await upsertFromSubscription(subscription, 'active');
-      break;
+      return;
     }
 
     case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice;
-      if (!invoice.subscription) break;
+      if (!invoice.subscription) return;
       const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
       await upsertFromSubscription(subscription, 'past_due');
-      break;
+      return;
     }
 
     case 'customer.subscription.updated': {
       const subscription = event.data.object as Stripe.Subscription;
       await upsertFromSubscription(subscription);
-      break;
+      return;
     }
 
     case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription;
       await upsertFromSubscription(subscription, 'canceled');
-      break;
+      return;
     }
   }
-
-  return new Response(JSON.stringify({ received: true }), {
-    status: 200,
-    headers: { 'content-type': 'application/json' },
-  });
-};
+}

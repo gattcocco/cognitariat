@@ -13,10 +13,21 @@ yarn-error.log*
 pnpm-debug.log*
 
 
-# environment variables
+# environment variables (qualsiasi variante: .env, .env.local, .env.production, ecc.)
 .env
-.env.production
+.env.*
+!.env.example
 .dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# chiavi/certificati che potrebbero finire per errore nella working copy
+*.pem
+*.key
+*.p12
+*.pfx
+*credentials*.json
+*service-account*.json
 
 # Wrangler local state
 .wrangler/
@@ -24,6 +35,10 @@ worker-configuration.d.ts
 
 # macOS-specific files
 .DS_Store
+
+# Windows-specific files
+Thumbs.db
+desktop.ini
 
 # jetbrains setting folder
 .idea/

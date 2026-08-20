@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { PRIVACY_POLICY_VERSION } from '../lib/consent';
+---
+<BaseLayout title="Informativa privacy — COG U" description="Come COG U tratta i dati delle persone iscritte, ai sensi del GDPR.">
+  <Header />
+  <main class="container" style="padding: 60px 0; max-width: 820px;">
+    <h1 class="section-title">Informativa sul trattamento dei dati personali</h1>
+    <p class="section-sub">Versione {PRIVACY_POLICY_VERSION} — ai sensi degli artt. 13 e 14 del Regolamento (UE) 2016/679 (GDPR)</p>
+
+    <p style="background:#fbe4e4; color:#8b1e1e; border-radius:12px; padding:16px 20px; margin-bottom: 32px; font-size:0.9rem;">
+      <strong>Nota per chi implementa — non pubblicare così com'è:</strong> i campi tra <code>[…]</code> vanno
+      completati con i dati legali reali dell'associazione. La sezione 3 sulla base giuridica art. 9 è scritta
+      in forma condizionale perché <strong>va verificata</strong> con chi segue la compliance/legale del cliente
+      sulla forma giuridica e le attività reali di COG U, non è un'assunzione automatica. La sezione 7 sui cookie
+      richiede un audit terze parti completo prima del lancio (vedi piano §4).
+    </p>
+
+    <h2>1. Titolare del trattamento</h2>
+    <p>
+      Il titolare del trattamento è <strong>[Denominazione legale completa dell'associazione]</strong>,
+      con sede in <strong>[Sede legale]</strong>, Codice Fiscale <strong>[CF]</strong>
+      [/ Partita IVA <strong>[P.IVA]</strong>], contattabile all'indirizzo
+      <a href="mailto:cognitariatz@proton.me">cognitariatz@proton.me</a>
+      [ed alla PEC [PEC], se presente].
+      [Referente/DPO per la privacy: [nominativo e contatto], se nominato.]
+    </p>
+
+    <h2>2. Quali dati raccogliamo</h2>
+    <p>Al momento dell'iscrizione raccogliamo: nome e cognome, indirizzo email, fascia di tesseramento scelta
+      (Solidarietà, Precariə, Stabile) e i metadati del pagamento (non i numeri di carta: quelli non transitano
+      né vengono mai memorizzati sui nostri sistemi, li gestisce esclusivamente il nostro fornitore di pagamenti,
+      Stripe).</p>
+
+    <h2>3. Perché trattiamo questi dati e su quale base giuridica</h2>
+    <p>Trattiamo nome, email e dati di pagamento per fornire il servizio di iscrizione e i benefit associati
+      (art. 6.1.b GDPR — esecuzione di un contratto) e, dove richiesto, sulla base del consenso espresso
+      (art. 6.1.a GDPR).</p>
+    <p>La <strong>fascia di tesseramento</strong>, in un contesto sindacale, può rivelare l'appartenenza a
+      un'organizzazione sindacale: la trattiamo come dato di categoria particolare ai sensi dell'art. 9 GDPR.
+      [<strong>Da verificare</strong>: se la forma giuridica e le attività di COG U rientrano nell'eccezione
+      art. 9.2.d (trattamento da parte di un'organizzazione con finalità sindacale, relativo ai soli dati dei
+      propri iscritti), il trattamento si basa su quella previsione; in ogni caso ti chiediamo separatamente,
+      al momento dell'iscrizione, un consenso esplicito dedicato a questo dato specifico.]</p>
+
+    <h2>4. A chi comunichiamo i tuoi dati</h2>
+    <ul>
+      <li><strong>Supabase</strong> (hosting di autenticazione e database, regione UE): conserva i tuoi dati
+        di account e di iscrizione.</li>
+      <li><strong>Stripe</strong> (elaborazione dei pagamenti): gestisce il pagamento della quota associativa e
+        i relativi obblighi fiscali. Stripe Inc. ha sede negli Stati Uniti ma aderisce alle Clausole
+        Contrattuali Standard UE e ai quadri di conformità GDPR per il trasferimento dei dati.</li>
+      <li><strong>Cloudflare</strong> (Turnstile, protezione anti-spam sul modulo di iscrizione; hosting del
+        sito): riceve i dati tecnici minimi necessari a verificare che la richiesta non provenga da un bot.</li>
+    </ul>
+    <p>Non vendiamo né cediamo i tuoi dati a terzi per finalità di marketing.</p>
+
+    <h2>5. Per quanto tempo conserviamo i dati</h2>
+    <p>[<strong>Da completare dopo aver definito la retention matrix con chi segue la contabilità/fiscalità
+      del cliente</strong> (piano §6): quali dati vengono cancellati subito alla fine dell'iscrizione, quali
+      vengono anonimizzati, e quali l'ente deve conservare per obblighi amministrativi o contabili, e per quanto
+      tempo. Non pubblicare un periodo di conservazione specifico finché questa verifica non è stata fatta.]</p>
+
+    <h2>6. I tuoi diritti</h2>
+    <p>Puoi in ogni momento richiedere l'accesso, la rettifica, la cancellazione o la portabilità dei tuoi dati,
+      oppure opporti al trattamento, scrivendo a
+      <a href="mailto:cognitariatz@proton.me">cognitariatz@proton.me</a>. Dalla tua
+      <a href="/account">area membro</a> puoi anche richiedere la cancellazione del tuo account. [Cosa viene
+      cancellato, cosa anonimizzato e cosa eventualmente conservato per obblighi contabili va precisato qui una
+      volta definita la retention matrix di cui al punto 5.] Hai inoltre diritto di proporre reclamo al Garante
+      per la protezione dei dati personali
+      (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>).</p>
+
+    <h2>7. Cookie e tecnologie simili</h2>
+    <p>[<strong>Da completare con un audit terze parti prima del lancio</strong> — piano §4. Ad oggi il sito
+      contatta, oltre ai nostri servizi (Supabase, Stripe):</p>
+    <ul>
+      <li>un cookie/token di sessione impostato da Supabase Auth quando accedi, verosimilmente qualificabile
+        come strettamente necessario (da confermare in sede di audit);</li>
+      <li>il widget Cloudflare Turnstile (anti-spam sul modulo di iscrizione) e i cookie impostati da Stripe sul
+        proprio dominio durante il pagamento (pagina ospitata da Stripe, non dal nostro sito);</li>
+      <li>Google Fonts, Font Awesome (CDN cdnjs) e gli embed video YouTube in modalità "nocookie": richieste
+        verso terzi da valutare nell'audit. Stiamo considerando di self-hostare font e icone per ridurre il
+        numero di terze parti contattate.</li>
+    </ul>
+    <p>Fino al completamento dell'audit, non dare per scontato che non sia necessario un banner di consenso.]</p>
+
+    <h2>8. Sicurezza</h2>
+    <p>I dati sono conservati su infrastrutture con sede nell'Unione Europea (Supabase, regione UE) e trasmessi
+      via connessioni cifrate (HTTPS/TLS). I pagamenti sono gestiti interamente da Stripe: non vediamo né
+      conserviamo mai i dati della tua carta.</p>
+  </main>
+  <Footer />
+</BaseLayout>

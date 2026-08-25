@@ -11,10 +11,11 @@
 --   payment_failed   pagamento asincrono non andato a buon fine
 --   rejected         iscrizione non accettata dal direttivo dopo il pagamento (vedi sotto)
 --
--- checkout_claimed_at è il timestamp dell'ultima "prenotazione" di un checkout: serve a
--- garantire che esista UNA SOLA Checkout Session aperta per utente (vedi la funzione
--- claim_membership_checkout in 0006). Il lease dura 30 minuti, allineato all'expires_at
--- della sessione Stripe creata in functions/api/checkout.ts.
+-- checkout_claim_token / checkout_claimed_at identificano l'ultima "prenotazione" di un
+-- checkout: servono a garantire che esista UNA SOLA Checkout Session aperta per utente
+-- (vedi la funzione claim_membership_checkout in 0006). Il token è l'identità della
+-- prenotazione: chi vuole sostituirne una deve presentare il token che ha verificato,
+-- così due richieste concorrenti non possono rinnovare entrambe (compare-and-swap).
 
 create table if not exists public.memberships (
   user_id uuid primary key references auth.users (id) on delete cascade,
@@ -24,6 +25,7 @@ create table if not exists public.memberships (
   amount_paid_cents integer,
   stripe_customer_id text,
   stripe_checkout_session_id text,
+  checkout_claim_token uuid,
   checkout_claimed_at timestamptz,
   valid_until date,
   updated_at timestamptz not null default now()

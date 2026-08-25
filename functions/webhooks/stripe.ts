@@ -87,15 +87,21 @@ async function handleEvent(admin: SupabaseClient, event: Stripe.Event): Promise<
     const validUntil = session.metadata?.valid_until;
     if (!userId || !tier || !isMembershipTier(tier)) return;
 
-    // Non retrocedere uno stato già 'active' (es. un evento arrivato in ritardo/duplicato
-    // per una sessione già confermata da un evento precedente).
     const { data: existing, error: selectError } = await admin
       .from('memberships')
       .select('status')
       .eq('user_id', userId)
       .maybeSingle();
     if (selectError) throw new Error(`Supabase read failed: ${selectError.message}`);
+
+    // Non retrocedere uno stato già 'active' (es. un evento arrivato in ritardo/duplicato
+    // per una sessione già confermata da un evento precedente).
     if (existing?.status === 'active' && status !== 'active') return;
+
+    // 'rejected' è una decisione del direttivo presa a mano dopo il rimborso (vedi la
+    // procedura in 0002_memberships.sql): un evento Stripe tardivo non deve riportare
+    // l'iscrizione ad attiva.
+    if (existing?.status === 'rejected') return;
 
     assertOk(
       await admin.from('memberships').upsert(

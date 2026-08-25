@@ -3,30 +3,9 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin, type RuntimeEnv } from '../../src/lib/supabase-server';
 import { getStripe, isMembershipTier } from '../../src/lib/stripe';
 
-type MembershipStatus = 'pending' | 'payment_pending' | 'active' | 'past_due' | 'canceled' | 'expired';
+type MembershipStatus = 'pending' | 'payment_pending' | 'active' | 'payment_failed';
 
-function mapStripeStatus(status: Stripe.Subscription.Status): MembershipStatus {
-  switch (status) {
-    case 'active':
-    case 'trialing':
-      return 'active';
-    case 'past_due':
-    case 'unpaid':
-      return 'past_due';
-    case 'canceled':
-      return 'canceled';
-    case 'incomplete_expired':
-      return 'expired';
-    default:
-      return 'payment_pending';
-  }
-}
-
-function periodEndDate(subscription: Stripe.Subscription): string {
-  return new Date(subscription.current_period_end * 1000).toISOString().slice(0, 10);
-}
-
-/** Lancia se la query Supabase è fallita: nessun upsert deve poter fallire in silenzio dentro il webhook. */
+/** Lancia se la query Supabase è fallita: nessuna scrittura può poter fallire in silenzio dentro il webhook. */
 function assertOk<T>({ error }: { data: T; error: { message: string } | null }): void {
   if (error) throw new Error(`Supabase write failed: ${error.message}`);
 }
@@ -34,11 +13,13 @@ function assertOk<T>({ error }: { data: T; error: { message: string } | null }):
 // Unico punto che marca un utente come iscritto pagante: non fidarsi mai del redirect
 // di ritorno dal browser dopo Stripe Checkout, solo di questo webhook firmato.
 //
+// Pagamento ONE-OFF (Build 1.0, piano v3), non abbonamento: checkout.session.completed è
+// il segnale principale, ma per i metodi di pagamento asincroni (es. SEPA) il pagamento
+// può restare "in corso" anche a sessione completata — session.payment_status distingue
+// i due casi. async_payment_succeeded/async_payment_failed arrivano poi per gli stessi.
+//
 // Idempotente e a prova di fallimento parziale: stripe_events.status passa da
-// 'processing' a 'processed' SOLO se l'intero handler completa senza errori. Se una
-// scrittura Supabase fallisce a metà, l'evento resta 'processing'/'failed' (mai
-// 'processed'), quindi un retry di Stripe rielabora l'evento da capo invece di trovare
-// una riga già "vista" e rispondere 200 senza aver applicato l'aggiornamento.
+// 'processing' a 'processed' SOLO se l'intero handler completa senza errori.
 export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
   const { request, env } = context;
   const stripe = getStripe(env);
@@ -66,7 +47,6 @@ export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
     .maybeSingle();
 
   if (lookupError) {
-    // DB non raggiungibile: rispondere errore così Stripe riprova più tardi.
     return new Response('Could not check event status', { status: 500 });
   }
 
@@ -74,8 +54,6 @@ export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
     return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
   }
 
-  // Prima consegna di questo event_id, oppure un retry di un evento rimasto 'processing'/
-  // 'failed' (mai arrivato a 'processed'): in entrambi i casi va (ri)elaborato.
   assertOk(
     await admin
       .from('stripe_events')
@@ -83,7 +61,7 @@ export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
   );
 
   try {
-    await handleEvent(admin, stripe, event);
+    await handleEvent(admin, event);
 
     assertOk(
       await admin
@@ -96,29 +74,39 @@ export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
       status: 200,
       headers: { 'content-type': 'application/json' },
     });
-  } catch (err) {
-    // Best-effort: se anche questo update fallisce, l'evento resta 'processing' e verrà
-    // comunque rielaborato al prossimo retry (non finisce mai 'processed' per errore).
+  } catch {
     await admin.from('stripe_events').update({ status: 'failed' }).eq('event_id', event.id);
     return new Response('Webhook handler failed', { status: 500 });
   }
 };
 
-async function handleEvent(admin: SupabaseClient, stripe: Stripe, event: Stripe.Event): Promise<void> {
-  async function upsertFromSubscription(subscription: Stripe.Subscription, statusOverride?: MembershipStatus) {
-    const userId = subscription.metadata?.supabase_user_id;
-    const tier = subscription.metadata?.tier;
+async function handleEvent(admin: SupabaseClient, event: Stripe.Event): Promise<void> {
+  async function upsertFromSession(session: Stripe.Checkout.Session, status: MembershipStatus) {
+    const userId = session.metadata?.supabase_user_id;
+    const tier = session.metadata?.tier;
+    const validUntil = session.metadata?.valid_until;
     if (!userId || !tier || !isMembershipTier(tier)) return;
+
+    // Non retrocedere uno stato già 'active' (es. un evento arrivato in ritardo/duplicato
+    // per una sessione già confermata da un evento precedente).
+    const { data: existing, error: selectError } = await admin
+      .from('memberships')
+      .select('status')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (selectError) throw new Error(`Supabase read failed: ${selectError.message}`);
+    if (existing?.status === 'active' && status !== 'active') return;
 
     assertOk(
       await admin.from('memberships').upsert(
         {
           user_id: userId,
           tier,
-          status: statusOverride ?? mapStripeStatus(subscription.status),
-          current_period_end: periodEndDate(subscription),
-          stripe_customer_id: subscription.customer as string,
-          stripe_subscription_id: subscription.id,
+          status,
+          amount_paid_cents: session.amount_total ?? null,
+          stripe_customer_id: (session.customer as string) ?? null,
+          stripe_checkout_session_id: session.id,
+          valid_until: status === 'active' ? validUntil ?? null : null,
         },
         { onConflict: 'user_id' }
       )
@@ -128,64 +116,25 @@ async function handleEvent(admin: SupabaseClient, stripe: Stripe, event: Stripe.
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
-      if (session.mode !== 'subscription' || !session.subscription) return; // merch (mode: 'payment'): niente da fare qui
+      if (session.mode !== 'payment' || !session.metadata?.tier) return; // merch/sostenitore: niente da fare qui
 
-      const userId = session.metadata?.supabase_user_id;
-      const tier = session.metadata?.tier;
-      if (!userId || !tier || !isMembershipTier(tier)) return;
-
-      // Non sovrascrivere uno stato più avanzato se invoice.paid è già arrivato prima
-      // (ordine non garantito): aggiorniamo qui solo se la riga è ancora 'pending'.
-      const { data: existing, error: selectError } = await admin
-        .from('memberships')
-        .select('status')
-        .eq('user_id', userId)
-        .maybeSingle();
-      if (selectError) throw new Error(`Supabase read failed: ${selectError.message}`);
-
-      const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-
-      assertOk(
-        await admin.from('memberships').upsert(
-          {
-            user_id: userId,
-            tier,
-            status: !existing || existing.status === 'pending' ? 'payment_pending' : existing.status,
-            current_period_end: periodEndDate(subscription),
-            stripe_customer_id: session.customer as string,
-            stripe_subscription_id: session.subscription as string,
-          },
-          { onConflict: 'user_id' }
-        )
-      );
+      // payment_status 'paid' = confermato subito (carta). 'unpaid' con metodo asincrono
+      // (es. SEPA) = addebito avviato ma non ancora incassato: si aspetta async_payment_*.
+      await upsertFromSession(session, session.payment_status === 'paid' ? 'active' : 'payment_pending');
       return;
     }
 
-    case 'invoice.paid': {
-      const invoice = event.data.object as Stripe.Invoice;
-      if (!invoice.subscription) return;
-      const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
-      await upsertFromSubscription(subscription, 'active');
+    case 'checkout.session.async_payment_succeeded': {
+      const session = event.data.object as Stripe.Checkout.Session;
+      if (!session.metadata?.tier) return;
+      await upsertFromSession(session, 'active');
       return;
     }
 
-    case 'invoice.payment_failed': {
-      const invoice = event.data.object as Stripe.Invoice;
-      if (!invoice.subscription) return;
-      const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
-      await upsertFromSubscription(subscription, 'past_due');
-      return;
-    }
-
-    case 'customer.subscription.updated': {
-      const subscription = event.data.object as Stripe.Subscription;
-      await upsertFromSubscription(subscription);
-      return;
-    }
-
-    case 'customer.subscription.deleted': {
-      const subscription = event.data.object as Stripe.Subscription;
-      await upsertFromSubscription(subscription, 'canceled');
+    case 'checkout.session.async_payment_failed': {
+      const session = event.data.object as Stripe.Checkout.Session;
+      if (!session.metadata?.tier) return;
+      await upsertFromSession(session, 'payment_failed');
       return;
     }
   }

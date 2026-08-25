@@ -30,8 +30,13 @@ declare
   current_privacy_version constant text := 'v1-2026-08-20'; -- tenere allineato a src/lib/consent.ts
 begin
   if old.email_confirmed_at is null and new.email_confirmed_at is not null then
-    insert into public.member_profiles (id, full_name)
-    values (new.id, new.raw_user_meta_data ->> 'full_name')
+    insert into public.member_profiles (id, first_name, last_name, codice_fiscale)
+    values (
+      new.id,
+      new.raw_user_meta_data ->> 'first_name',
+      new.raw_user_meta_data ->> 'last_name',
+      nullif(new.raw_user_meta_data ->> 'codice_fiscale', '')
+    )
     on conflict (id) do nothing;
 
     insert into public.privacy_acceptances (user_id, version)

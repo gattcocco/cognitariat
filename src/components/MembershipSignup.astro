@@ -7,11 +7,26 @@
   <form id="signup-form">
     <input type="hidden" id="signup-tier" value="" />
 
-    <label for="signup-name">Nome e cognome</label>
-    <input type="text" id="signup-name" name="fullName" autocomplete="name" required />
+    <label for="signup-first-name">Nome</label>
+    <input type="text" id="signup-first-name" name="firstName" autocomplete="given-name" required />
+
+    <label for="signup-last-name">Cognome</label>
+    <input type="text" id="signup-last-name" name="lastName" autocomplete="family-name" required />
 
     <label for="signup-email">Email</label>
     <input type="email" id="signup-email" name="email" autocomplete="email" required />
+
+    <label for="signup-cf">Codice Fiscale <span class="form-note" style="display:inline;">(facoltativo, per ora)</span></label>
+    <input
+      type="text"
+      id="signup-cf"
+      name="codiceFiscale"
+      autocomplete="off"
+      maxlength="16"
+      style="text-transform: uppercase;"
+      pattern="[A-Za-z]{6}[0-9LMNPQRSTUV]{2}[A-EHLMPRST][0-9LMNPQRSTUV]{2}[A-Za-z][0-9LMNPQRSTUV]{3}[A-Za-z]"
+      title="Formato codice fiscale non valido — lascia vuoto se non vuoi comunicarlo ora."
+    />
 
     <div class="consent-row">
       <input type="checkbox" id="consent-privacy" required />
@@ -54,10 +69,10 @@
   const tierNote = document.getElementById('signup-selected-tier') as HTMLElement;
   const messageEl = document.getElementById('signup-message') as HTMLElement;
 
+  // Fasce quota 2026, una tantum (Build 1.0) — vedi piano v3.
   const TIER_LABELS: Record<string, string> = {
-    solidarieta: 'Solidarietà — €10/anno',
-    precaria: 'Precariə — €20/anno',
-    stabile: 'Stabile — €30/anno',
+    studente: 'Studentə / disoccupatə — €10, quota 2026',
+    cognitario: 'Cognitariə — €20, quota 2026',
   };
 
   function setTier(tier: string) {
@@ -80,7 +95,9 @@
     messageEl.className = '';
 
     const email = (document.getElementById('signup-email') as HTMLInputElement).value;
-    const fullName = (document.getElementById('signup-name') as HTMLInputElement).value;
+    const firstName = (document.getElementById('signup-first-name') as HTMLInputElement).value;
+    const lastName = (document.getElementById('signup-last-name') as HTMLInputElement).value;
+    const codiceFiscale = (document.getElementById('signup-cf') as HTMLInputElement).value.trim().toUpperCase();
     const tier = tierInput.value;
 
     // Token del widget Turnstile: Supabase Auth (configurato con Bot and Abuse Protection)
@@ -101,15 +118,21 @@
     const redirectTo = new URL('/auth/callback', location.origin);
     if (tier) redirectTo.searchParams.set('tier', tier);
 
-    // full_name è l'unico dato non sensibile che arriva dal client: la prova di
-    // accettazione dell'informativa (versione + timestamp) è determinata lato server dal
-    // trigger DB alla conferma email, non da qui — vedi supabase/migrations/0005_privacy_acceptances.sql.
+    // first_name/last_name/codice_fiscale sono gli unici dati non finanziari che arrivano
+    // dal client: la prova di accettazione dell'informativa (versione + timestamp) è
+    // determinata lato server dal trigger DB alla conferma email, non da qui — vedi
+    // supabase/migrations/0005_privacy_acceptances.sql. Il codice fiscale non viene mai
+    // inviato a Stripe (vedi functions/api/checkout.ts).
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         captchaToken,
         emailRedirectTo: redirectTo.toString(),
-        data: { full_name: fullName },
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          codice_fiscale: codiceFiscale || null,
+        },
       },
     });
 

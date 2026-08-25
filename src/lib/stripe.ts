@@ -16,9 +16,8 @@ export function getStripe(env: RuntimeEnv): Stripe {
 
 export function priceIdForTier(env: RuntimeEnv, tier: MembershipTier): string {
   const map: Record<MembershipTier, string> = {
-    solidarieta: env.STRIPE_PRICE_SOLIDARIETA,
-    precaria: env.STRIPE_PRICE_PRECARIA,
-    stabile: env.STRIPE_PRICE_STABILE,
+    studente: env.STRIPE_PRICE_STUDENTE,
+    cognitario: env.STRIPE_PRICE_COGNITARIO,
   };
   return map[tier];
 }

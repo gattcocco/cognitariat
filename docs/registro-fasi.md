@@ -333,3 +333,216 @@ stati contati come verifica.
 - `src/pages/auth/callback.astro` avvia ancora un checkout se riceve `?tier=...`. Nessun elemento
   del sito produce più quel parametro, ma il percorso va chiuso lato server insieme al resto del
   gating.
+
+---
+
+## Fase 5 — Pagamenti fermi, dipendenze tolte, consegna
+
+Data: 2026-09-05. Ramo: `dev`. Nessun push, nessun merge, nessun deploy, nessuna modifica DNS,
+nessuna attivazione Stripe.
+
+### 1. I tre checkout sono bloccati lato server
+
+Nuovo modulo `src/lib/pagamenti.ts`. Il blocco è la **prima istruzione** di ciascuno dei tre
+endpoint (`functions/api/checkout.ts`, `checkout-merch.ts`, `checkout-sostenitore.ts`): viene prima
+della lettura del corpo, prima della validazione del token — che è già una chiamata di rete verso
+Supabase — prima della costruzione del client Stripe e prima di qualunque scrittura.
+
+Due condizioni, non una:
+
+- `PAGAMENTI_ATTIVI` deve valere **esattamente** `"true"`. Assente, vuota, `"false"`, `"1"`, `"si"`,
+  `"TRUE"`, `" true "`: tutto il resto tiene chiuso. Una variabile scritta male deve chiudere, non
+  aprire.
+- Con la bandiera accesa ma anche una sola variabile mancante o vuota, si risponde comunque con un
+  errore controllato. Senza, si sarebbe costruito il client Stripe con una chiave `undefined` e si
+  sarebbe fallito dentro la libreria, con un 500 opaco.
+
+In entrambi i casi: `503`, JSON `{ error, pagamenti }`, `cache-control: no-store`. Il messaggio
+pubblico **non** dice quali variabili mancano: quel dettaglio va nei log del runtime.
+
+Il **webhook Stripe non passa dal cancello**, di proposito: deve poter riconciliare eventuali
+pagamenti già avviati anche a incassi chiusi.
+
+### 2. Il callback non avvia più un checkout
+
+`/auth/callback?tier=cognitario` faceva partire una sessione di pagamento anche senza nessun
+pulsante nel sito. Ora il ramo è dietro `PUBLIC_PAGAMENTI_ATTIVI`, e il percorso resta lì intatto
+per la riattivazione. È comodità, non sicurezza: il confine vero è lato server, che rifiuta
+comunque.
+
+### 3. Font e icone non passano più da terzi
+
+Erano due `<link>` verso `fonts.googleapis.com` e `cdnjs.cloudflare.com`: due terze parti
+contattate a ogni visita, due punti di rottura (in Fase 4 l'icona della busta non arrivava) e due
+voci nell'audit cookie.
+
+- **Font in `public/fonts/`**, `@font-face` in `src/styles/font.css`. Inter e Shantell Sans, SIL
+  OFL 1.1, con `Inter-OFL.txt` e `ShantellSans-OFL.txt` versionati accanto ai file come la licenza
+  richiede, più un `LEGGIMI.txt` che spiega cosa c'è e perché.
+- **Icone**: `src/components/Icona.astro`, sei forme geometriche disegnate qui. Nessun foglio di
+  stile esterno, nessuna questione di licenza, e scalano bene allo zoom.
+- **anime.js** non arriva più da jsdelivr: è una dipendenza del progetto, caricata con un import
+  dinamico (chunk separato di 39 KB, solo sulla home, mai con movimento ridotto).
+
+I due file `-ext-sub` sono sottoinsiemi ridotti ai segni latini estesi che servono davvero, schwa
+compresa: per Inter 28 KB invece di 133. Il rischio del sottoinsieme — un carattere nuovo che
+torna in silenzio al font di sistema — è coperto da un controllo automatico (punto 8).
+
+### 4. Il font delle annotazioni: Shantell Sans
+
+Tre candidati provati sulle stesse frasi in `_local/campionario/confronto-font.html`, con misura
+automatica della schwa oltre alla prova visiva:
+
+| Font | ə nel font | ə nel controllo monospace | Esito |
+|---|---|---|---|
+| Shantell Sans | 36,22 px | 35,19 px | disegnata dal font |
+| **Kalam** | **35,19 px** | **35,19 px** | **identica al controllo: il glifo non c'è** |
+| Caveat | 20,80 px | 35,19 px | disegnata dal font |
+| Inter (confronto) | 34,31 px | 35,19 px | disegnata dal font |
+
+**Kalam non contiene U+0259.** Il sottoinsieme `latin-ext` di Google copre l'intervallo che la
+comprende, ma l'intervallo non è il glifo: con Kalam, «Studentə» e «Cognitariə» sarebbero uscite
+con una lettera presa da un altro carattere. Verificato anche a occhio: nella riga di Kalam la ə è
+visibilmente dritta, mentre il resto è inclinato.
+
+Shantell Sans entra in un punto solo: `.nota-metodo`, il commento a margine. Peso medio (500),
+nessuna animazione. Inter resta per tutto il resto.
+
+### 5. Privacy e testi pubblici
+
+`/privacy` conteneva la bozza dell'informativa lunga: dati legali fra parentesi quadre, una nota in
+pagina che diceva «non pubblicare così com'è», e la descrizione di trattamenti che oggi non
+avvengono. Non era completabile da qui — servono i dati legali dell'ente, la verifica sull'art. 9,
+la retention matrix e l'audit terze parti.
+
+La pagina ora dice quello che è vero adesso: il sito non raccoglie dati, non ci sono moduli, le
+iscrizioni sono chiuse; cosa viene contattato aprendo una pagina (solo YouTube, e solo arrivando
+alla sezione video); cosa succede se ci si scrive; e l'impegno esplicito a pubblicare l'informativa
+estesa **prima** di raccogliere il primo dato. Il testo lungo è in
+`docs/informativa-privacy-bozza.md` con l'elenco di cosa serve per completarlo.
+
+`PRIVACY_POLICY_VERSION` passa a `v2-2026-09-05`. **Bloccante prima di riaprire**: la migration
+0005 registra ancora `v1-2026-08-20` come versione accettata. Oggi è inerte (nessuno può accettare
+niente), ma va allineata con una nuova migration.
+
+**MANGOS è stato tolto.** La sezione «Perché ci preoccupa» reggeva interamente sull'acronimo: una
+etichetta di mercato riciclata, con dentro tre società non quotate, spiegata per essere subito
+smontata. Aggiungeva rumore. Il punto che valeva — le decisioni si prendono altrove,
+l'infrastruttura atterra qui — è passato in coda a «La corsa e dove atterra», dove ci sono i dati
+Terna che lo sostengono.
+
+### 6. Intro: quattro casi, tutti provati
+
+Provati con un server locale che rompe apposta il caricamento del chunk
+(`scratchpad/serve-prove-intro.js`, non versionato).
+
+| Caso | Come | Risultato |
+|---|---|---|
+| Normale | chunk servito subito | intro completa, overlay rimosso, hero visibile |
+| Lento | chunk ritardato di 6 s | a 3 s il failsafe scopre la pagina; a 6 s il modulo **rinuncia** |
+| Fallito | chunk servito con 503 | il `catch` scopre la pagina, nessun testo invisibile |
+| Movimento ridotto | `matchMedia` forzato | nessun gate CSS, nessun overlay, **chunk mai scaricato** |
+
+**Difetto trovato e corretto qui**: nel caso lento, il modulo arrivava dopo il failsafe e faceva
+ripartire l'intro da capo, calando il pannello nero su una pagina che si stava già leggendo. Ora
+`window.__coguReveal` lascia una traccia (`__coguRivelato`) e il modulo si ferma prima di creare
+l'overlay.
+
+Nota sul caso «movimento ridotto»: la preferenza di sistema non è emulabile con gli strumenti
+disponibili, quindi il ramo JavaScript è stato provato con `matchMedia` sostituito, e la metà CSS
+(`@media (prefers-reduced-motion: reduce){.cogu-intro-overlay{display:none!important}}`) è
+verificata nel foglio di stile costruito. Non è la stessa cosa di una prova con la preferenza
+attiva nel sistema operativo: resta da fare così.
+
+### 7. Verifica visiva senza toccare gli stili
+
+Metodo: **solo emulazione del viewport**, nessuno spostamento di margini o posizionamenti. Il
+riquadro del browser in questa sessione cattura solo a scorrimento zero, quindi le pagine sono
+state guardate con viewport alti (800×1000, 800×4000, 800×9999) che mostrano il documento dall'alto
+senza scorrere, e mobile a 390×2000.
+
+Guardati: home completa (800×9999, tutte le sezioni presenti, tre iframe video caricati,
+illustrazione caricata), i primi 4000 px a piena leggibilità, `/privacy`, `/account`, home mobile,
+stati hover, zoom.
+
+**Limite dichiarato**: a scorrimento diverso da zero la cattura torna bianca, e le catture dopo
+navigazione a un'ancora funzionano solo la prima volta. Le sezioni in fondo alla home (tesseramento,
+merch, footer) sono quindi verificate in leggibilità piena solo per `#membership` (una cattura
+riuscita), e per il resto nella panoramica a pagina intera più i controlli su DOM e testo. Non è
+stato usato nessun trucco sugli stili per aggirare il limite.
+
+### 8. Controlli automatici nuovi
+
+- `npm run check:glifi` — legge gli `unicode-range` da `src/styles/font.css` e li confronta con i
+  caratteri presenti nell'HTML costruito. Provato iniettando `→` e `中`: fallisce come deve.
+- `npm run check:testi` — cerca segnaposto di bozza (parentesi quadre con testo, TODO, «da
+  completare») e testo attaccato a un link o a un `<strong>`. Quest'ultimo problema è comparso
+  **sette volte** in due fasi, sempre per lo stesso motivo: Astro toglie lo spazio prima di un a
+  capo. Ora lo prende il controllo, non l'occhio.
+- `npm run test:functions` — 15 prove sul cancello dei pagamenti, incluse le tre chiamate agli
+  endpoint veri con `fetch` sostituita da una funzione che fallisce: se il blocco lasciasse passare
+  anche solo la validazione del token, il test fallirebbe.
+- `npm run verify` esegue tutto in fila. La CI (`.github/workflows/ci.yml`) fa lo stesso e ora
+  gira anche sui push a `dev`.
+
+### 9. Controlli eseguiti
+
+| Controllo | Esito |
+|---|---|
+| `npm run check:all` | 0 errori, 0 warning, 0 hint |
+| `npm run build` | 4 pagine |
+| `npm run check:glifi` | nessun carattere fuori dai font ospitati |
+| `npm run check:testi` | nessun segnaposto, nessuno spazio mangiato |
+| `npm run test:functions` | 15 test, 15 passati |
+| Tre checkout via `wrangler pages dev` con `.dev.vars` reale (bandiera assente) | 503 `non_attivi` su tutti e tre |
+| Tre checkout con bandiera `true` e chiavi Stripe svuotate | 503 `configurazione_incompleta` su tutti e tre |
+| Intro nei quattro casi | vedi tabella al punto 6 |
+| Hover pulsante primario e voci di menu | verificato **a vista**: rosa più chiaro con testo nero, voce di menu verde e sottolineata |
+| Zoom 200% | viewport dimezzato (640×1000) e `zoom: 2` del documento: nessuno scorrimento orizzontale, tutto in colonna, niente tagliato |
+| Struttura per lettori di schermo | `lang="it"`, un solo `h1`, gerarchia coerente, 4 landmark, 0 link e 0 pulsanti senza nome accessibile, 0 SVG esposti, iframe con `title` |
+
+Due correzioni nate da quest'ultimo controllo: il titolo del footer era un `h3` e finiva allo stesso
+livello delle schede del merch (ora è un paragrafo con la stessa resa); l'alt di `runlocal.png` era
+«run local ai», che a chi non vede l'immagine non dice niente.
+
+### 10. Nota di metodo sulle misure
+
+`getComputedStyle` letto attraverso l'automazione di questa sessione restituisce valori vecchi per
+alcune proprietà (`opacity`, `background-color`, `transform`): il pulsante dell'hero risultava a
+`opacity: 0` mentre negli screenshot era perfettamente visibile, e uno stato hover forzato con
+`!important` continuava a leggersi con i valori di base. Le verifiche di stato sono quindi state
+fatte **a vista**, non per rilettura di stili. Vale la pena saperlo per le prossime volte.
+
+### 11. Controlli non eseguiti — restano aperti
+
+1. **Area membro con una sessione reale.** Non c'è modo di crearne una: il modulo di iscrizione non
+   esiste più e il magic link richiede una casella di posta. Sono stati visti gli stati «sessione
+   assente» ed «errore»; lo stato «tessera caricata» no.
+   **Requisito prima di aprire pubblicamente gli account**: provare l'accesso vero end-to-end
+   (magic link → callback → area membro) con Supabase configurato.
+2. **`prefers-reduced-motion` con la preferenza attiva nel sistema operativo** (punto 6).
+3. **Lettore di schermo vero.** Fatta la verifica strutturale, non l'ascolto.
+4. **Schwa su un secondo sistema operativo.** Qui verificata su Windows.
+5. **Audit cookie e terze parti** per il momento dell'apertura: restano YouTube (nocookie) sulla
+   home e, quando riapriranno le iscrizioni, Supabase Auth, Stripe e Turnstile.
+6. **Allineamento della versione dell'informativa** con una nuova migration (punto 5).
+7. **Dati legali dell'ente**, verifica sull'art. 9 e retention matrix: prerequisiti
+   dell'informativa estesa, elencati in `docs/informativa-privacy-bozza.md`.
+
+### 12. Come si riaccendono i pagamenti
+
+1. Definire retention matrix, base giuridica e dati legali; pubblicare l'informativa estesa e
+   allineare `PRIVACY_POLICY_VERSION` con una nuova migration.
+2. Ricreare il modulo di iscrizione (`MembershipSignup`), rimosso in Fase 4, con Turnstile
+   configurato in Supabase Auth.
+3. Impostare le variabili Stripe nell'ambiente Cloudflare Pages e verificare che ci siano **tutte**
+   (il cancello risponde `configurazione_incompleta` se ne manca una).
+4. Mettere `PAGAMENTI_ATTIVI=true` lato server e `PUBLIC_PAGAMENTI_ATTIVI=true` lato build.
+5. Rimettere i pulsanti in `Membership.astro` e `Merch.astro` e togliere le etichette «Non ancora
+   aperto» / «Non ancora in vendita».
+6. Ripristinare `hasOfferCatalog` nei dati strutturati di `BaseLayout.astro`.
+7. Eseguire la checklist di verifica del piano: SEPA in test, idempotenza del webhook, eventi fuori
+   ordine, cleanup degli utenti non confermati.
+
+Per spegnere di nuovo basta il passo 4 al contrario: togliere `PAGAMENTI_ATTIVI` chiude i tre
+endpoint senza toccare il codice.

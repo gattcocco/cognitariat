@@ -73,40 +73,74 @@ appena accennato rende il campo invisibile a chi ha vista ridotta.
 
 ## 4. Tipografia
 
-- **Titoli e corpo**: Inter. La gerarchia si fa col peso (800 / 700 / 600), **non col maiuscolo**.
-- **Annotazioni**: Doodle Lines, poche e brevi. `--font-annotazioni`.
-- **Schwa**: il fallback (`Segoe UI`, `system-ui`) copre `ə`. Il campionario ha una prova
-  dedicata: se in una riga lo schwa appare come rettangolo vuoto, quel fallback non va usato.
+- **Titoli, corpo, etichette e controlli**: Inter. La gerarchia si fa col peso (800 / 700 / 600),
+  **non col maiuscolo**. Non cambia niente in Fase 5.
+- **Annotazioni**: Shantell Sans, peso medio (500), poche e brevi. `--font-annotazioni`.
+  Nel sito entra in un punto solo: `.nota-metodo`, il commento a margine del testo.
+- **Schwa (ə)**: verificata nel file effettivamente pubblicato, non presunta.
 
-### Doodle Lines: incorporabile, ma non ancora pubblicato
+### I font sono ospitati da noi
+
+Dalla Fase 5 non c'è più nessun `<link>` verso fonts.googleapis.com né verso cdnjs: i file stanno
+in `public/fonts/`, gli `@font-face` in `src/styles/font.css`, le icone sono SVG disegnati in
+`src/components/Icona.astro`. Il sito non contatta nessuna terza parte per rendersi leggibile.
+
+Entrambi i font sono **SIL Open Font License 1.1**, che consente l'hosting e la ridistribuzione
+purché licenza e avviso di copyright viaggino con i file: stanno in `public/fonts/`, versionati.
+È l'opposto del certificato Envato di Doodle Lines, che è personale e resta in `_local/`.
+
+I due file `-ext-sub` sono sottoinsiemi ridotti ai segni latini estesi che usiamo davvero
+(28 KB invece di 133 per Inter). `npm run check:glifi` confronta gli unicode-range dichiarati con
+i caratteri presenti nell'HTML costruito e fallisce se qualcosa non è coperto: senza quel controllo
+un carattere nuovo tornerebbe in silenzio al font di sistema.
+
+### Perché Shantell Sans, e cosa è stato scartato
+
+Tre candidati provati sulle stesse frasi in `_local/campionario/confronto-font.html`:
+
+| Font | Carattere | Schwa nel file | Esito |
+|---|---|---|---|
+| **Shantell Sans** | pennarello, irregolare ma controllato | **sì**, disegnata dal font | **scelto** |
+| Kalam | scrittura più morbida e quotidiana | **no**: il browser ripiega sul font di sistema | scartato |
+| Caveat | corsivo leggero e spontaneo | sì | tenuto come alternativa |
+
+La prova della schwa non è un dettaglio: il sottoinsieme `latin-ext` di Google *copre l'intervallo*
+che contiene U+0259, ma l'intervallo non è il glifo. Kalam ha l'intervallo e non il glifo, e le
+parole «Studentə» e «Cognitariə» — che nel sito ci sono — sarebbero uscite con una lettera presa da
+un altro carattere.
+
+### Doodle Lines: incorporabile, ma fuori dal sito
 
 La Envato Elements License **consente** l'incorporamento web:
 
 > «You can incorporate a web-enabled Font as part of an End Product, but your End Product must not
 > encourage or facilitate users to extract the Font or create new text using it.»
 
-Da cui tre regole vincolanti per l'implementazione:
+Da cui tre regole, se un giorno lo si attiva: solo WOFF2 (mai `.ttf`/`.otf`, servirebbe il file
+installabile), nessuno strumento che generi testo in quel font, uso limitato alle annotazioni.
 
-1. **Pubblicare solo WOFF2**, mai `.ttf`/`.otf`. Servire il file installabile equivale a
-   facilitarne l'estrazione. Nessun link di download, nessun percorso pubblico al file originale.
-2. **Niente strumenti che generino testo** in quel font: input che rendono nel carattere,
-   generatori di immagini, specimen interattivi pubblici. Le annotazioni statiche brevi vanno bene.
-3. **Solo dove serve davvero.** Il font è per poche annotazioni, non per titoli o corpo del testo.
-
-**Stato attuale: non pubblicato.** Nel sito `--font-annotazioni` dichiara la famiglia ma non esiste
-alcun `@font-face`, quindi il browser usa il fallback e il file non viene mai richiesto.
-
-Resta un punto da chiarire prima di attivarlo: la licenza sui font dice che il font può essere usato
-**solo dallə sottoscrittorə** e non trasferito ad altri, «even another person within the same
-company or a client». Il licenziatario è una persona fisica, il sito è dell'associazione — stessa
-categoria di domanda del progetto registrato. Vedi `_local/licenze-e-originali/INVENTARIO.md`.
+**Resta però il punto che lo tiene fuori**: la licenza dice che il font può essere usato solo
+dallə sottoscrittorə e non trasferito ad altri, «even another person within the same company or a
+client». Il licenziatario è una persona fisica, il sito è dell'associazione. Finché non è chiarito,
+il posto delle annotazioni è di Shantell Sans, che quel problema non ce l'ha.
+Vedi `_local/licenze-e-originali/INVENTARIO.md`.
 
 ## 5. Animazione d'ingresso
 
-Preservata così com'era: sequenza, ritmo, transizioni e failsafe a 3 secondi se il modulo
-anime.js non parte. `@media (prefers-reduced-motion: reduce)` nasconde l'overlay, e il gate CSS
-`html.cogu-intro` è applicato via JS solo quando il movimento ridotto **non** è richiesto — quindi
-senza JS l'hero resta visibile.
+Sequenza, ritmo e transizioni restano quelli di partenza. Cambia da dove arriva il codice e come
+si comporta quando qualcosa va storto — quattro casi, tutti provati (registro Fase 5):
+
+- **normale**: anime.js arriva dal nostro bundle (import dinamico, chunk separato), l'intro parte
+  e si pulisce da sola;
+- **lento**: il failsafe scopre la pagina a 3 secondi. Se il modulo atterra dopo, **rinuncia**:
+  `window.__coguRivelato` gli dice che qualcuno sta già leggendo, e non cala di nuovo il pannello;
+- **fallito**: il modulo non arriva, il `catch` scopre la pagina. Nessun testo resta invisibile;
+- **movimento ridotto**: lo script in `BaseLayout` esce prima di applicare il gate CSS, il chunk di
+  anime.js **non viene nemmeno scaricato**, e l'hero è visibile dal primo istante.
+
+Il failsafe non si limita a togliere la classe: rimuove l'overlay e riporta a stato finale le
+parole del titolo, che hanno un `opacity` inline. Senza quel secondo pezzo, una timeline bloccata
+lasciava un H1 invisibile sotto un pannello nero orfano.
 
 Un'accortezza da non perdere: l'animazione avvolge ogni parola del titolo in
 `<span class="cogu-w">` per animarle in cascata. La regola che colora la parola chiave è perciò

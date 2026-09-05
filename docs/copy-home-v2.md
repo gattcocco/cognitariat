@@ -78,9 +78,18 @@ MilanoFinanza (18/08/2026); ANSA (25/08/2026) per le 27 stazioni.
 
 ---
 
-## 2. Perché ci preoccupa
+## 2. Perché ci preoccupa — RITIRATA IN FASE 5
 
-**Id**: `perche-ci-preoccupa` · **Stato**: contesto
+**Id**: `perche-ci-preoccupa` · **Stato**: non pubblicata
+
+> **Decisione del 05/09/2026: questa sezione non è online.** Reggeva interamente
+> sull'acronimo MANGOS, che aggiungeva rumore invece che informazione: un'etichetta di
+> mercato riciclata, con dentro tre società non quotate, spiegata per essere subito
+> smontata. Il testo resta qui come materiale d'archivio, non come copy approvato.
+>
+> Il punto che valeva — le decisioni si prendono altrove, l'infrastruttura atterra qui — è
+> passato in coda alla sezione 1, dove ci sono i dati Terna che lo sostengono.
+> Il titolo provvisorio «Sei aziende, e un acronimo» decade con la sezione.
 
 **Titolo**: Sei aziende, e un acronimo che dice più di quanto vorrebbe
 

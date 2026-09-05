@@ -78,15 +78,28 @@ appena accennato rende il campo invisibile a chi ha vista ridotta.
 - **Schwa**: il fallback (`Segoe UI`, `system-ui`) copre `ə`. Il campionario ha una prova
   dedicata: se in una riga lo schwa appare come rettangolo vuoto, quel fallback non va usato.
 
-### Doodle Lines non è pubblicato
+### Doodle Lines: incorporabile, ma non ancora pubblicato
 
-Il file del font sta **solo** in `_local/`, non in `public/`, non nel repository. Nel sito
-`--font-annotazioni` dichiara la famiglia ma **non esiste alcun `@font-face`**: il browser ripiega
-sul fallback e il file non viene mai richiesto.
+La Envato Elements License **consente** l'incorporamento web:
 
-Resta così finché non è verificato che la licenza Envato Elements copra l'incorporamento web per
-questo item. La licenza è registrata al progetto giusto («Cognitariato sito», codice `3Q4NXLYW6F`),
-ma il permesso di `@font-face` è una questione separata.
+> «You can incorporate a web-enabled Font as part of an End Product, but your End Product must not
+> encourage or facilitate users to extract the Font or create new text using it.»
+
+Da cui tre regole vincolanti per l'implementazione:
+
+1. **Pubblicare solo WOFF2**, mai `.ttf`/`.otf`. Servire il file installabile equivale a
+   facilitarne l'estrazione. Nessun link di download, nessun percorso pubblico al file originale.
+2. **Niente strumenti che generino testo** in quel font: input che rendono nel carattere,
+   generatori di immagini, specimen interattivi pubblici. Le annotazioni statiche brevi vanno bene.
+3. **Solo dove serve davvero.** Il font è per poche annotazioni, non per titoli o corpo del testo.
+
+**Stato attuale: non pubblicato.** Nel sito `--font-annotazioni` dichiara la famiglia ma non esiste
+alcun `@font-face`, quindi il browser usa il fallback e il file non viene mai richiesto.
+
+Resta un punto da chiarire prima di attivarlo: la licenza sui font dice che il font può essere usato
+**solo dallə sottoscrittorə** e non trasferito ad altri, «even another person within the same
+company or a client». Il licenziatario è una persona fisica, il sito è dell'associazione — stessa
+categoria di domanda del progetto registrato. Vedi `_local/licenze-e-originali/INVENTARIO.md`.
 
 ## 5. Animazione d'ingresso
 

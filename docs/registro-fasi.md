@@ -195,8 +195,16 @@ verificabile dall'esterno, nel copy la riga è generica in attesa di conferma.
 
 ### Decisioni ancora necessarie
 
-1. **Incorporamento web di Doodle Lines**: la licenza è al progetto giusto, ma il permesso di
-   `@font-face` va verificato nei termini Envato. Finché non è chiaro, il font resta locale e il
-   sito usa il fallback.
+1. ~~**Incorporamento web di Doodle Lines**~~ — **parzialmente chiuso** (2026-09-05). La Envato
+   Elements License lo **consente** esplicitamente: *«You can incorporate a web-enabled Font as
+   part of an End Product, but your End Product must not encourage or facilitate users to extract
+   the Font or create new text using it.»*
+   Ne discendono tre vincoli implementativi: pubblicare **solo WOFF2** (non `.ttf`/`.otf`, che
+   sarebbe facilitare l'estrazione), nessuno strumento che generi testo in quel font, uso limitato
+   alle annotazioni.
+   **Resta però aperto un punto**: la stessa licenza dice che il font può essere usato solo dallə
+   sottoscrittorə e non trasferito ad altri, «even another person within the same company or a
+   client». Il licenziatario è una persona fisica, il sito è dell'associazione. Da chiarire prima
+   di pubblicare il font — non prima di lavorarci. Finché non è chiaro, il sito usa il fallback.
 2. **Ritaglio delle illustrazioni**: i PNG sorgente sono verticali fino a 532×1114 con molto
    bianco. Vanno ritagliati ed esportati per il web prima della Fase 4.

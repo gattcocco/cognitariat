@@ -208,3 +208,128 @@ verificabile dall'esterno, nel copy la riga è generica in attesa di conferma.
    di pubblicare il font — non prima di lavorarci. Finché non è chiaro, il sito usa il fallback.
 2. **Ritaglio delle illustrazioni**: i PNG sorgente sono verticali fino a 532×1114 con molto
    bianco. Vanno ritagliati ed esportati per il web prima della Fase 4.
+
+---
+
+## Fase 4 — Integrazione di testi e personaggi
+
+Data: 2026-09-05. Ramo: `dev`. Nessun deploy, nessun merge, nessuna modifica DNS, nessuna
+attivazione Stripe.
+
+### Cosa è cambiato
+
+**Struttura della home.** L'ordine editoriale di `docs/copy-home-v2.md` è ora quello del sito:
+`#cosa-succede`, `#perche-ci-preoccupa`, `#lavoro`, `#alternative`, `#cosa-facciamo`, `#video`,
+`#cosa-costruiamo`, `#avvicinarsi`, `#immaginario`, `#membership`, `#merch`. Le àncore storiche
+`#contract-support`, `#advocacy`, `#legal`, `#strike` sono conservate come `span` dentro le sezioni
+che oggi contengono quei contenuti, così i link già in giro non finiscono nel vuoto.
+
+**Identità ibrida.** Sindacato *e* osservatorio in titolo, sottotitolo, metadati, JSON-LD, footer.
+Le sezioni distinguono con un'etichetta cosa è attività in corso e cosa è progetto: `.occhiello`
+per la prima, `.occhiello--progetto` (bordo tratteggiato, non solo colore) per la seconda.
+
+**Illustrazioni.** Tre presenze in tutta la home, come da indicazione: nessuna sequenza di schede
+decorate. In questa fase è entrata la prima figura (`#lavoro`), esportata come SVG con `viewBox`
+ritagliato sul contenuto misurato con `getBBox()` — nessun ritaglio automatico del corpo, nessuna
+perdita di dettaglio. Gli originali restano in `_local/`, fuori da Git e dal deploy.
+
+**Pagamenti fermi.** In `#membership` e `#merch` non esiste alcun pulsante d'acquisto: verificato a
+DOM che gli unici elementi cliccabili nelle due sezioni sono un'àncora interna. I prezzi restano
+come informazione. `hasOfferCatalog` resta rimosso dai dati strutturati. Il codice Stripe
+(Functions, migrazioni) è intatto per la riattivazione.
+
+**Footer riscritto.** Diceva due cose non vere: «Sindacato del Cognitariato» da solo nascondeva
+l'osservatorio, e «GDPR compliant · dati residenti UE · crittografia end-to-end» era una promessa
+tecnica che il sito non può mantenere né dimostrare. Sostituita da un link semplice all'informativa.
+Rimosso anche un blocco che stampava due virgolette vuote.
+
+**Area membro.** Ora distingue tre stati invece di due: sessione assente, tessera caricata,
+**errore di caricamento**. Il testo per chi non ha una sessione non manda più a una pagina
+d'iscrizione che non esiste più e non promette un tesseramento chiuso.
+
+### Problemi trovati e corretti in questa fase
+
+1. **L'intro poteva lasciare la pagina senza titolo.** Il failsafe di 3 secondi toglieva la classe
+   `html.cogu-intro` ma non l'overlay né l'`opacity` inline messa sulle parole dell'H1: con la
+   timeline bloccata (scheda in background, rAF sospesi, CDN lenta) restava un titolo invisibile
+   sotto un pannello nero orfano. Osservato dal vivo. Ora il failsafe rimuove l'overlay e riporta
+   hero e parole allo stato finale, e viene riprogrammato oltre la durata reale della timeline
+   (~3,7 s) quando anime.js parte davvero, così non taglia più l'animazione a metà.
+2. **Il focus cambiava forma agli elementi.** La regola di focus imponeva `border-radius: 4px`: i
+   pulsanti pillola diventavano squadrati nel momento in cui ricevevano il focus. Rimosso.
+3. **Mancava il salto al contenuto** (WCAG 2.4.1): da tastiera si attraversavano ogni volta due
+   banner e sette voci di menu. Aggiunto «Salta al contenuto», con focus giallo perché il fondo è
+   nero. Poiché lo smooth-scroll intercetta i link `#`, ora sposta anche il focus: `main` ha
+   `tabindex="-1"` apposta, senza contorno perché non è un controllo.
+4. **La figura verticale su mobile era impaginata male dal contenitore, non dall'asset.** A una
+   colonna, `width: 100%` la portava a ~483px di altezza, il `max-height: 220px` la ricomprimeva e
+   `object-fit: contain` lasciava due bande vuote ai lati. Non è stato ritagliato niente: è il
+   contenitore ad adattarsi alla figura (`width: auto`, altezza massima 260px). Rapporto misurato
+   dopo la correzione: 0,692 contro 0,693 nativo.
+5. **Link verde su fondo d'errore rosato a 4,31** (sotto 4,5) nel nuovo blocco dell'area membro.
+   Dentro `.form-error` i link sono ora neri e sottolineati.
+6. **Spazi mangiati prima dei link.** Quattro punti (footer, tesseramento, due nell'informativa)
+   in cui il testo si attaccava al link. Corretti; la build è stata ripassata con una scansione
+   automatica dell'HTML prodotto: 0 occorrenze residue.
+7. **Didascalia bianca sopra una foto.** Il contrasto sopra un'immagine non è calcolabile in
+   automatico. La sfumatura ora arriva ad almeno 0,78 di nero su tutta la fascia della didascalia:
+   il bianco resta sopra 10:1 anche sul punto più chiaro possibile dell'immagine.
+
+### Controlli eseguiti
+
+| Controllo | Come | Esito |
+|---|---|---|
+| `npm run check:all` | astro check + tsc functions | 0 errori, 0 warning, 0 hint |
+| `npm run build` | build statica | 4 pagine |
+| Sezioni e àncore presenti | probe DOM su `dist` servito da `wrangler pages dev` | 11 sezioni, 4 àncore storiche |
+| Nessun pulsante d'acquisto | enumerazione DOM in `#membership` e `#merch` | solo un'àncora interna |
+| Contrasto automatico, home | 153 nodi di testo esaminati | 2 segnalazioni, **entrambi falsi positivi** (didascalia bianca sopra la foto: lo script legge solo `background-color` e non vede né l'immagine né la sfumatura `::after`) |
+| Contrasto automatico, `/privacy` | 64 nodi | 0 |
+| Contrasto automatico, `/account` nei tre stati | 19 / 20 / 30 nodi | 1 problema trovato **e corretto** (punto 5), poi 0 |
+| Tastiera: ordine e visibilità del focus | 14 `Tab` reali, eventi `focusin` registrati | 13 elementi, tutti con contorno visibile, ordine coerente |
+| Salto al contenuto | focus da tastiera + screenshot | compare in alto a sinistra, contorno giallo su nero |
+| Reflow senza scorrimento orizzontale | viewport 640×512 (≈1280 al 200%) e 330×700 | nessuno scorrimento orizzontale del documento |
+| Schwa nella catena reale | `document.fonts` + misure canvas + prova visiva | il sottoinsieme `latin-ext` di Inter (che contiene U+0259) risulta **caricato**: la ə è disegnata da Inter, non dal fallback. Forzando `sans-serif` e `serif` di sistema resta disegnata correttamente |
+| Illustrazione: proporzioni | misura del box renderizzato | desktop 220×317,7 e mobile 180×260, rapporto 0,692 contro 0,693 nativo |
+
+Il risultato sul contrasto va letto per quello che è: **zero problemi rilevati dal controllo
+automatico di contrasto** su home, `/privacy` e `/account` nei tre stati, dopo la correzione del
+punto 5. Non è un giudizio complessivo di accessibilità.
+
+### Screenshot acquisiti
+
+Desktop (1280 e 800 CSS px) e mobile (375×812), dopo il caricamento di immagini e font e dopo la
+conclusione dell'intro: hero, sezione illustrata `#lavoro`, banner assemblea, `#cosa-costruiamo`,
+`#membership`, `#merch`, footer, `/account` nello stato «sessione assente» e nello stato d'errore.
+
+Nota di metodo: la cattura della pagina *scorsa* restituiva immagini bianche. La causa non era il
+sito ma il modo di catturare. Le sezioni sono state quindi portate in cima alla viewport spostando
+il `margin-top` del `body` a scorrimento zero, e catturate lì. Gli screenshot bianchi non sono
+stati contati come verifica.
+
+### Controlli non eseguiti — restano aperti
+
+1. **`prefers-reduced-motion` in un browser reale.** La regola CSS e la guardia JS sono verificate
+   nell'output di build (`@media (prefers-reduced-motion: reduce){.cogu-intro-overlay{display:none!important}}`
+   e l'uscita anticipata dello script inline), ma la preferenza di sistema non è emulabile con gli
+   strumenti disponibili qui. Va provata attivandola nel sistema operativo.
+2. **Stati `:hover` a colori misurati.** Le regole sono in sorgente, i valori erano già stati
+   calcolati in Fase 3 e `:hover` risulta correttamente attivo sull'elemento puntato; però la
+   rilettura dei colori calcolati attraverso l'automazione restituisce sempre lo stato base, quindi
+   non è stata usata come prova. Da guardare a occhio.
+3. **Screen reader.** Non eseguibile da qui.
+4. **Area membro con una sessione reale.** Gli stati «sessione assente» ed «errore» sono stati
+   visti; lo stato «tessera caricata» è stato controllato solo per il contrasto, mostrando il
+   blocco con i valori segnaposto. Serve un accesso vero, quindi Supabase configurato.
+5. **Font Awesome e Google Fonts da CDN.** In locale l'icona della busta non si carica. In
+   produzione arriverebbe, ma resta aperta la valutazione del piano §4 sull'auto-ospitare entrambi
+   per ridurre le terze parti contattate.
+6. **Rendering dello schwa su un secondo sistema operativo.** Qui è verificato su Windows.
+7. **«Sei aziende, e un acronimo»** resta un titolo provvisorio: da pubblicare solo se il contenuto
+   MANGOS è verificato e utile.
+
+### Rimandato alla Fase 5 — perimetro della fase successiva, non problema aperto
+
+- `src/pages/auth/callback.astro` avvia ancora un checkout se riceve `?tier=...`. Nessun elemento
+  del sito produce più quel parametro, ma il percorso va chiuso lato server insieme al resto del
+  gating.

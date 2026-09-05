@@ -6,8 +6,8 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #fefcf5;
-  color: #1e1b1a;
+  background-color: var(--fondo);
+  color: var(--nero);
   line-height: 1.4;
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
@@ -24,10 +24,10 @@ body {
 .site-header {
   position: sticky;
   top: 0;
-  background: rgba(254, 252, 245, 0.96);
+  background: rgba(255, 255, 255, 0.96);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  border-bottom: 2px solid #e0dbcf;
+  border-bottom: 2px solid var(--bordo);
   z-index: 100;
   padding: 16px 0;
 }
@@ -40,19 +40,18 @@ body {
   gap: 16px;
 }
 
+/* Colore pieno, non piu' un gradiente su testo: e' testo grande (1,8rem, 800)
+   quindi il rosa su bianco (4,13) rientra nella soglia AA per il testo grande. */
 .logo .brand {
   font-size: 1.8rem;
-  font-weight: 800;
+  font-weight: var(--peso-titolo);
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #bc2f2f 0%, #8b1e1e 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  color: var(--rosa);
 }
 .logo span {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #5a4e44;
+  color: var(--nero-secondario);
   display: block;
 }
 
@@ -64,56 +63,65 @@ body {
 }
 .main-nav a {
   text-decoration: none;
-  font-weight: 600;
+  font-weight: var(--peso-medio);
   font-size: 0.9rem;
-  color: #2c2826;
+  color: var(--nero);
   transition: color 0.2s;
   white-space: nowrap;
 }
+/* Hover verde e non rosa: a 0,9rem il rosa su bianco (4,13) non raggiunge AA.
+   La sottolineatura evita inoltre di affidare lo stato al solo colore. */
 .main-nav a:hover,
 .main-nav a:focus-visible {
-  color: #bc2f2f;
+  color: var(--verde);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-/* buttons */
+/* buttons
+   Il testo del pulsante rosa e' NERO, non bianco: rosa/bianco da' 4,13 e non
+   raggiunge il 4,5 richiesto per il testo normale, mentre rosa/nero da' 5,09.
+   L'hover schiarisce il rosa (scurirlo abbasserebbe il contrasto col nero). */
 .btn-primary {
-  background: #bc2f2f;
-  color: white;
+  background: var(--rosa);
+  color: var(--nero);
   border: none;
   padding: 12px 28px;
-  font-weight: 700;
+  font-weight: var(--peso-forte);
   font-size: 1rem;
-  border-radius: 40px;
+  border-radius: var(--raggio-pill);
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 8px var(--ombra);
   font-family: inherit;
   text-decoration: none;
 }
 .btn-primary:hover {
-  background: #991f1f;
+  background: var(--rosa-hover);
   transform: scale(0.98);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px var(--ombra);
 }
-.btn-primary:focus-visible {
-  outline: 3px solid #f7d44a;
-  outline-offset: 2px;
-}
-.btn-primary:disabled {
-  opacity: 0.6;
+.btn-primary:disabled,
+.btn-primary[aria-disabled='true'] {
+  background: var(--bianco);
+  color: var(--nero-secondario);
+  border: 2px solid var(--bordo-forte);
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
+
+/* Il pulsante secondario ha bordo rosa ma testo nero, per lo stesso motivo. */
 .btn-outline {
   background: transparent;
-  border: 2px solid #bc2f2f;
-  color: #bc2f2f;
+  border: 2px solid var(--rosa);
+  color: var(--nero);
   padding: 10px 24px;
-  font-weight: 700;
-  border-radius: 40px;
+  font-weight: var(--peso-forte);
+  border-radius: var(--raggio-pill);
   transition: 0.2s;
   cursor: pointer;
   font-family: inherit;
@@ -121,18 +129,35 @@ body {
   display: inline-block;
 }
 .btn-outline:hover {
-  background: #bc2f2f;
-  color: white;
+  background: var(--rosa);
+  color: var(--nero);
 }
-.btn-outline:disabled {
-  opacity: 0.6;
+.btn-outline:disabled,
+.btn-outline[aria-disabled='true'] {
+  border-color: var(--bordo-forte);
+  color: var(--nero-secondario);
+  background: transparent;
   cursor: not-allowed;
+}
+
+/* Focus unico per tutti gli elementi interattivi: e' il token --focus, che
+   diventa giallo dentro .sezione-scura. Mai rimuovere l'outline senza
+   sostituirlo con qualcosa di altrettanto visibile. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: var(--focus-spessore) solid var(--focus);
+  outline-offset: var(--focus-offset);
+  border-radius: 4px;
 }
 
 /* hero */
 .hero {
   padding: 60px 0 50px;
-  background: radial-gradient(circle at 10% 30%, #fff3e8 0%, #fefcf5 90%);
+  background: var(--fondo);
 }
 .hero-grid {
   display: flex;
@@ -145,8 +170,8 @@ body {
   min-width: 280px;
 }
 .hero-badge {
-  background: #1e1b1a;
-  color: #f7d44a;
+  background: var(--nero);
+  color: var(--giallo);
   display: inline-block;
   padding: 6px 16px;
   border-radius: 40px;
@@ -162,19 +187,22 @@ body {
   letter-spacing: -0.02em;
   margin-bottom: 20px;
 }
-.hero-content h1 span {
-  color: #bc2f2f;
-  border-bottom: 4px solid #f7d44a;
+/* Solo la parola chiave e' rosa, non tutto il titolo. L'animazione d'ingresso
+   avvolge ogni parola in uno <span class="cogu-w"> per animarle in cascata:
+   senza :not() quella regola colorerebbe di rosa l'intero H1. */
+.hero-content h1 span:not(.cogu-w) {
+  color: var(--rosa);
+  border-bottom: 4px solid var(--giallo);
 }
 .hero-lead {
   font-size: 1.3rem;
   font-weight: 500;
-  color: #3b322e;
+  color: var(--nero-secondario);
   margin-bottom: 16px;
 }
 .hero-desc {
   font-size: 1rem;
-  color: #4a3e38;
+  color: var(--nero-secondario);
   margin-bottom: 32px;
   max-width: 90%;
 }
@@ -184,20 +212,20 @@ body {
   gap: 18px 28px;
   margin: 28px 0;
   font-size: 0.85rem;
-  background: #f1ede5;
+  background: var(--giallo-tenue);
   padding: 12px 20px;
   border-radius: 28px;
   width: fit-content;
   max-width: 100%;
 }
 .hero-stats i {
-  color: #bc2f2f;
+  color: var(--rosa);
   margin-right: 8px;
 }
 .hero-visual {
   flex: 0.8;
   min-width: 240px;
-  background: #e6dfd3;
+  background: var(--giallo-tenue);
   border-radius: 32px;
   padding: 30px 20px;
   text-align: center;
@@ -205,12 +233,12 @@ body {
 }
 .hero-visual i {
   font-size: 6rem;
-  color: #bc2f2f;
+  color: var(--rosa);
   opacity: 0.8;
 }
 .ai-warning {
-  background: #2c2826;
-  color: #fdf3d9;
+  background: var(--nero);
+  color: var(--bianco);
   border-radius: 24px;
   padding: 14px 20px;
   margin-top: 20px;
@@ -233,12 +261,12 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, rgba(30,27,26,0.85) 0%, rgba(30,27,26,0.15) 55%, rgba(30,27,26,0) 100%);
+  background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0) 100%);
 }
 .assembly-banner-caption {
   position: relative;
   z-index: 1;
-  color: #fefcf5;
+  color: var(--fondo);
   padding: 24px 0 28px;
   font-size: 1rem;
   font-weight: 500;
@@ -253,7 +281,7 @@ body {
 /* sections generali */
 section {
   padding: 70px 0;
-  border-bottom: 1px solid #e7e2d8;
+  border-bottom: 1px solid var(--bordo);
 }
 .section-title {
   font-size: 2rem;
@@ -262,7 +290,7 @@ section {
   letter-spacing: -0.01em;
 }
 .section-sub {
-  color: #6b5c52;
+  color: var(--nero-secondario);
   margin-bottom: 48px;
   max-width: 700px;
   font-size: 1.1rem;
@@ -273,20 +301,20 @@ section {
   gap: 32px;
 }
 .card {
-  background: white;
+  background: var(--bianco);
   border-radius: 28px;
   padding: 28px 24px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.02);
-  border: 1px solid #e7e0d4;
+  border: 1px solid var(--bordo);
   transition: all 0.2s;
 }
 .card:hover {
-  border-color: rgba(188, 47, 47, 0.25);
+  border-color: var(--rosa);
   box-shadow: 0 16px 28px rgba(0,0,0,0.05);
 }
 .card-icon {
   font-size: 2.2rem;
-  color: #bc2f2f;
+  color: var(--rosa);
   margin-bottom: 20px;
 }
 .card h3 {
@@ -295,7 +323,7 @@ section {
   margin-bottom: 12px;
 }
 .price-tier {
-  background: #faf7f2;
+  background: var(--giallo-tenue);
   border-radius: 20px;
   padding: 20px;
   text-align: center;
@@ -303,11 +331,15 @@ section {
 .price {
   font-size: 2rem;
   font-weight: 800;
-  color: #bc2f2f;
+  color: var(--rosa);
 }
+/* Il <small> ereditava il rosa da .price: a 14px sul fondo giallino scendeva a
+   3,79, sotto la soglia del testo normale. La cifra grande resta rosa (testo
+   grande), la postilla passa al nero. */
 .price small {
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: var(--peso-medio);
+  color: var(--nero);
 }
 
 .member-list {
@@ -318,7 +350,7 @@ section {
   list-style: none;
 }
 .member-list li {
-  background: #ede8df;
+  background: var(--giallo-tenue);
   border-radius: 40px;
   padding: 8px 18px;
   font-size: 0.85rem;
@@ -326,28 +358,38 @@ section {
 }
 
 .cta-section {
-  background: #1e1b1a;
-  color: white;
+  background: var(--nero);
+  color: var(--bianco);
   text-align: center;
   border-bottom: none;
   padding: 60px 0;
 }
 .cta-section .btn-primary {
-  background: #f7d44a;
-  color: #1e1b1a;
+  background: var(--giallo);
+  color: var(--nero);
   margin-top: 20px;
 }
 .cta-section .btn-primary:hover {
-  background: #ecc534;
+  background: var(--giallo-hover);
 }
 .footer {
-  background: #f1ede5;
+  background: var(--bianco);
+  border-top: 2px solid var(--bordo);
   padding: 48px 0 32px;
   font-size: 0.85rem;
-  color: #4a413b;
+  color: var(--nero-secondario);
 }
-.footer a {
-  color: #2c2826;
+/* I link sono verdi E sottolineati: il verde su bianco passa AA (4,95) e la
+   sottolineatura non affida il significato al solo colore. */
+.footer a,
+.link {
+  color: var(--verde);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footer a:hover,
+.link:hover {
+  color: var(--verde-hover);
 }
 
 /* tablet */
@@ -377,11 +419,11 @@ section {
   gap: 32px;
 }
 .video-card {
-  background: white;
+  background: var(--bianco);
   border-radius: 28px;
   padding: 16px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.02);
-  border: 1px solid #e7e0d4;
+  border: 1px solid var(--bordo);
 }
 .video-embed {
   position: relative;
@@ -389,7 +431,7 @@ section {
   aspect-ratio: 9 / 16;
   border-radius: 20px;
   overflow: hidden;
-  background: #000;
+  background: var(--nero);
 }
 .video-embed iframe {
   position: absolute;
@@ -415,49 +457,56 @@ section {
 
 /* Banner verso il dossier Resistenze AI */
 .resistenze-banner {
-  background: #2c2826;
-  color: #fdf3d9;
+  background: var(--nero);
+  color: var(--bianco);
   text-align: center;
   padding: 10px 20px;
   font-size: 0.85rem;
   font-weight: 500;
 }
 .resistenze-banner a {
-  color: #f7d44a;
+  color: var(--giallo);
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.resistenze-banner a:hover { color: #fff; }
+.resistenze-banner a:hover { color: var(--bianco); }
 
-/* Banner Scrivici */
+/* Banner Scrivici — fondo rosa, testo NERO.
+   Il bianco su rosa da' 4,13 e questo e' testo a 0,9rem, cioe' testo normale:
+   servono 4,5. Il nero su rosa da' 5,09. Per lo stesso motivo il link non puo'
+   essere giallo (giallo su rosa: 2,85): resta nero e si distingue per peso e
+   sottolineatura, non per colore. */
 .scrivici-banner {
-  background: #bc2f2f;
-  color: #fefcf5;
+  background: var(--rosa);
+  color: var(--nero);
   text-align: center;
   padding: 10px 20px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: var(--peso-medio);
 }
 .scrivici-banner a {
-  color: #f7d44a;
+  color: var(--nero);
+  font-weight: var(--peso-forte);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 .scrivici-banner a:hover {
-  color: #fff;
+  text-decoration-thickness: 3px;
 }
 
 /* Slideshow immaginario collettivo */
 .imaginarium {
-  background: #1e1b1a;
+  background: var(--nero);
   padding: 60px 0;
 }
 .imaginarium .section-title,
 .imaginarium .section-sub {
-  color: #fdf3d9;
+  color: var(--bianco);
 }
-.imaginarium .section-sub { color: #c2b9ab; }
+/* Su fondo nero il grigio del testo secondario sparirebbe: qui il sottotitolo
+   resta bianco pieno (21:1). Il grigio --nero-secondario vale solo su bianco. */
+.imaginarium .section-sub { color: var(--bianco); }
 .slideshow {
   position: relative;
   max-width: 900px;
@@ -465,7 +514,7 @@ section {
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-  background: #000;
+  background: var(--nero);
 }
 .slideshow-track {
   display: flex;
@@ -485,18 +534,18 @@ section {
   position: absolute;
   left: 0; right: 0; bottom: 0;
   background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-  color: #fdf3d9;
+  color: var(--bianco);
   padding: 24px 28px 18px;
   font-size: 0.95rem;
 }
-.slide-caption strong { color: #f7d44a; }
+.slide-caption strong { color: var(--giallo); }
 .slideshow-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   background: rgba(0,0,0,0.5);
   border: none;
-  color: #fdf3d9;
+  color: var(--bianco);
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -507,7 +556,7 @@ section {
   justify-content: center;
   transition: background 0.2s;
 }
-.slideshow-nav:hover { background: #bc2f2f; }
+.slideshow-nav:hover { background: var(--rosa); }
 .slideshow-nav.prev { left: 16px; }
 .slideshow-nav.next { right: 16px; }
 .slideshow-dots {
@@ -516,43 +565,51 @@ section {
   gap: 10px;
   margin-top: 18px;
 }
+/* I pallini stanno su fondo nero: il grigio scuro non raggiungerebbe il 3:1
+   richiesto per gli elementi non testuali. Bianco semitrasparente per gli
+   inattivi, giallo pieno per l'attivo — e la differenza non e' solo di colore
+   ma anche di dimensione, per non affidarla alla sola tinta. */
 .slideshow-dots button {
   width: 10px; height: 10px;
   border-radius: 50%;
   border: none;
-  background: #5a4e44;
+  background: rgba(255, 255, 255, 0.55);
   cursor: pointer;
   padding: 0;
 }
-.slideshow-dots button.active { background: #f7d44a; }
+.slideshow-dots button.active {
+  background: var(--giallo);
+  width: 14px; height: 14px;
+}
 
 /* ===== Intro WOW — entrata estetica della home (JS-gated) ===== */
 .cogu-intro-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #1e1b1a;
+  background: var(--nero);
   display: grid;
   place-items: center;
   will-change: transform;
 }
 .cogu-intro-mark { text-align: center; padding: 0 24px; }
+/* Colore pieno al posto del gradiente su testo: il gradiente rosa->rosa non
+   aggiungeva nulla e background-clip:text non e' supportato ovunque, lasciando
+   il testo trasparente quando fallisce. Rosa su nero: 5,09. */
 .cogu-intro-brand {
   display: block;
   font-size: clamp(3rem, 13vw, 7.5rem);
-  font-weight: 800;
+  font-weight: var(--peso-titolo);
   letter-spacing: -0.03em;
   line-height: 1;
-  background: linear-gradient(135deg, #e0533f 0%, #bc2f2f 55%, #8b1e1e 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  color: var(--rosa);
 }
+/* Su fondo nero serve il bianco: il grigio secondario e' pensato per il bianco. */
 .cogu-intro-tag {
   display: block;
   margin-top: 16px;
-  color: #c2b9ab;
-  font-weight: 600;
+  color: var(--bianco);
+  font-weight: var(--peso-medio);
   font-size: clamp(0.78rem, 2.4vw, 1.05rem);
   letter-spacing: 0.34em;
   text-transform: uppercase;
@@ -562,7 +619,7 @@ section {
   height: 3px;
   width: min(280px, 62vw);
   margin: 24px auto 0;
-  background: #f7d44a;
+  background: var(--giallo);
   border-radius: 3px;
   transform: scaleX(0);
   transform-origin: center;
@@ -591,10 +648,10 @@ html.cogu-intro .hero > .container:last-child > div {
 .member-form {
   max-width: 480px;
   margin: 0 auto;
-  background: white;
+  background: var(--bianco);
   border-radius: 28px;
   padding: 32px;
-  border: 1px solid #e7e0d4;
+  border: 1px solid var(--bordo);
 }
 .member-form label {
   display: block;
@@ -602,14 +659,23 @@ html.cogu-intro .hero > .container:last-child > div {
   font-size: 0.9rem;
   margin: 16px 0 6px;
 }
+/* Bordo a 3,35:1 come richiede WCAG 1.4.11 per i confini dei controlli:
+   un bordo appena accennato e' esteticamente piacevole ma rende il campo
+   invisibile a chi ha vista ridotta. */
 .member-form input[type="text"],
 .member-form input[type="email"] {
   width: 100%;
   padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid #d8d1c4;
+  border-radius: var(--raggio-s);
+  border: 1px solid var(--bordo-campo);
   font-family: inherit;
   font-size: 1rem;
+  color: var(--nero);
+  background: var(--bianco);
+}
+.member-form input[aria-invalid='true'] {
+  border-color: var(--rosa);
+  border-width: 2px;
 }
 .member-form .consent-row {
   display: flex;
@@ -622,38 +688,49 @@ html.cogu-intro .hero > .container:last-child > div {
 .member-form .btn-primary { margin-top: 20px; width: 100%; justify-content: center; }
 .form-note {
   font-size: 0.8rem;
-  color: #6b5c52;
+  color: var(--nero-secondario);
   margin-top: 12px;
 }
+/* Errore: testo NERO su fondo rosa diluito, non testo rosa (che su fondo quasi
+   bianco non arriva a 4,5). Il bordo laterale e il simbolo prima del testo
+   fanno si' che l'errore non sia comunicato dal solo colore (WCAG 1.4.1). */
 .form-error {
-  background: #fbe4e4;
-  color: #8b1e1e;
-  border-radius: 12px;
+  background: var(--rosa-tenue);
+  color: var(--nero);
+  border-left: 4px solid var(--rosa);
+  border-radius: var(--raggio-s);
   padding: 10px 14px;
   font-size: 0.85rem;
   margin-top: 12px;
 }
+.form-error::before {
+  content: '⚠ ';
+  font-weight: var(--peso-forte);
+}
+/* Tessera: testo NERO su rosa (5,09). Il bianco su rosa da' 4,13 e la tessera
+   contiene un elenco a 0,9rem, cioe' testo normale: non basterebbe. */
 .member-card {
   max-width: 420px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #bc2f2f 0%, #8b1e1e 100%);
-  color: #fefcf5;
-  border-radius: 28px;
+  background: var(--rosa);
+  color: var(--nero);
+  border-radius: var(--raggio-l);
   padding: 32px;
-  box-shadow: 0 16px 32px rgba(0,0,0,0.15);
+  box-shadow: 0 16px 32px var(--ombra);
 }
 .member-card .member-card-tier {
   font-size: 1.6rem;
-  font-weight: 800;
+  font-weight: var(--peso-titolo);
 }
 .member-card .member-card-status {
   display: inline-block;
   margin-top: 8px;
   padding: 4px 14px;
-  border-radius: 40px;
+  border-radius: var(--raggio-pill);
   font-size: 0.8rem;
-  font-weight: 700;
-  background: rgba(255,255,255,0.18);
+  font-weight: var(--peso-forte);
+  background: var(--bianco);
+  color: var(--nero);
 }
 .member-card dl {
   margin-top: 20px;
@@ -662,7 +739,9 @@ html.cogu-intro .hero > .container:last-child > div {
   gap: 6px 16px;
   font-size: 0.9rem;
 }
-.member-card dt { opacity: 0.75; }
+/* Niente opacity sul testo: abbasserebbe il contrasto sotto la soglia.
+   La distinzione fra etichetta e valore la fa il peso, non la trasparenza. */
+.member-card dt { font-weight: var(--peso-medio); }
 .account-actions {
   max-width: 420px;
   margin: 20px auto 0;

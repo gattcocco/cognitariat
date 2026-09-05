@@ -12,14 +12,14 @@ const items = [
     <div class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(240px,1fr));">
       {items.map((item) => (
         <div class="card" style="text-align: center;">
-          <i class={`fas ${item.icon}`} style="font-size: 2.5rem; color:#bc2f2f;" aria-hidden="true"></i>
+          <i class={`fas ${item.icon}`} style="font-size: 2.5rem; color: var(--rosa);" aria-hidden="true"></i>
           <h3>{item.title}</h3>
           <p>{item.desc}</p>
           <button class="btn-outline" type="button" data-merch-button={item.id} style="margin-top: 12px;">{item.cta}</button>
         </div>
       ))}
     </div>
-    <div class="ai-warning" style="background: #e2d9cf; color:#1e1b1a; margin-top: 30px; text-align: center;">
+    <div class="ai-warning" style="background: var(--giallo-tenue); color: var(--nero); margin-top: 30px; text-align: center;">
       <i class="fas fa-store" aria-hidden="true"></i> I proventi del merch finanziano il fondo di solidarietà legale e le campagne di organizzazione.
     </div>
   </div>

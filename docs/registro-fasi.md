@@ -135,3 +135,68 @@ verificabile dall'esterno, nel copy la riga è generica in attesa di conferma.
 3. Footer: la riga «GDPR compliant · crittografia end-to-end» e «PRD v1.0» vanno riviste.
 4. Navigazione: proposta di togliere Membership e Merch dalle voci principali, coerentemente col
    fatto che non sono operativi. Le sezioni restano nel sito.
+
+---
+
+## Fase 3 — Sistema visivo e campionario accessibile
+
+**Stato: completata.** `check:all` 0 errori, `build` ok.
+
+### Modifiche
+
+- **`src/styles/tokens.css`** (nuovo): unica fonte per colori, tipografia, raggi, focus.
+  Importato in `BaseLayout` prima di `global.css`.
+- **`global.css`**: eliminati tutti i 27 colori hardcoded. Sabbia e beige rimossi da pagina,
+  sezioni e card; fondo principale bianco.
+- **Componenti**: rimossi i 10 colori inline, sostituiti da token.
+- **`docs/manuale-brand.md`** (nuovo).
+- **`_local/campionario/`** (fuori dal repo): campionario con titoli, testo, link, pulsanti,
+  form con errore, tre esempi illustrati, prova dello schwa.
+
+### Controlli eseguiti
+
+| Controllo | Esito |
+|---|---|
+| Rapporti di contrasto dichiarati nel brief | **tutti e 6 verificati esatti** (calcolo WCAG 2.1) |
+| Audit automatico contrasti su home renderizzata | 5 problemi trovati → **0 residui** |
+| Audit su `/privacy` | 0 problemi |
+| Overflow orizzontale a 360 px | nessuno |
+| Overflow orizzontale a 390 px | nessuno |
+| Console | nessun errore |
+| Selettori dell'animazione d'ingresso | tutti presenti |
+| `prefers-reduced-motion` + gate `html.cogu-intro` | intatti |
+| Campionario e font nella build pubblica | **assenti** (verificato su `dist/`) |
+| `check:all` / `build` | 0 errori |
+
+### Problemi trovati e corretti
+
+1. **Tutto l'H1 diventava rosa.** L'animazione avvolge ogni parola in `<span>`, facendo scattare la
+   regola pensata per la sola parola chiave. Corretto con `span:not(.cogu-w)`.
+2. **Banner rosa con testo bianco** (4,13) e link giallo su rosa (2,85): entrambi sotto soglia.
+   Passati a nero, con il link distinto da peso e sottolineatura.
+3. **`.price small`** ereditava il rosa: a 14px sul fondo giallino stava a 3,79.
+4. **Bordo dei campi di form** a 1,38:1, contro il 3:1 richiesto da WCAG 1.4.11. Nuovo token
+   `--bordo-campo` a 3,35:1.
+5. **Tessera membro** con testo bianco su rosa e `opacity: 0.75` sulle etichette: entrambi sotto
+   soglia. Ora testo nero, distinzione col peso invece che con la trasparenza.
+6. **Testo grigio su fondo nero** in `.imaginarium .section-sub` e `.cogu-intro-tag`, e pallini
+   dello slideshow a 2,4:1 su nero.
+7. **Errore mio nel verso dell'hover**: avevo scurito il rosa (`#C22A58`), che col testo nero
+   scende a 3,77. Corretto schiarendolo (`#E84B79`, 5,71).
+
+### Verifiche non disponibili
+
+- **Lettura con screen reader** e prova reale da tastiera su dispositivo fisico: non eseguibili
+  da qui. Il focus è implementato e visibile, ma va provato.
+- **Zoom 200%/400%**: non simulabile in modo affidabile con gli strumenti disponibili; la
+  checklist è nel campionario.
+- **Rendering dello schwa nei fallback reali** su Windows/macOS/Linux: il campionario ha la prova,
+  va guardata su almeno due sistemi.
+
+### Decisioni ancora necessarie
+
+1. **Incorporamento web di Doodle Lines**: la licenza è al progetto giusto, ma il permesso di
+   `@font-face` va verificato nei termini Envato. Finché non è chiaro, il font resta locale e il
+   sito usa il fallback.
+2. **Ritaglio delle illustrazioni**: i PNG sorgente sono verticali fino a 532×1114 con molto
+   bianco. Vanno ritagliati ed esportati per il web prima della Fase 4.

@@ -151,7 +151,9 @@ select:focus-visible,
 [tabindex]:focus-visible {
   outline: var(--focus-spessore) solid var(--focus);
   outline-offset: var(--focus-offset);
-  border-radius: 4px;
+  /* Niente border-radius qui: cambiava la forma dell'elemento nel momento in cui
+     riceve il focus (i pulsanti pillola diventavano squadrati). L'outline segue
+     gia' da solo il raggio dell'elemento. */
 }
 
 /* hero */
@@ -261,7 +263,11 @@ select:focus-visible,
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0) 100%);
+  /* Il contrasto del testo sopra una foto non e' calcolabile in automatico:
+     dipende dal pixel sotto. La sfumatura arriva quindi ad almeno 0,75 di nero
+     su tutta la fascia dove sta la didascalia, cosi' il bianco resta sopra 10:1
+     anche se sotto ci fosse la parte piu' chiara dell'immagine. */
+  background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.78) 24%, rgba(0,0,0,0.15) 62%, rgba(0,0,0,0) 100%);
 }
 .assembly-banner-caption {
   position: relative;
@@ -391,6 +397,17 @@ section {
 .link:hover {
   color: var(--verde-hover);
 }
+/* Due colonne che collassano da sole sotto i 640px: prima erano stili inline
+   nel componente, qui restano governabili dai token come il resto. */
+.footer-cols {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px 40px;
+}
+.footer-cols > div { min-width: min(100%, 280px); }
+.footer-cols h3 { font-size: 1rem; margin-bottom: 8px; color: var(--nero); }
+.footer-cols p { margin: 0 0 6px; }
 
 /* tablet */
 @media (max-width: 1024px) {
@@ -626,15 +643,15 @@ section {
 }
 /* Stati iniziali dell'hero: applicati SOLO durante l'intro (classe aggiunta
    da JS solo se non c'è reduced-motion). Senza JS l'hero resta visibile. */
+/* Elenco allineato agli elementi che l'hero contiene davvero dopo la
+   riscrittura dei testi: statistiche, riquadro "Cognitariato vs AI" e fascia
+   citazione non esistono piu'. Se si aggiunge un elemento all'hero e lo si
+   anima, va aggiunto anche qui, altrimenti compare prima della cascata. */
 html.cogu-intro .hero-badge,
 html.cogu-intro .hero-content h1,
 html.cogu-intro .hero-lead,
 html.cogu-intro .hero-desc,
-html.cogu-intro .hero-stats,
-html.cogu-intro .hero-content > .btn-primary,
-html.cogu-intro .ai-warning,
-html.cogu-intro .hero-visual,
-html.cogu-intro .hero > .container:last-child > div {
+html.cogu-intro .hero-content > .btn-primary {
   opacity: 0;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -748,4 +765,227 @@ html.cogu-intro .hero > .container:last-child > div {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* ============================================================================
+   Blocchi editoriali — Fase 4
+   Il sito passa da una griglia di card a testo lungo leggibile. Le card
+   restano dove hanno senso (video, tesseramento, merch), non per il discorso.
+   ========================================================================= */
+
+/* Misura di lettura: circa 70 caratteri, il limite oltre il quale l'occhio
+   fatica a ritrovare l'inizio della riga successiva. */
+.prosa {
+  max-width: 68ch;
+}
+.prosa > p {
+  margin-bottom: 18px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+.prosa > p:last-child {
+  margin-bottom: 0;
+}
+
+/* Occhiello: dice se la sezione descrive attivita' reali o progetti. */
+.occhiello {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: var(--peso-forte);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--giallo);
+  color: var(--nero);
+  padding: 5px 14px;
+  border-radius: var(--raggio-pill);
+  margin-bottom: 14px;
+}
+/* Per i progetti non ancora attivi: bordo invece di fondo pieno, cosi' si
+   distingue dall'occhiello delle attivita' reali anche senza percepire il
+   colore (WCAG 1.4.1: non affidarsi al solo colore). */
+.occhiello--progetto {
+  background: transparent;
+  border: 2px dashed var(--nero);
+  padding: 3px 12px;
+}
+
+/* Nota di metodo: quello che non sappiamo, i limiti di un dato. Marcata con
+   un bordo laterale perche' e' un cambio di voce, non un'enfasi. */
+.nota-metodo {
+  border-left: 4px solid var(--verde);
+  padding: 4px 0 4px 16px;
+  margin: 22px 0;
+  color: var(--nero);
+}
+
+.fonte {
+  font-size: 0.85rem;
+  color: var(--nero-secondario);
+  margin-top: 24px;
+}
+
+/* Elenco titolo + spiegazione, al posto delle card per il testo discorsivo. */
+.elenco-definizioni {
+  margin: 24px 0;
+}
+.elenco-definizioni dt {
+  font-weight: var(--peso-forte);
+  font-size: 1.1rem;
+  margin-top: 20px;
+}
+.elenco-definizioni dd {
+  margin: 6px 0 0;
+  line-height: 1.65;
+}
+
+.elenco-progetto {
+  margin: 20px 0 20px 20px;
+  line-height: 1.7;
+}
+.elenco-progetto li {
+  margin-bottom: 10px;
+}
+
+.sezione-progetto {
+  background: var(--giallo-tenue);
+}
+
+.riquadro-domande {
+  border: 2px solid var(--nero);
+  border-radius: var(--raggio-m);
+  padding: 24px;
+  margin: 32px 0;
+}
+.riquadro-domande h3 {
+  font-size: 1.25rem;
+  margin-bottom: 10px;
+}
+.riquadro-domande ol {
+  margin: 16px 0 16px 20px;
+  line-height: 1.7;
+}
+.riquadro-domande li {
+  margin-bottom: 10px;
+}
+
+/* Ancore storiche: i vecchi id restano raggiungibili dai link esterni gia' in
+   giro, senza occupare spazio. scroll-margin-top evita che l'header sticky
+   copra il titolo quando si arriva da un'ancora. */
+.ancora-storica {
+  display: block;
+  height: 0;
+  scroll-margin-top: 90px;
+}
+section[id] {
+  scroll-margin-top: 90px;
+}
+
+/* Blocco con illustrazione: testo e figura affiancati, figura che si sposta
+   sotto quando non c'e' spazio. */
+.blocco-illustrato {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 40px;
+  align-items: start;
+}
+.blocco-illustrato .figura {
+  margin: 0;
+  color: var(--nero);
+}
+/* height:auto con aspect-ratio preserva le proporzioni originali della figura
+   e, insieme a width/height dichiarati nell'HTML, evita lo spostamento del
+   layout mentre l'immagine carica. */
+.blocco-illustrato .figura img {
+  width: 100%;
+  height: auto;
+  max-height: 340px;
+  object-fit: contain;
+  display: block;
+}
+@media (max-width: 800px) {
+  .blocco-illustrato {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  /* Su una colonna sola, width:100% porterebbe la figura a ~483px di altezza:
+     il max-height la riporterebbe a 220 e object-fit lascerebbe due bande vuote
+     ai lati. Il vuoto sarebbe del contenitore, non dell'asset. Qui e' il
+     contenitore ad adattarsi alla figura: larghezza derivata dall'altezza. */
+  .blocco-illustrato .figura img {
+    width: auto;
+    max-width: 100%;
+    max-height: 260px;
+    margin-inline: auto;
+  }
+}
+
+/* Hero senza colonna visiva: il testo puo' usare piu' larghezza. */
+.hero-content--largo {
+  max-width: 44rem;
+}
+
+/* Il logo e' diventato un link alla home: non deve sembrare un link di testo. */
+.logo {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.logo:hover .brand {
+  color: var(--rosa-hover);
+}
+
+/* Etichetta per funzioni presenti ma non ancora attive (tesseramento, merch). */
+.non-attivo {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: var(--peso-forte);
+  border: 2px solid var(--nero);
+  border-radius: var(--raggio-pill);
+  padding: 3px 12px;
+  margin-bottom: 12px;
+}
+
+/* Salto al contenuto: senza, con la tastiera si attraversano ogni volta i due
+   banner e le sette voci di menu prima di arrivare al testo (WCAG 2.4.1).
+   Nascosto finche' non riceve il focus; il focus qui e' giallo perche' il
+   fondo e' nero e il nero del token sparirebbe. */
+.salta-al-contenuto {
+  --focus: var(--giallo);
+  position: absolute;
+  left: 8px;
+  top: -80px;
+  z-index: 10000;
+  background: var(--nero);
+  color: var(--bianco);
+  padding: 10px 18px;
+  border-radius: var(--raggio-s);
+  font-weight: var(--peso-forte);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.salta-al-contenuto:focus {
+  top: 8px;
+}
+
+/* main riceve il focus in modo programmatico dopo «Salta al contenuto»: serve a
+   spostare davvero la tastiera, ma un contorno attorno all'intera pagina non
+   comunicherebbe niente di utile. L'indicatore resta su tutti i controlli veri. */
+main[tabindex='-1']:focus,
+main[tabindex='-1']:focus-visible {
+  outline: none;
+}
+
+/* Dentro il riquadro d'errore il fondo e' rosato: il verde dei link ci scende a
+   4,31 e non passa AA. Il testo del blocco e' gia' nero; i link restano neri e
+   si distinguono per la sottolineatura, non per il colore (WCAG 1.4.1). */
+.form-error a,
+.form-error a.link {
+  color: var(--nero);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.form-error a:hover,
+.form-error a.link:hover {
+  color: var(--nero);
+  text-decoration-thickness: 2px;
 }

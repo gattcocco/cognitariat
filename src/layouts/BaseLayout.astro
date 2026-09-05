@@ -8,8 +8,8 @@ interface Props {
 }
 
 const {
-  title = "COG U · Sindacato del Cognitariato",
-  description = "COG U — il primo sindacato online in Italia. E' al 100% con i/le cognitari/e GenZ e Millennial minacciat3 dall'AI: agitazione, sciopero, contrattazione collettiva contro lo sfruttamento algoritmico di precari/e.",
+  title = "COG U · Sindacato e osservatorio sul lavoro cognitivo",
+  description = "Sindacato in costruzione e osservatorio attivo sul lavoro cognitivo e sulle infrastrutture dell'AI: data center, energia, contratti. Documentiamo e mettiamo in comune quello che troviamo.",
 } = Astro.props;
 ---
 
@@ -21,58 +21,41 @@ const {
   <title>{title}</title>
 
   <meta name="description" content={description}>
-  <meta name="theme-color" content="#bc2f2f">
+  <meta name="theme-color" content="#e5376a">
   <meta name="robots" content="index, follow">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="COG U · Sindacato del Cognitariato">
-  <meta property="og:description" content="Difenditi dall'AI con il sindacato del cognitariato che non teme il capitale digitale.">
+  <meta property="og:title" content="COG U · Sindacato e osservatorio sul lavoro cognitivo">
+  <meta property="og:description" content="Chi sta costruendo l'intelligenza artificiale, con quali soldi, a spese di cosa. E chi la sta costruendo in un altro modo.">
   <meta property="og:locale" content="it_IT">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="COG U · Sindacato del Cognitariato">
-  <meta name="twitter:description" content="Agisci sull'AI. Tutela legale, contrattazione collettiva, sciopero, advocacy e governance.">
+  <meta name="twitter:title" content="COG U · Sindacato e osservatorio sul lavoro cognitivo">
+  <meta name="twitter:description" content="Documentiamo cosa succede al lavoro cognitivo e alle infrastrutture che lo reggono: data center, energia, contratti.">
 
   <script is:inline type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "COG U — Cognitive Workers Union",
-    "alternateName": "Sindacato del Cognitariato",
-    "description": "Progetto/PRD di un sindacato online per il cognitariato italiano: tutela legale, contrattazione collettiva, sciopero digitale e advocacy contro lo sfruttamento algoritmico del lavoro cognitivo.",
+    "alternateName": "Sindacato e osservatorio sul lavoro cognitivo",
+    "description": "Sindacato in costruzione e osservatorio attivo sul lavoro cognitivo e sulle infrastrutture dell'intelligenza artificiale: data center, energia, contratti.",
     "url": "https://cognitariatzone.org/",
-    "logo": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23bc2f2f'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Inter,sans-serif' font-size='34' font-weight='800' fill='%23fefcf5' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E",
-    "slogan": "Agisci sull'AI",
+    "logo": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5376a'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Inter,sans-serif' font-size='34' font-weight='800' fill='%23ffffff' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E",
     "areaServed": { "@type": "AdministrativeArea", "name": "Italia" },
-    "knowsAbout": ["Intelligenza artificiale e lavoro", "Contrattazione collettiva", "Lavoro cognitivo precario", "Diritti del lavoro digitale"],
+    "knowsAbout": ["Intelligenza artificiale e lavoro", "Data center e consumo energetico", "Lavoro cognitivo precario", "AI open source e frugale"],
     "sameAs": [
       "https://github.com/gattcocco/cognitariat",
       "https://gattcocco.github.io/mappa-e-contenuti/"
-    ],
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "Quota associativa COG U 2026",
-      "itemListElement": [
-        {
-          "@type": "Offer",
-          "name": "Tessera Studentə / disoccupatə 2026",
-          "description": "Quota associativa una tantum per studentə e disoccupatə, valida fino al 31/12/2026.",
-          "price": "10",
-          "priceCurrency": "EUR",
-          "priceValidUntil": "2026-12-31"
-        },
-        {
-          "@type": "Offer",
-          "name": "Tessera Cognitariə 2026",
-          "description": "Quota associativa una tantum, valida fino al 31/12/2026.",
-          "price": "20",
-          "priceCurrency": "EUR",
-          "priceValidUntil": "2026-12-31"
-        }
-      ]
-    }
+    ]
   })} />
+  {/*
+    hasOfferCatalog rimosso finche' il tesseramento e' chiuso: dichiarare Offer
+    con prezzo nei dati strutturati direbbe ai motori di ricerca che le quote
+    sono acquistabili, mentre la pagina dice il contrario. Va ripristinato
+    insieme alla riattivazione dei pagamenti.
+  */}
 
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23bc2f2f'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Inter,sans-serif' font-size='34' font-weight='800' fill='%23fefcf5' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5376a'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Inter,sans-serif' font-size='34' font-weight='800' fill='%23ffffff' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,7 +69,17 @@ const {
         if (rm) return; // niente intro: l'hero resta visibile
         var d = document.documentElement;
         d.classList.add('cogu-intro');
-        window.__coguReveal = function () { d.classList.remove('cogu-intro'); };
+        window.__coguReveal = function () {
+          d.classList.remove('cogu-intro');
+          // Se la timeline non arriva al suo cleanup (CDN lenta, scheda in background
+          // che sospende i rAF) l'overlay resterebbe sopra il contenuto: il failsafe
+          // deve rimuoverlo, non limitarsi a riaccendere l'opacita'.
+          var ov = document.querySelector('.cogu-intro-overlay');
+          if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+          // Le parole del titolo hanno opacity inline: senza questo reset
+          // resterebbero invisibili anche a gate CSS rimosso.
+          if (window.__coguHeroReset) window.__coguHeroReset();
+        };
         // Se il modulo anime.js non parte (CDN bloccata / browser vecchio), rivela comunque.
         window.__coguFailsafe = setTimeout(window.__coguReveal, 3000);
       } catch (e) {}
@@ -94,6 +87,7 @@ const {
   </script>
 </head>
 <body>
+  <a class="salta-al-contenuto" href="#contenuto">Salta al contenuto</a>
   <slot />
 
   <script>
@@ -105,6 +99,11 @@ const {
           if (target) {
             e.preventDefault();
             target.scrollIntoView({ behavior: 'smooth' });
+            // Lo scroll non sposta il focus: senza questo, chi usa il link
+            // «Salta al contenuto» vedrebbe scorrere la pagina ma resterebbe
+            // con il focus nell'header. main ha tabindex="-1" apposta; sugli
+            // altri bersagli, non focalizzabili, focus() non fa nulla.
+            if (target instanceof HTMLElement) target.focus({ preventScroll: true });
           }
         }
       });

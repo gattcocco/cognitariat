@@ -1,129 +1,41 @@
 ---
-import MembershipSignup from './MembershipSignup.astro';
-
-// Quote associative 2026 (Build 1.0): pagamento one-off, valide fino al 31/12/2026,
-// nessun rinnovo automatico. Vedi piano v3.
+// Fase 4: struttura conservata, acquisti DISABILITATI.
+// Le quote 2026 e la logica Stripe restano intatte nel codice (functions/,
+// migrazioni, componenti) per poter essere riattivate senza ricostruire il
+// flusso, ma qui nessun pulsante deve suggerire che si possa gia' pagare:
+// l'etichetta dice cosa e' vero adesso, non cosa sara'.
 const tiers = [
-  { id: 'studente', icon: 'fa-hand-holding-heart', title: 'Studentə / disoccupatə', desc: 'Accesso completo a tutte le funzioni sindacali.', price: 10 },
-  { id: 'cognitario', icon: 'fa-briefcase', title: 'Cognitariə', desc: 'La quota associativa standard per chi lavora nel cognitariato.', price: 20 },
+  { id: 'studente', title: 'Studentə / disoccupatə', desc: 'Accesso completo a tutte le funzioni sindacali.', price: 10 },
+  { id: 'cognitario', title: 'Cognitariə', desc: 'La quota associativa standard per chi lavora nel cognitariato.', price: 20 },
 ];
 ---
 <section id="membership">
   <div class="container">
-    <h2 class="section-title">Iscrizione &amp; Benefit <i class="fas fa-id-card" aria-hidden="true"></i></h2>
-    <p class="section-sub">Quota associativa 2026, valida fino al 31/12/2026 — pagamento unico, nessun rinnovo automatico. Scegli la fascia in base alla tua condizione lavorativa.</p>
+    <p class="occhiello occhiello--progetto">Non ancora aperto</p>
+    <h2 class="section-title">Tesseramento</h2>
+    <p class="section-sub">
+      Le quote sono definite, ma il tesseramento non è ancora aperto: non stiamo raccogliendo
+      iscrizioni né pagamenti. Quando apriremo lo scriveremo qui e nell'osservatorio.
+    </p>
+
     <div class="cards-grid">
       {tiers.map((t) => (
         <div class="card">
-          <div class="card-icon"><i class={`fas ${t.icon}`} aria-hidden="true"></i></div>
           <h3>{t.title}</h3>
           <p>{t.desc}</p>
-          <div class="price-tier" style="margin-top: 20px;"><span class="price">€{t.price} <small>una tantum, 2026</small></span></div>
-          <div class="tier-card-cta">
-            <button class="btn-primary" type="button" data-tier-button={t.id} style="width:100%; justify-content:center;">
-              Iscriviti
-            </button>
-          </div>
+          <p class="price-tier"><span class="price">€{t.price} <small>una tantum, quota 2026</small></span></p>
         </div>
       ))}
       <div class="card">
-        <div class="card-icon"><i class="fas fa-heart" aria-hidden="true"></i></div>
-        <h3>Sostenitore</h3>
-        <p>Un contributo libero per chi vuole sostenere COG U senza prendere la tessera. Nessuna iscrizione, nessun account.</p>
-        <div class="price-tier" style="margin-top: 20px;"><span class="price">€50+ <small>a tua scelta</small></span></div>
-        <div class="tier-card-cta">
-          <button class="btn-outline" type="button" id="sostenitore-button" style="width:100%;">
-            Sostienici
-          </button>
-        </div>
+        <h3>Contributo sostenitore</h3>
+        <p>Un contributo libero per chi vuole sostenere COG U senza prendere la tessera.</p>
+        <p class="price-tier"><span class="price">€50+ <small>a tua scelta</small></span></p>
       </div>
     </div>
-    <ul class="member-list">
-      <li><i class="fas fa-check-circle" aria-hidden="true"></i> Tessera sindacale digitale con QR</li>
-      <li><i class="fas fa-gavel" aria-hidden="true"></i> Consulenza contratti + AI clausole tossiche</li>
-      <li><i class="fas fa-people-arrows" aria-hidden="true"></i> Azione collettiva e fondo sciopero</li>
-      <li><i class="fas fa-chalkboard-user" aria-hidden="true"></i> Assemblee e voto digitale</li>
-      <li><i class="fas fa-percent" aria-hidden="true"></i> Sconti network di reciproca</li>
-    </ul>
 
-    <div style="margin-top: 48px;">
-      <MembershipSignup />
-    </div>
+    <p class="nota-metodo" style="margin-top: 28px;">
+      Nel frattempo la cosa più utile che puoi fare non è pagare: è{' '}
+      <a class="link" href="#avvicinarsi">raccontarci un caso o segnalarci un progetto</a>.
+    </p>
   </div>
 </section>
-
-<script>
-  import { supabase } from '../lib/supabase-browser';
-
-  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-tier-button]');
-
-  async function updateButtonsForAuthState() {
-    const { data: { session } } = await supabase.auth.getSession();
-    buttons.forEach((btn) => {
-      btn.textContent = session ? 'Iscriviti' : 'Accedi per iscriverti';
-    });
-  }
-  updateButtonsForAuthState();
-  supabase.auth.onAuthStateChange(() => updateButtonsForAuthState());
-
-  buttons.forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const tier = btn.dataset.tierButton!;
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        document.dispatchEvent(new CustomEvent('cogu:select-tier', { detail: tier }));
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = 'Un attimo…';
-      try {
-        const res = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ tier }),
-        });
-        const data = await res.json();
-        if (res.ok && data.url) {
-          window.location.href = data.url;
-        } else {
-          // Es. 409 "hai già una quota attiva": mostrare il messaggio specifico del
-          // server, non un generico "riprova" che confonderebbe in quel caso.
-          alert(data.error ?? 'Non siamo riusciti ad avviare il pagamento. Riprova tra poco o scrivici a cognitariatz@proton.me');
-          btn.disabled = false;
-          btn.textContent = 'Iscriviti';
-        }
-      } catch {
-        alert('Non siamo riusciti ad avviare il pagamento. Riprova tra poco o scrivici a cognitariatz@proton.me');
-        btn.disabled = false;
-        btn.textContent = 'Iscriviti';
-      }
-    });
-  });
-
-  // Sostenitore: nessun login, nessuna scelta di fascia — va dritto a Stripe Checkout con
-  // importo libero (minimo €50). Nessuna riga scritta nel nostro DB.
-  document.getElementById('sostenitore-button')?.addEventListener('click', async () => {
-    const btn = document.getElementById('sostenitore-button') as HTMLButtonElement;
-    btn.disabled = true;
-    const originalLabel = btn.textContent;
-    btn.textContent = 'Un attimo…';
-    try {
-      const res = await fetch('/api/checkout-sostenitore', { method: 'POST' });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error ?? 'Errore imprevisto');
-      }
-    } catch {
-      alert('Non siamo riusciti ad avviare il pagamento. Riprova tra poco o scrivici a cognitariatz@proton.me');
-      btn.disabled = false;
-      btn.textContent = originalLabel;
-    }
-  });
-</script>

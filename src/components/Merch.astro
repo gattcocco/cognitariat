@@ -1,54 +1,29 @@
 ---
+// Fase 4: struttura conservata, acquisti DISABILITATI.
+// I tre articoli restano descritti, ma senza pulsanti d'acquisto: la Function
+// functions/api/checkout-merch.ts resta in codice per la riattivazione futura.
 const items = [
-  { id: 't-shirt', icon: 'fa-shirt', title: 'Magliette COG U', desc: '"AGISCI SULL\'AI" · "Cognitariato in lotta" · design anti‑capitalista', cta: 'Acquista' },
-  { id: 'pin', icon: 'fa-certificate', title: 'Spille & Pin', desc: 'Simbolo del sindacato, edizioni limitate campagne', cta: 'Scopri' },
-  { id: 'poster', icon: 'fa-paintbrush', title: 'Poster & Sticker', desc: '"HI better than AI" · "Cognitariat RULES/ Oligarchy SUCKS" · set adesivi solidarity pack', cta: 'Preordina' },
+  { id: 't-shirt', title: 'Magliette', desc: 'Design sul lavoro cognitivo e le infrastrutture dell\'AI.' },
+  { id: 'pin', title: 'Spille e pin', desc: 'Edizioni limitate legate alle campagne.' },
+  { id: 'poster', title: 'Poster e sticker', desc: 'Grafiche da attaccare dove serve.' },
 ];
 ---
 <section id="merch">
   <div class="container">
-    <h2 class="section-title">T‑Shirts &amp; Merchandising <i class="fas fa-shirt" aria-hidden="true"></i></h2>
-    <p class="section-sub">Vesti con stile e finanzi la lotta: spille, magliette, poster e sticker sovversivi.</p>
+    <p class="occhiello occhiello--progetto">Non ancora in vendita</p>
+    <h2 class="section-title">Merchandising</h2>
+    <p class="section-sub">
+      Il merch è in preparazione e non è ancora acquistabile. Quando lo sarà, i proventi andranno al
+      fondo di solidarietà e alle campagne.
+    </p>
+
     <div class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(240px,1fr));">
       {items.map((item) => (
-        <div class="card" style="text-align: center;">
-          <i class={`fas ${item.icon}`} style="font-size: 2.5rem; color: var(--rosa);" aria-hidden="true"></i>
+        <div class="card">
           <h3>{item.title}</h3>
           <p>{item.desc}</p>
-          <button class="btn-outline" type="button" data-merch-button={item.id} style="margin-top: 12px;">{item.cta}</button>
         </div>
       ))}
     </div>
-    <div class="ai-warning" style="background: var(--giallo-tenue); color: var(--nero); margin-top: 30px; text-align: center;">
-      <i class="fas fa-store" aria-hidden="true"></i> I proventi del merch finanziano il fondo di solidarietà legale e le campagne di organizzazione.
-    </div>
   </div>
 </section>
-
-<script>
-  document.querySelectorAll<HTMLButtonElement>('[data-merch-button]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const item = btn.dataset.merchButton!;
-      btn.disabled = true;
-      const originalLabel = btn.textContent;
-      btn.textContent = 'Un attimo…';
-      try {
-        const res = await fetch('/api/checkout-merch', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ item }),
-        });
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          throw new Error(data.error ?? 'Errore imprevisto');
-        }
-      } catch {
-        alert('Lo shop non è ancora disponibile per questo articolo. Scrivi a cognitariatz@proton.me');
-        btn.disabled = false;
-        btn.textContent = originalLabel;
-      }
-    });
-  });
-</script>

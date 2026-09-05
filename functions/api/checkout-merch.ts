@@ -1,9 +1,15 @@
 import type { RuntimeEnv } from '../../src/lib/supabase-server';
 import { getStripe, priceIdForMerchItem, isMerchItem } from '../../src/lib/stripe';
+import { cancelloPagamenti, CHIAVI_MERCH } from '../../src/lib/pagamenti';
 
 // Fase 2: acquisto merch, one-off, nessun account richiesto (mode: 'payment').
 export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
   const { request, env } = context;
+
+  // Come per la quota: il blocco precede la lettura del corpo e la costruzione
+  // del client Stripe. Vedi src/lib/pagamenti.ts.
+  const cancello = cancelloPagamenti(env, CHIAVI_MERCH);
+  if (cancello.bloccato) return cancello.risposta;
 
   let body: { item?: string };
   try {

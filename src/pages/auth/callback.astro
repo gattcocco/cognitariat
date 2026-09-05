@@ -27,7 +27,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     const params = new URLSearchParams(location.search);
     const tier = params.get('tier');
 
-    if (tier) {
+    // Percorso conservato per la riattivazione, spento finche' i pagamenti sono
+    // fermi. Senza questa guardia bastava aprire /auth/callback?tier=cognitario
+    // per far partire un checkout, anche senza nessun pulsante nel sito.
+    // Questa e' comodita', non sicurezza: il confine vero e' in
+    // src/lib/pagamenti.ts, che rifiuta la richiesta lato server comunque.
+    const pagamentiAttivi = import.meta.env.PUBLIC_PAGAMENTI_ATTIVI === 'true';
+
+    if (tier && pagamentiAttivi) {
       messageEl.textContent = 'Accesso riuscito, ti portiamo al pagamento…';
       try {
         const res = await fetch('/api/checkout', {

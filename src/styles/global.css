@@ -406,7 +406,15 @@ section {
   gap: 24px 40px;
 }
 .footer-cols > div { min-width: min(100%, 280px); }
-.footer-cols h3 { font-size: 1rem; margin-bottom: 8px; color: var(--nero); }
+/* La firma del footer non e' un'intestazione di sezione: ha l'aria di un
+   titolo ma nella struttura del documento sarebbe finita allo stesso livello
+   delle schede del merch, facendo leggere il footer come un quarto articolo. */
+.footer-cols .footer-firma {
+  font-size: 1rem;
+  font-weight: var(--peso-forte);
+  margin-bottom: 8px;
+  color: var(--nero);
+}
 .footer-cols p { margin: 0 0 6px; }
 
 /* tablet */
@@ -811,11 +819,20 @@ html.cogu-intro .hero-content > .btn-primary {
 
 /* Nota di metodo: quello che non sappiamo, i limiti di un dato. Marcata con
    un bordo laterale perche' e' un cambio di voce, non un'enfasi. */
+/* L'annotazione a margine e' l'unico posto in cui entra Shantell Sans: e' un
+   commento a mano sul testo, non una parte del testo. Paragrafi, titoli,
+   etichette e pulsanti restano Inter. Nessun effetto di movimento.
+   Leggermente piu' grande di Inter a parita' di corpo, perche' l'occhio medio
+   di Shantell e' piu' piccolo e a 1rem risulterebbe minuto. */
 .nota-metodo {
   border-left: 4px solid var(--verde);
   padding: 4px 0 4px 16px;
   margin: 22px 0;
   color: var(--nero);
+  font-family: var(--font-annotazioni);
+  font-weight: var(--peso-annotazione);
+  font-size: 1.12rem;
+  line-height: 1.5;
 }
 
 .fonte {

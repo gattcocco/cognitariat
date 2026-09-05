@@ -4,18 +4,19 @@
 // gia'), e «GDPR compliant · crittografia end-to-end» era una promessa tecnica
 // che il sito non puo' mantenere ne' dimostrare: al suo posto un link semplice
 // all'informativa. Rimosso anche il blocco centrale che stampava due virgolette.
+import Icona from './Icona.astro';
 ---
 <footer class="footer">
   <div class="container">
     <div class="footer-cols">
       <div>
-        <h3 style="font-weight: 700;">COG U — Sindacato e osservatorio sul lavoro cognitivo</h3>
+        <p class="footer-firma">COG U — Sindacato e osservatorio sul lavoro cognitivo</p>
         <p>Documentiamo cosa succede al lavoro cognitivo e alle infrastrutture che lo reggono.</p>
         <p>© 2026 Cognitive Workers Union · in costruzione, non ancora lanciato ufficialmente</p>
       </div>
       <div>
         <p>
-          <i class="fas fa-envelope" aria-hidden="true"></i>
+          <Icona nome="busta" />
           <a href="mailto:cognitariatz@proton.me">cognitariatz@proton.me</a>{' '}
           — scrivici per info, casi e collaborazioni
         </p>

@@ -1,0 +1,61 @@
+/* ============================================================================
+   Font serviti dal nostro dominio, non da una CDN.
+
+   Prima erano due <link> verso fonts.googleapis.com e cdnjs.cloudflare.com: due
+   terze parti contattate a ogni visita, due punti di rottura (in locale, senza
+   rete, il sito perdeva font e icone) e due voci in piu' nell'audit cookie del
+   piano §4. Ora i file stanno in public/fonts/ e le icone sono SVG inline.
+
+   Licenze: Inter e Shantell Sans sono entrambi SIL Open Font License 1.1, che
+   permette esplicitamente di ospitarli e di ridistribuirli insieme al progetto,
+   a patto che licenza e avviso di copyright restino accanto ai file. Stanno in
+   public/fonts/Inter-OFL.txt e public/fonts/ShantellSans-OFL.txt, versionati nel
+   repository — al contrario del certificato Envato di Doodle Lines, che e'
+   personale e resta in _local/, fuori da Git.
+
+   I due file "-ext-sub" sono sottoinsiemi: contengono i segni latini estesi che
+   ci servono davvero, schwa compresa, invece dell'intero blocco latin-ext (che
+   per Inter pesa 133 KB contro 28). Se un testo nuovo introduce un carattere
+   fuori da questi intervalli, il browser tornerebbe in silenzio al font di
+   sistema: per questo `npm run check:glifi` rilegge gli unicode-range qui sotto
+   e li confronta con i caratteri realmente presenti nell'HTML costruito.
+   ========================================================================= */
+
+/* --- Inter: testi, paragrafi, controlli. Variabile, pesi 300-800. --- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url('/fonts/inter-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url('/fonts/inter-latin-ext-sub.woff2') format('woff2');
+  unicode-range: U+0100-0107, U+010A-010F, U+0112-011B, U+011E-0123, U+012A-0131, U+0141-0148, U+014C-0151, U+0154-015B, U+015E-0165, U+016A-0173, U+0179-017E, U+018F, U+01CD-01D4, U+01E0-01E1, U+01E6-01E7, U+01EA-01ED, U+01F4-01F5, U+01FA-01FB, U+0226-0229, U+022E-0231, U+0259, U+0301, U+0304, U+0306-0307, U+030A-030C, U+0327-0328, U+1E08-1E0B, U+1E10-1E11, U+1E16-1E17, U+1E1C-1E1D, U+1E20-1E21, U+1E44-1E45, U+1E52-1E53, U+1E58-1E59, U+1E60-1E61, U+1E64-1E67, U+1E6A-1E6B, U+1EAE-1EAF;
+}
+
+/* --- Shantell Sans: solo annotazioni e brevi richiami. Variabile, 300-800.
+       Scelto fra tre candidati (vedi _local/campionario/confronto-font.html):
+       tratto da pennarello ma controllato, e — verificato, non presunto —
+       contiene la schwa. Kalam, provato accanto, non ce l'ha. --- */
+@font-face {
+  font-family: 'Shantell Sans';
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url('/fonts/shantell-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Shantell Sans';
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url('/fonts/shantell-latin-ext-sub.woff2') format('woff2');
+  unicode-range: U+0100-0107, U+010A-010F, U+0112-011B, U+011E-0123, U+012A-0131, U+0141-0148, U+014C-0151, U+0154-015B, U+015E-0165, U+016A-0173, U+0179-017E, U+018F, U+01CD-01D4, U+01E0-01E1, U+01E6-01E7, U+01EA-01ED, U+01F4-01F5, U+01FA-01FB, U+0226-0229, U+022E-0231, U+0259, U+0301, U+0304, U+0306-0307, U+030A-030C, U+0327-0328, U+1E08-1E0B, U+1E10-1E11, U+1E16-1E17, U+1E1C-1E1D, U+1E20-1E21, U+1E44-1E45, U+1E52-1E53, U+1E58-1E59, U+1E60-1E61, U+1E64-1E67, U+1E6A-1E6B, U+1EAE-1EAF;
+}

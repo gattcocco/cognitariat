@@ -1,0 +1,54 @@
+---
+/**
+ * Icone disegnate qui, non caricate da una CDN.
+ *
+ * Prima il sito tirava giu' l'intero foglio di Font Awesome da cdnjs per sei
+ * glifi: una terza parte contattata a ogni visita, un carico di rete
+ * sproporzionato e — visto in Fase 4 — un'icona che in locale non arrivava e
+ * lasciava un quadratino al posto della busta. Sono forme geometriche semplici:
+ * si disegnano, e cosi' non portano nemmeno una questione di licenza.
+ *
+ * Tutte decorative: `aria-hidden`, perche' accanto c'e' sempre il testo che
+ * dice la stessa cosa. Se un'icona dovesse mai restare da sola, va accompagnata
+ * da un'etichetta, non resa "accessibile" aggiungendole un title.
+ */
+interface Props {
+  nome: 'busta' | 'mappa' | 'video' | 'esci' | 'chevron-sinistra' | 'chevron-destra';
+  /** Dimensione in em rispetto al testo accanto. */
+  dimensione?: number;
+}
+
+const { nome, dimensione = 1 } = Astro.props;
+
+const forme: Record<Props['nome'], string> = {
+  busta: '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3.2 7.2 12 13l8.8-5.8"/>',
+  mappa: '<path d="M9 4 3 6.4v13.4L9 17.4l6 2.4 6-2.4V4l-6 2.4z"/><path d="M9 4v13.4M15 6.4v13.4"/>',
+  video: '<rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 11.2 21.5 8v8l-6-3.2z"/>',
+  esci: '<path d="M10.5 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4.5"/><path d="m15.5 8 4 4-4 4M19.5 12H9.5"/>',
+  'chevron-sinistra': '<path d="M15 5 8 12l7 7"/>',
+  'chevron-destra': '<path d="m9 5 7 7-7 7"/>',
+};
+---
+<svg
+  class="icona"
+  viewBox="0 0 24 24"
+  width={`${dimensione}em`}
+  height={`${dimensione}em`}
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.8"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+  set:html={forme[nome]}
+/>
+
+<style is:global>
+  /* Allineata alla linea di base del testo che accompagna, come faceva l'icona
+     del font: senza questo l'SVG siede sulla baseline e sembra piu' in alto. */
+  .icona {
+    vertical-align: -0.14em;
+    flex-shrink: 0;
+  }
+</style>

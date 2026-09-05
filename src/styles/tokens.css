@@ -71,13 +71,19 @@
   --superficie: var(--bianco);
 
   /* --- tipografia ---
-     Inter per gerarchia e corpo. Doodle Lines NON e' qui: e' caricato solo nel
-     campionario locale, finche' non e' verificato l'incorporamento web
-     (vedi _local/licenze-e-originali/INVENTARIO.md).
-     Il fallback include font con buona copertura dello schwa. */
+     Inter per gerarchia, corpo e controlli: nessun cambio.
+     Shantell Sans per le sole annotazioni. E' la prima alternativa a Doodle
+     Lines, che resta fuori dal sito finche' non e' chiarito il trasferimento
+     della licenza Envato: Shantell Sans e' SIL OFL 1.1, quindi ospitabile sul
+     nostro dominio e versionabile con il suo OFL.txt (vedi src/styles/font.css).
+     Confronto e prova della schwa: _local/campionario/confronto-font.html.
+     Il fallback resta un corsivo di sistema, per il caso in cui il file non
+     arrivi: e' un'annotazione, non deve bloccare la lettura. */
   --font-titoli: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-testo: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-annotazioni: 'Doodle Lines', 'Segoe Script', cursive;
+  --font-annotazioni: 'Shantell Sans', 'Segoe Script', 'Bradley Hand', cursive;
+  /* Peso medio, come da indicazione: il tratto regge senza diventare chiassoso. */
+  --peso-annotazione: 500;
 
   --peso-titolo: 800;
   --peso-forte: 700;

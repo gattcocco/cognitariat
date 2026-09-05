@@ -4,7 +4,6 @@ import Banners from '../components/Banners.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import CosaSucceded from '../components/CosaSucceded.astro';
-import PercheCiPreoccupa from '../components/PercheCiPreoccupa.astro';
 import Lavoro from '../components/Lavoro.astro';
 import Alternative from '../components/Alternative.astro';
 import AssemblyBanner from '../components/AssemblyBanner.astro';
@@ -22,14 +21,18 @@ import Footer from '../components/Footer.astro';
   <Header />
   <main id="contenuto" tabindex="-1">
     <!--
-      Ordine editoriale di docs/copy-home-v2.md: prima cosa succede e perche'
-      ci preoccupa, poi il lavoro, poi le alternative (che occupano almeno tanto
-      spazio quanto le preoccupazioni), poi cosa facciamo davvero, poi cosa e'
-      solo un progetto, infine come avvicinarsi.
+      Ordine editoriale di docs/copy-home-v2.md: prima cosa succede, poi il
+      lavoro, poi le alternative (che occupano almeno tanto spazio quanto le
+      preoccupazioni), poi cosa facciamo davvero, poi cosa e' solo un progetto,
+      infine come avvicinarsi.
+      La sezione "perche' ci preoccupa" e' stata tolta in Fase 5: reggeva sul
+      solo acronimo MANGOS, che aggiungeva rumore invece che informazione. Il
+      punto che vale — le decisioni si prendono altrove, l'infrastruttura atterra
+      qui — e' passato in coda a "cosa succede", dove ci sono i dati che lo
+      sostengono.
     -->
     <Hero />
     <CosaSucceded />
-    <PercheCiPreoccupa />
     <Lavoro />
     <Alternative />
     <AssemblyBanner />
@@ -49,12 +52,25 @@ import Footer from '../components/Footer.astro';
   </main>
 </BaseLayout>
 
-<script is:inline type="module">
-  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!reduce) {
+<script>
+  /**
+   * Intro d'ingresso. Sta in una funzione e non a livello di modulo perche' ha
+   * piu' di un motivo per rinunciare a meta' strada, e "return" a livello di
+   * modulo non e' consentito.
+   */
+  async function avviaIntro() {
     try {
-      const { createTimeline, stagger, utils } =
-        await import('https://cdn.jsdelivr.net/npm/animejs/+esm');
+      // anime.js arriva dal nostro bundle, non da jsdelivr. In Fase 4 la CDN non
+      // rispondeva e l'intro restava a meta': con il pacchetto in locale quel modo
+      // di rompersi sparisce, e resta un import dinamico, cosi' il codice
+      // dell'animazione non pesa sul caricamento iniziale della pagina.
+      const { createTimeline, stagger, utils } = await import('animejs');
+
+      // Il modulo puo' arrivare dopo che il failsafe ha gia' scoperto la pagina:
+      // con una rete lenta il testo diventa leggibile a 3 secondi e il chunk
+      // atterra dopo. Ripartire da li' vorrebbe dire coprire di nero una pagina
+      // che la persona sta gia' leggendo. Meglio niente intro.
+      if (window.__coguRivelato) return;
 
       const overlay = document.createElement('div');
       overlay.className = 'cogu-intro-overlay';
@@ -68,12 +84,15 @@ import Footer from '../components/Footer.astro';
       document.body.appendChild(overlay);
 
       const h1 = document.querySelector('.hero-content h1');
-      const words = [];
+      // Ogni parola del titolo finisce in uno span, per farle entrare in cascata.
+      // La regola CSS della parola chiave usa :not(.cogu-w) proprio per questo:
+      // senza, colorerebbe di rosa l'intero H1.
+      const words: HTMLElement[] = [];
       if (h1) {
         const frag = document.createDocumentFragment();
         Array.from(h1.childNodes).forEach((node) => {
-          if (node.nodeType === 3) {
-            node.textContent.split(/(\s+)/).forEach((tok) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            (node.textContent ?? '').split(/(\s+)/).forEach((tok) => {
               if (tok === '') return;
               if (/^\s+$/.test(tok)) { frag.appendChild(document.createTextNode(tok)); return; }
               const w = document.createElement('span');
@@ -83,7 +102,7 @@ import Footer from '../components/Footer.astro';
               frag.appendChild(w);
               words.push(w);
             });
-          } else if (node.nodeType === 1) {
+          } else if (node instanceof HTMLElement) {
             node.style.display = 'inline-block';
             frag.appendChild(node);
             words.push(node);
@@ -139,10 +158,21 @@ import Footer from '../components/Footer.astro';
       // reale, altrimenti taglierebbe l'ingresso a meta' a ogni caricamento.
       // Resta comunque una rete per le timeline che si bloccano.
       if (window.__coguFailsafe) clearTimeout(window.__coguFailsafe);
-      window.__coguFailsafe = setTimeout(window.__coguReveal,
-                                        Math.max(tl.duration || 0, 3700) + 1500);
+      window.__coguFailsafe = setTimeout(
+        () => window.__coguReveal?.(),
+        Math.max(tl.duration || 0, 3700) + 1500
+      );
     } catch (e) {
+      // anime.js non disponibile, o qualcosa e' andato storto nel costruire la
+      // timeline: la pagina deve restare leggibile comunque.
       if (window.__coguReveal) window.__coguReveal();
     }
   }
+
+  // Con "movimento ridotto" attivo non si parte proprio: nessun pannello, nessuna
+  // animazione, l'hero e' visibile fin dal primo istante (lo script inline in
+  // BaseLayout non ha nemmeno applicato il gate CSS).
+  const movimentoRidotto =
+    window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!movimentoRidotto) avviaIntro();
 </script>

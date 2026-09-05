@@ -69,3 +69,69 @@ La Fase 5 deve spostare il gate **prima** di qualsiasi inizializzazione e scritt
    Messo da parte in `_ESCLUSO-senza-certificato/`, da non usare.
 4. **🟠 Il README dice «branch da `main`»**, ma `main` non è compilabile. Da aggiornare quando la
    struttura si stabilizza.
+
+### Aggiornamento post-fase — licenze risolte (2026-09-05)
+
+Il committente ha riscaricato le licenze registrandole al progetto **«Cognitariato sito»**.
+Verificati tutti e 8 i nuovi certificati: progetto corretto su ognuno. Conseguenze:
+
+- Il blocco n. 1 (licenze su progetto sbagliato) è **chiuso** per 7 prodotti su 9.
+- Il blocco n. 3 è **chiuso**: `K24X65ZGBW` è intestato proprio a «Student Characters Doodle
+  Illustration» (autore `slabdsgn`), quindi il pacchetto è rientrato dall'esclusione.
+- Restano **due pacchetti non riscaricati**: «Funny Grumpy Animals Doodle Illustration Set» e
+  «Grumpy People Doodle Character Set», ancora registrati a «social»/«Envato». Non vanno usati
+  finché non sono ri-tesserati. In alternativa c'è «Grumpy Pets Doodles», stesso autore, regolare.
+- Il blocco n. 2 (font) **resta aperto**: la licenza è ora corretta, ma l'incorporamento via
+  `@font-face` va ancora verificato nei termini Envato.
+- Contenuto artistico dei pacchetti riscaricati verificato identico a quello già in archivio
+  (`sha256` escludendo i certificati).
+
+---
+
+## Fase 2 — Riscrittura dei contenuti
+
+**Stato: completata.** Pipeline verde (`check:all` 0 errori, `build` ok).
+
+### Consegna
+
+`docs/copy-home-v2.md` — copy completo per 8 sezioni + hero, ciascuna con id, titolo, corpo, CTA
+unica, stato (attività attuale / progetto), fonti con data e ruolo dell'illustrazione.
+
+### Identità ibrida
+
+Ogni sezione dichiara se descrive **attività attuale** o **progetto**. L'osservatorio non sostituisce
+il sindacato: la sezione 5 racconta cosa esiste (osservatorio, lettura dei testi di legge,
+divulgazione), la 6 dichiara apertamente come *progetto non ancora attivo* libreria clausole, rete
+avvocatə, archivio casi e contrattazione collettiva — che oggi il sito presenta invece come servizi
+disponibili.
+
+### Fact-checking — il lavoro principale della fase
+
+Il brief chiedeva esplicitamente di non dare per verificati i propri esempi. Verificati con fonti
+puntuali: MANGOS (composizione, origine BofA/Vivek Arya, 3 su 6 private), depositi ETF alla SEC,
+Irlanda 22% (CSO), richieste Terna, ddl 1821, comitato di Bornasco.
+
+**Una affermazione del brief è risultata smentita**: «Lombardia 65-70% delle richieste italiane».
+I dati Terna al 31/07/2026 danno **~47%** (44,96 GW su 95,86), con la quota lombarda in calo e il
+Piemonte secondo. Nel copy è diventato «quasi metà».
+
+**Non verificate, quindi fuori dal copy**: rapporto energetico 7B vs 175B parametri (10-30×);
+Minne Atairu, Ameera Kawash, Indigenous Data Sovereignty; acqua e falde; Arcene/Bollate come
+progetti specifici.
+
+**Da confermare dal committente**: l'appuntamento «ogni mercoledì al Ponte della Ghisolfa» — non
+verificabile dall'esterno, nel copy la riga è generica in attesa di conferma.
+
+### Verifiche non disponibili
+
+- **Lettura ad alta voce**: è un controllo umano, non eseguibile da qui. Il copy è scritto per
+  reggerla (frasi corte, una idea per frase) ma va provata.
+- **Link e ancore**: verificabili solo in Fase 4, a integrazione avvenuta.
+
+### Decisioni ancora necessarie
+
+1. Conferma o smentita dell'appuntamento settimanale (§7 questioni aperte del copy).
+2. Se elencare i dossier dell'osservatorio per titolo, servono i link a quelli pubblicati.
+3. Footer: la riga «GDPR compliant · crittografia end-to-end» e «PRD v1.0» vanno riviste.
+4. Navigazione: proposta di togliere Membership e Merch dalle voci principali, coerentemente col
+   fatto che non sono operativi. Le sezioni restano nel sito.

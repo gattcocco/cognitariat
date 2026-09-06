@@ -4,6 +4,7 @@ import Banners from '../components/Banners.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import CosaSucceded from '../components/CosaSucceded.astro';
+import PercheCiPreoccupa from '../components/PercheCiPreoccupa.astro';
 import Lavoro from '../components/Lavoro.astro';
 import Alternative from '../components/Alternative.astro';
 import AssemblyBanner from '../components/AssemblyBanner.astro';
@@ -21,18 +22,17 @@ import Footer from '../components/Footer.astro';
   <Header />
   <main id="contenuto" tabindex="-1">
     <!--
-      Ordine editoriale di docs/copy-home-v2.md: prima cosa succede, poi il
-      lavoro, poi le alternative (che occupano almeno tanto spazio quanto le
-      preoccupazioni), poi cosa facciamo davvero, poi cosa e' solo un progetto,
-      infine come avvicinarsi.
-      La sezione "perche' ci preoccupa" e' stata tolta in Fase 5: reggeva sul
-      solo acronimo MANGOS, che aggiungeva rumore invece che informazione. Il
-      punto che vale — le decisioni si prendono altrove, l'infrastruttura atterra
-      qui — e' passato in coda a "cosa succede", dove ci sono i dati che lo
-      sostengono.
+      Ordine editoriale di docs/copy-home-v2.md: prima cosa succede, poi perche'
+      ci preoccupa, poi il lavoro, poi le alternative (che occupano almeno tanto
+      spazio quanto le preoccupazioni), poi cosa facciamo davvero, poi cosa e'
+      solo un progetto, infine come avvicinarsi.
+      "Perche' ci preoccupa" e' tornata in Fase 5 riscritta da zero: la versione
+      precedente reggeva sull'acronimo MANGOS, questa su due decisioni gia' prese
+      e un dato gia' misurato. Resta piu' corta delle alternative, di proposito.
     -->
     <Hero />
     <CosaSucceded />
+    <PercheCiPreoccupa />
     <Lavoro />
     <Alternative />
     <AssemblyBanner />

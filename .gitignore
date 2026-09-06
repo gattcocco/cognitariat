@@ -61,3 +61,10 @@ _local/
 font/
 **/license_certificate_*.pdf
 _local/licenze-e-originali/
+
+# Documenti di lavoro sul copy: restano sul disco, fuori dal repository.
+# Non sono materiale del sito e non servono a chi legge il codice. Il copy
+# definitivo (docs/copy-home-v2.md), il manuale di brand e i registri delle
+# verifiche restano invece versionati.
+/testi-sito.md
+/info regole nuovi testi/

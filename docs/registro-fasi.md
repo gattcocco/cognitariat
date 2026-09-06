@@ -546,3 +546,190 @@ fatte **a vista**, non per rilettura di stili. Vale la pena saperlo per le pross
 
 Per spegnere di nuovo basta il passo 4 al contrario: togliere `PAGAMENTI_ATTIVI` chiude i tre
 endpoint senza toccare il codice.
+
+---
+
+## Preparazione della preview pubblica — 06/09/2026
+
+Ramo `dev`. Obiettivo: mettere online una **preview** del sito senza pagamenti e senza
+registrazioni. Nessun merge, nessun deploy production, nessuna modifica DNS.
+
+### 1. Dove va a finire un push di `dev` — verificato prima di pushare
+
+Wrangler non è autenticato in questa postazione, quindi il pannello Cloudflare non è
+interrogabile direttamente. La configurazione è stata ricostruita dall'esterno, con dati
+pubblici e in sola lettura:
+
+| Cosa | Come è stato verificato | Risultato |
+|---|---|---|
+| Produzione vera del dominio | `GET /repos/gattcocco/cognitariat/pages` | GitHub Pages, `build_type: legacy`, sorgente **branch `main`**, dominio `cognitariatzone.org` |
+| Deployment registrati su GitHub | `GET .../deployments` | solo `github-pages` su `main`: nessun deployment Cloudflare passa da qui |
+| Cloudflare è collegato al repo? | check runs sull'head di `feat/membership-v2-1` | sì: app «Cloudflare Workers and Pages», progetto Pages `cognitariat` |
+| Qual è il branch di produzione di Pages | confronto byte a byte fra `https://cognitariat.pages.dev/` (alias di produzione) e `https://8a7a5902.cognitariat.pages.dev/` (deployment costruito da `feat/membership-v2-1`) | **identici** (29 464 byte, stesso sha1): la produzione di Pages è servita da `feat/membership-v2-1` |
+| Alias di branch | `main.` / `dev.` / `feat-membership-v2-1.cognitariat.pages.dev` | 404 tutti e tre: nessuna preview esistente per quei branch |
+
+Conclusione: **`dev` non è il branch di produzione di nessuno dei due hosting.**
+`cognitariatzone.org` si aggiorna solo da `main`; `cognitariat.pages.dev` solo da
+`feat/membership-v2-1`. Un push di `dev` può al massimo produrre una preview, oppure non
+produrre niente se le preview sono disattivate per i branch non di produzione — in nessun caso
+tocca la produzione. Da qui il via libera al push.
+
+Corrisponde a quanto documentato in `PROVISIONING.md` §4, che dava il production branch a
+`feat/membership-v2-1` («temporaneo e voluto»). La verifica non si è fermata al documento
+perché un documento dice le intenzioni, non lo stato.
+
+### 2. Documenti di lavoro fuori dal repository
+
+`.gitignore` esclude ora `/testi-sito.md` e `/info regole nuovi testi/`, che restano sul disco.
+Controllato che restino **tracciati** i font open source con le loro licenze
+(`public/fonts/*.woff2`, `Inter-OFL.txt`, `ShantellSans-OFL.txt`, `LEGGIMI.txt`), il copy
+definitivo, il manuale di brand e i registri; e che restino **esclusi** gli originali
+commerciali e i certificati personali (`font/DoodleLines.*`, `font/license_certificate_*.pdf`,
+tutto `_local/`).
+
+### 3. Supabase: il modulo tolto non chiude l'API
+
+Il modulo di iscrizione è stato rimosso in Fase 4, ma `PUBLIC_SUPABASE_URL` e la anon key sono
+pubbliche per costruzione: l'endpoint Auth risponde a chiunque le usi, modulo o non modulo.
+
+**Non è stato possibile verificarlo qui**: `.dev.vars` e `.env` di questa copia contengono
+segnaposto (`https://placeholder…`, `placeholder…`, `sk_test_placeholder`), non le credenziali
+del progetto vero. Nessuna chiamata all'infrastruttura reale è quindi stata fatta.
+
+Al suo posto è stato scritto `npm run check:supabase`
+(`scripts/verifica-supabase.mjs`), da eseguire con le credenziali vere. Fa due cose, entrambe
+senza effetti collaterali:
+
+- legge `GET /auth/v1/settings` (pubblico, sola lettura) e riporta se le registrazioni via API
+  sono aperte, se la conferma email è saltata, quali provider esterni sono attivi;
+- manda **una** richiesta di magic link con un indirizzo volutamente non valido. Non parte
+  nessuna email e non nasce nessun utente in nessuno dei due casi: conta solo quale errore
+  torna. Errore di captcha ⇒ il captcha è preteso prima della validazione. Errore di formato ⇒
+  nessun captcha, e una richiesta ben formata sarebbe passata.
+
+Lo script **non modifica niente** e chiude ricordando di contare gli utenti confermati
+esistenti prima di chiudere le registrazioni, per non togliere l'accesso a qualcuno senza
+saperlo.
+
+Segnalazione a parte: `.env` contiene `PUBLIC_TURNSTILE_SITE_KEY=1x00000000…`, che è la
+**site key di prova** di Cloudflare — quella che passa sempre. Va sostituita con la chiave vera
+quando il widget tornerà in pagina.
+
+### 4. Il consenso privacy non si deduce dalla conferma email
+
+Nuova migration `supabase/migrations/0007_consenso_privacy_esplicito.sql`, **non applicata** al
+database remoto.
+
+Il difetto stava nella 0005: a ogni transizione `email_confirmed_at NULL → non NULL` veniva
+scritta una riga in `privacy_acceptances`, con una versione fissata nel codice della funzione.
+Cioè: cliccare un magic link veniva registrato come prova di aver accettato l'informativa. Il
+click prova che quella casella è tua; non prova che ti sia stato mostrato un testo, né quale.
+Sbagliava in tre modi concreti: registrava accettazioni per utenti creati per altre vie (invito,
+chiamata diretta all'API); stampava la versione corrente del server invece di quella vista dalla
+persona; scattava anche su una riconferma o un cambio di indirizzo.
+
+La 0007: tiene la creazione del profilo alla conferma (quella è corretta); scrive in
+`privacy_acceptances` **solo** se i metadata dichiarano esplicitamente il consenso e la versione
+vista; accetta solo versioni presenti nella nuova tabella `privacy_versions` (dove convivono
+`v1-2026-08-20` e `v2-2026-09-05`, invece di sostituirsi); non tocca una riga esistente. In coda
+c'è una query diagnostica commentata che elenca le accettazioni prive di dichiarazione — da
+leggere, non da eseguire alla cieca.
+
+**L'allineamento v1/v2 da solo non chiude il punto.** Perché esista una prova vera serve che il
+modulo di iscrizione, quando verrà ricostruito, passi `privacy_version` e `privacy_accepted` in
+`options.data` di `signInWithOtp()`, con una casella separata e non pre-spuntata. Senza quei
+campi la 0007 non registra niente, ed è voluto: meglio nessuna prova che una prova finta.
+
+### 5. Informativa: cosa dice adesso e cosa manca davvero
+
+Aggiunte le tre cose fattuali che mancavano e che si potevano scrivere senza inventare:
+
+- **l'hosting**: quali dati tecnici registra Cloudflare (IP, momento, pagina, browser) e a cosa
+  servono — prima si diceva solo che «registra i dati tecnici»;
+- **YouTube**: che la richiesta arriva a Google, sui suoi server, anche fuori dall'Unione
+  Europea, e che finché non si scorre fino ai video non parte niente;
+- **la posta**: che la casella è su Proton (Proton AG, Svizzera). Era l'unico punto in cui dei
+  dati arrivano davvero a noi, e il fornitore non era nominato.
+
+Non sono state scritte garanzie sui fornitori, tempi di conservazione o basi giuridiche: non
+sono verificati e inventarli sarebbe peggio che ometterli. **Manca ancora** (elenco preciso, per
+il lancio pubblico e a maggior ragione per la riapertura delle iscrizioni):
+
+1. **Titolare del trattamento**: denominazione legale, sede, codice fiscale ed eventuale partita
+   IVA, PEC se presente. Oggi la pagina non dice chi risponde dei dati — è il buco principale.
+2. **Referente privacy / DPO**, se nominato.
+3. **Tempi di conservazione** dei log di hosting e delle email ricevute.
+4. **Basi giuridiche** dichiarate per i due trattamenti che esistono già (log tecnici e
+   corrispondenza).
+5. **Rapporti con i fornitori**: se e con quali garanzie sono inquadrati Cloudflare, Proton e
+   Google (per gli embed).
+6. Per la riapertura: art. 9, retention matrix, audit cookie completo — già elencati in
+   `docs/informativa-privacy-bozza.md`.
+
+### 6. «Perché ci preoccupa» torna, senza MANGOS
+
+Riscritta da zero su due decisioni già prese e un dato già misurato, entrambi dalla tabella
+delle fonti verificate di `docs/copy-home-v2.md`:
+
+- **Irlanda, CSO, dati 2024**: i data center consumano il 22% dell'elettricità contatorizzata,
+  contro il 5% del 2015. Un consuntivo, non una proiezione;
+- **ddl 1821**, Camera 24/02/2026, 243 sì / 0 no / 6 astenuti: qualifica i data center come
+  opere di pubblica utilità e delega il Governo a semplificarne le procedure in sei mesi.
+
+Il legame con il lavoro è dichiarato per quello che è — una lettura nostra, non un dato: quando
+qualcosa viene dichiarato necessario, discuterne le condizioni diventa un intralcio; vale per un
+terreno e per un contratto. La sezione chiude sull'identità doppia, documentare e spiegare.
+
+Il dettaglio parlamentare del ddl si è spostato qui; in «Quello che c'è davvero» resta la voce
+sull'attività (leggiamo i testi di legge) senza ripetere gli stessi numeri. La sezione è più
+corta delle alternative, di proposito.
+
+### 7. Pagamenti: nessuna riattivazione automatica
+
+- La bandiera `PAGAMENTI_ATTIVI` non è impostata da nessuna parte nel repository: i due file di
+  esempio la mettono a `false`, la CI non la tocca, `wrangler.toml` non la contiene.
+- Nessun punto del codice legge lo stato dell'account Stripe: inserire un IBAN nel pannello
+  Stripe non cambia niente qui. L'unico interruttore è la variabile d'ambiente.
+- Lato browser il controllo è **al momento della build**, non a runtime: nel bundle prodotto il
+  ramo del checkout nel callback **non esiste proprio**, il compilatore l'ha eliminato. Il
+  callback compilato si riduce a leggere `tier` e andare all'area membro. Riaccenderlo richiede
+  una nuova build, non basta cambiare una variabile: è una proprietà utile, niente si accende da
+  solo.
+
+### 8. Pagina 404
+
+Non esisteva. Senza, Cloudflare Pages e GitHub Pages servono la loro pagina di errore generica,
+senza intestazione e senza un modo di tornare indietro — e chi arriva da un link vecchio pensa
+che il sito non ci sia più. Aggiunta `src/pages/404.astro`, che i due hosting usano da soli
+perché Astro la costruisce come `dist/404.html`. Dice che il sito è stato riscritto e dove
+guardare.
+
+### 9. Controlli eseguiti
+
+| Controllo | Esito |
+|---|---|
+| `npm run verify` | 0 errori, 0 warning, 0 hint · build 6 pagine · glifi ok · testi ok · 15/15 test |
+| Smoke test `/` | 200 |
+| Smoke test `/privacy`, `/account`, `/auth/callback` | 200 (dopo il redirect di trailing slash) |
+| Smoke test percorso inesistente | **404** con la nostra pagina |
+| `/account` da disconnessi | stato «sessione assente», zero richieste esterne |
+| POST ai tre checkout | **503** `non_attivi` su tutti e tre |
+| Sezione ripristinata | verificata a vista: occhiello «Contesto», due fatti, fonti in coda, più corta delle alternative |
+
+Il controllo `check:testi` ha intercettato due spazi mangiati nei testi nuovi (Irlanda e 404)
+prima che finissero nella build: è esattamente il motivo per cui esiste.
+
+### 10. Cosa resta aperto per il sito pubblico
+
+1. **Titolare del trattamento e dati legali dell'ente** — senza, l'informativa non è completa.
+2. **Configurazione Supabase da verificare con le credenziali vere** (`npm run check:supabase`):
+   registrazioni via API e captcha davanti all'endpoint Auth.
+3. **Site key Turnstile di prova** in `.env`, da sostituire con quella vera.
+4. **Migration 0007 da applicare a mano** quando si riaprono le registrazioni, insieme al
+   modulo di iscrizione che porti la dichiarazione di consenso.
+5. **Area membro con una sessione reale**: mai provata end-to-end.
+6. `prefers-reduced-motion` con la preferenza attiva nel sistema operativo; lettore di schermo;
+   schwa su un secondo sistema operativo.
+7. **`/admin`** (Sveltia CMS) è servito dal sito, `noindex` e non linkato, ma raggiungibile:
+   punta al backend GitHub sul branch `main` e carica lo script da `unpkg.com`. Da confermare
+   che l'accesso OAuth non sia configurato — o da proteggere — prima del lancio pubblico.

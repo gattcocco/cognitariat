@@ -78,18 +78,39 @@ MilanoFinanza (18/08/2026); ANSA (25/08/2026) per le 27 stazioni.
 
 ---
 
-## 2. Perché ci preoccupa — RITIRATA IN FASE 5
+## 2. Perché ci preoccupa — RISCRITTA E RIPUBBLICATA (06/09/2026)
 
-**Id**: `perche-ci-preoccupa` · **Stato**: non pubblicata
+**Id**: `perche-ci-preoccupa` · **Stato**: contesto · **Titolo**: «Perché ci preoccupa»
 
-> **Decisione del 05/09/2026: questa sezione non è online.** Reggeva interamente
-> sull'acronimo MANGOS, che aggiungeva rumore invece che informazione: un'etichetta di
-> mercato riciclata, con dentro tre società non quotate, spiegata per essere subito
-> smontata. Il testo resta qui come materiale d'archivio, non come copy approvato.
+> **Storia della sezione.** La prima versione reggeva interamente sull'acronimo MANGOS:
+> un'etichetta di mercato riciclata, con dentro tre società non quotate, spiegata per essere
+> subito smontata. Il lettore ne usciva sapendo che una sigla è discutibile, non che qualcosa
+> lo riguarda. Ritirata il 05/09/2026, riscritta da zero il giorno dopo. Il testo MANGOS resta
+> qui sotto come materiale d'archivio, **non pubblicato**; il titolo provvisorio «Sei aziende,
+> e un acronimo» decade con esso.
 >
-> Il punto che valeva — le decisioni si prendono altrove, l'infrastruttura atterra qui — è
-> passato in coda alla sezione 1, dove ci sono i dati Terna che lo sostengono.
-> Il titolo provvisorio «Sei aziende, e un acronimo» decade con la sezione.
+> **La versione online** (`src/components/PercheCiPreoccupa.astro`) sta su due decisioni già
+> prese e un dato già misurato, entrambi nella tabella delle fonti verificate:
+>
+> - **Irlanda, CSO (dati 2024)**: i data center consumano il 22% dell'elettricità
+>   contatorizzata, contro il 5% del 2015. Un consuntivo, non una proiezione: è il paese che è
+>   partito prima con gli stessi argomenti.
+> - **ddl 1821**, Camera 24/02/2026, 243 sì / 0 no / 6 astenuti: qualifica i data center come
+>   opere di pubblica utilità e delega il Governo a semplificarne le procedure in sei mesi.
+>   Il dettaglio parlamentare vive qui, dove serve al ragionamento; in §5 resta la voce
+>   sull'attività (leggere i testi di legge) senza ripetere gli stessi numeri.
+>
+> Il legame con il lavoro è dichiarato come lettura nostra, non come dato: quando qualcosa
+> viene dichiarato necessario, discuterne le condizioni diventa un intralcio — vale per un
+> terreno e per un contratto. La sezione chiude sull'identità doppia: documentare i casi e
+> spiegare come funzionano le macchine.
+>
+> **Lunghezza**: volutamente contenuta. Le alternative devono continuare a occupare almeno
+> tanto spazio quanto le preoccupazioni.
+
+---
+
+### Archivio — versione MANGOS, non pubblicata
 
 **Titolo**: Sei aziende, e un acronimo che dice più di quanto vorrebbe
 

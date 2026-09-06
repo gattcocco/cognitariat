@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+/**
+ * Mancava. Senza questo file Cloudflare Pages (e GitHub Pages) servono la loro
+ * pagina di errore generica: nessuna intestazione, nessun modo di tornare al
+ * sito, e per chi arriva da un link vecchio la sensazione che il sito non esista
+ * piu'. Astro la costruisce come dist/404.html e i due hosting la usano da soli.
+ *
+ * Il sito ha cambiato struttura in Fase 4: le vecchie sezioni sono diventate
+ * ancore dentro sezioni nuove. Le ancore sono state conservate, ma un indirizzo
+ * che puntava a una pagina separata puo' comunque non esistere piu': qui si dice
+ * dove guardare, invece di lasciare la persona in un vicolo cieco.
+ */
+---
+<BaseLayout
+  title="Pagina non trovata — COG U"
+  description="L'indirizzo cercato non esiste o è cambiato."
+>
+  <Header />
+  <main id="contenuto" tabindex="-1" class="container" style="padding: 80px 0 100px; max-width: 820px;">
+    <div class="prosa">
+      <h1 class="section-title">Questa pagina non c'è</h1>
+
+      <p>
+        L'indirizzo che hai aperto non esiste, oppure è cambiato. Il sito è stato riscritto di
+        recente: alcune sezioni che prima erano pagine a sé adesso vivono dentro la home.
+      </p>
+
+      <p>Da qui puoi:</p>
+
+      <ul class="elenco-progetto">
+        <li><a class="link" href="/">tornare alla home</a> e ripartire dall'inizio;</li>
+        <li>
+          andare direttamente a <a class="link" href="/#cosa-facciamo">quello che facciamo davvero</a>{' '}
+          o a <a class="link" href="/#alternative">le alternative</a>;
+        </li>
+        <li>
+          leggere i dossier sull'osservatorio{' '}
+          <a class="link" href="https://gattcocco.github.io/mappa-e-contenuti/" rel="noopener">Resistenze AI</a>.
+        </li>
+      </ul>
+
+      <p>
+        Se ci sei arrivato da un link che avevamo pubblicato noi, scrivicelo a{' '}
+        <a class="link" href="mailto:cognitariatz@proton.me">cognitariatz@proton.me</a>: lo
+        sistemiamo.
+      </p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

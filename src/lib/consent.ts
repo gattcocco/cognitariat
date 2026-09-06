@@ -11,8 +11,16 @@
 // docs/informativa-privacy-bozza.md) ma una nota breve e vera sullo stato attuale, in cui il
 // sito non raccoglie dati. La versione cambia di conseguenza.
 //
-// BLOCCANTE PRIMA DI RIAPRIRE LE ISCRIZIONI: la migration 0005 registra ancora
-// 'v1-2026-08-20' come versione accettata. Oggi è inerte, perché non esiste nessun modulo di
-// iscrizione e nessuno può accettare niente; ma nel momento in cui il tesseramento riapre,
-// l'informativa estesa va pubblicata e la versione allineata con una NUOVA migration.
+// L'allineamento è preparato in supabase/migrations/0007_consenso_privacy_esplicito.sql,
+// NON ancora applicata al database remoto. La 0007 non si limita a cambiare la costante:
+// toglie il difetto per cui la conferma dell'email veniva registrata come prova di aver
+// accettato l'informativa. Cliccare un magic link dimostra che quella casella è tua, non che
+// ti sia stato mostrato un testo né quale versione. D'ora in poi l'accettazione si scrive solo
+// se i metadata di iscrizione la dichiarano, con la versione effettivamente vista, e solo se
+// quella versione è fra quelle note al server.
+//
+// RESTA DA FARE PRIMA DI RIAPRIRE: il modulo di iscrizione (rimosso in Fase 4) deve passare
+// privacy_version e privacy_accepted in options.data di signInWithOtp(), con una casella di
+// consenso separata e non pre-spuntata. Senza quei campi non viene registrato niente — è
+// voluto: meglio nessuna prova che una prova finta.
 export const PRIVACY_POLICY_VERSION = 'v2-2026-09-05';

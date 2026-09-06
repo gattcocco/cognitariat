@@ -5,7 +5,7 @@ autore: Editoriale
 excerpt: "Il testo con cui COG U si presenta: da dove veniamo, contro cosa ci organizziamo e cosa chiediamo — dalla riduzione dell’orario al salario minimo, dai data center al posto delle macchine linguistiche nel lavoro cognitivo."
 cover: /images/articoli/manifesto-cognitario-contro-oligarchia-ai.webp
 coverAlt: "Manifesto grafico in nero, rosso e panna. Sei figure in controluce tirano una grossa corda rossa legata a una torre di server che si sta crepando; dietro, lo skyline di Milano con il Duomo. In alto il titolo «COG U — Manifesto cognitario contro l’oligarchia AI»."
-bozza: true
+bozza: false
 ---
 
 Siamo Cognitari.e: lavoriamo nella comunicazione, nella scuola, negli uffici, nelle biblioteche, nella università, nella logistica, nel sociale. Siamo precari.e di ogni genere ed etnia e la nostra sopravvivenza è messa a repentaglio dalle macchine linguistiche in cui investono banche e aziende per sostituirci dopo che ci hanno usato per addestrarle.

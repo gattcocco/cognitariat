@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
+import Icona from '../../components/Icona.astro';
 import { articoliDaCostruire, dataItaliana, dataIso } from '../../lib/articoli';
 
 /**
@@ -43,7 +44,7 @@ const immagineSocial = cover?.replace(/\.webp$/i, '.jpg') ?? undefined;
   <main id="contenuto" tabindex="-1" class="container" style="padding: 48px 0 90px;">
     <article class="articolo">
       <p class="articolo-torna">
-        <a class="link" href="/blog/">← Tutti gli articoli</a>
+        <a class="link" href="/blog/"><Icona nome="chevron-sinistra" /> Tutti gli articoli</a>
       </p>
 
       {bozza && (

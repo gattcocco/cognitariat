@@ -38,6 +38,12 @@ interface ImportMetaEnv {
   readonly CF_PAGES_URL?: string;
   /** Nome del ramo che serve la produzione: tutto il resto e' anteprima (noindex). */
   readonly BRANCH_PRODUZIONE?: string;
+  /**
+   * Origine stabile del servizio di login del CMS, scritta in /admin/config.yml.
+   * GitHub accetta un solo indirizzo di callback per applicazione OAuth, quindi
+   * va puntata all'alias di ramo e non all'URL del singolo deployment.
+   */
+  readonly CMS_AUTH_BASE_URL?: string;
 }
 
 interface ImportMeta {

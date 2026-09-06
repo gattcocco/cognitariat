@@ -31,6 +31,13 @@ interface ImportMetaEnv {
    * Il confine vero e' in src/lib/pagamenti.ts, lato server.
    */
   readonly PUBLIC_PAGAMENTI_ATTIVI?: string;
+  /** "true" per costruire anche le bozze: solo anteprime locali o protette. */
+  readonly MOSTRA_BOZZE?: string;
+  /** Impostate da Cloudflare Pages durante il build. */
+  readonly CF_PAGES_BRANCH?: string;
+  readonly CF_PAGES_URL?: string;
+  /** Nome del ramo che serve la produzione: tutto il resto e' anteprima (noindex). */
+  readonly BRANCH_PRODUZIONE?: string;
 }
 
 interface ImportMeta {

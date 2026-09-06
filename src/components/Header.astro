@@ -3,6 +3,11 @@
 // editoriale e mettono per prime le cose che esistono.
 // Membership e Merch escono dal menu principale perche' non sono operativi
 // (le sezioni restano nella pagina, con acquisti disabilitati).
+//
+// Le ancore sono assolute ("/#lavoro", non "#lavoro"): l'intestazione compare
+// anche su /blog, /privacy e /account, dove un'ancora relativa non porta da
+// nessuna parte perche' quella sezione in pagina non c'e'. Prima da quelle
+// pagine meta' del menu non faceva niente.
 ---
 <header class="site-header">
   <div class="container header-flex">
@@ -12,12 +17,13 @@
     </a>
     <nav class="main-nav" aria-label="Navigazione principale">
       <ul>
-        <li><a href="#cosa-succede">Cosa succede</a></li>
-        <li><a href="#lavoro">Il lavoro</a></li>
-        <li><a href="#alternative">Alternative</a></li>
-        <li><a href="#cosa-facciamo">Cosa facciamo</a></li>
+        <li><a href="/#cosa-succede">Cosa succede</a></li>
+        <li><a href="/#lavoro">Il lavoro</a></li>
+        <li><a href="/#alternative">Alternative</a></li>
+        <li><a href="/#cosa-facciamo">Cosa facciamo</a></li>
+        <li><a href="/blog/">Blog</a></li>
         <li><a href="https://gattcocco.github.io/mappa-e-contenuti/" target="_blank" rel="noopener">Osservatorio</a></li>
-        <li><a href="#avvicinarsi">Scrivici</a></li>
+        <li><a href="/#avvicinarsi">Scrivici</a></li>
       </ul>
     </nav>
   </div>

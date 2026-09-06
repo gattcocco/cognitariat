@@ -1,0 +1,39 @@
+---
+import CardArticolo from './CardArticolo.astro';
+import { articoliPubblicati } from '../lib/articoli';
+
+/**
+ * Richiamo agli ultimi articoli in home.
+ *
+ * Usa `articoliPubblicati`, non `articoliDaCostruire`: in home le bozze non
+ * entrano mai, nemmeno in sviluppo locale. L'elenco in /blog serve anche a
+ * rivedere un pezzo prima di pubblicarlo, la home no — e' la vetrina, e una
+ * vetrina con dentro una bozza e' un errore anche quando nessun altro la vede.
+ *
+ * Se non c'e' niente da mostrare la sezione non esiste: meglio una home piu'
+ * corta di una sezione «Dal blog» vuota, che racconta un blog che non c'e'.
+ */
+const ultimi = (await articoliPubblicati()).slice(0, 3);
+---
+{ultimi.length > 0 && (
+  <section id="blog">
+    <div class="container">
+      <div class="prosa">
+        <p class="occhiello">Osservatorio</p>
+        <h2 class="section-title">Dal blog</h2>
+        <p class="section-sub">
+          Analisi e posizioni, con le fonti in fondo. I dossier con le mappe stanno
+          sull'osservatorio.
+        </p>
+      </div>
+
+      <div class="griglia-articoli">
+        {ultimi.map((articolo) => <CardArticolo articolo={articolo} livello={3} />)}
+      </div>
+
+      <p style="margin-top: 32px;">
+        <a class="btn-primary" href="/blog/">Tutti gli articoli</a>
+      </p>
+    </div>
+  </section>
+)}

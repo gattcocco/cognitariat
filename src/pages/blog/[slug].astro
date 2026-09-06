@@ -1,0 +1,162 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { articoliDaCostruire, dataItaliana, dataIso } from '../../lib/articoli';
+
+/**
+ * Pagina del singolo articolo.
+ *
+ * `articoliDaCostruire` e non `getCollection` diretto: e' il punto in cui una
+ * bozza smette di esistere. In una build pubblica la pagina non viene proprio
+ * generata, quindi l'indirizzo risponde 404 — non basta toglierla dagli elenchi,
+ * perche' un indirizzo indovinato o condiviso resterebbe raggiungibile.
+ */
+export async function getStaticPaths() {
+  const articoli = await articoliDaCostruire();
+  return articoli.map((articolo) => ({
+    params: { slug: articolo.id },
+    props: { articolo },
+  }));
+}
+
+const { articolo } = Astro.props;
+const { title, excerpt, autore, date, cover, coverAlt, bozza } = articolo.data;
+const { Content } = await render(articolo);
+
+// og:image: si preferisce il JPEG allo stesso nome, se c'e'. Alcuni scraper
+// social non gestiscono ancora bene il WebP, e una copertina che non compare
+// vanifica il senso di averla.
+const immagineSocial = cover?.replace(/\.webp$/i, '.jpg') ?? undefined;
+---
+<BaseLayout
+  title={`${title} — COG U`}
+  description={excerpt}
+  immagine={immagineSocial}
+  tipo="article"
+  pubblicatoIl={dataIso(date)}
+  autore={autore}
+  noindex={bozza}
+>
+  <Header />
+  <main id="contenuto" tabindex="-1" class="container" style="padding: 48px 0 90px;">
+    <article class="articolo">
+      <p class="articolo-torna">
+        <a class="link" href="/blog/">← Tutti gli articoli</a>
+      </p>
+
+      {bozza && (
+        <p class="occhiello occhiello--progetto">Bozza — non pubblicata</p>
+      )}
+
+      <h1 class="articolo-titolo">{title}</h1>
+
+      <p class="articolo-meta">
+        <time datetime={dataIso(date)}>{dataItaliana(date)}</time>
+        <span aria-hidden="true"> · </span>
+        <span>{autore}</span>
+      </p>
+
+      <p class="articolo-sommario">{excerpt}</p>
+
+      {cover && (
+        <figure class="articolo-copertina">
+          <img src={cover} alt={coverAlt} width="1200" height="800" decoding="async" />
+        </figure>
+      )}
+
+      <div class="articolo-corpo prosa">
+        <Content />
+      </div>
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style is:global>
+  .articolo {
+    max-width: 72ch;
+    margin: 0 auto;
+  }
+  .articolo-torna {
+    margin: 0 0 28px;
+    font-size: 0.9rem;
+  }
+  .articolo-titolo {
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
+    font-weight: var(--peso-titolo);
+    letter-spacing: -0.02em;
+    margin: 12px 0 16px;
+  }
+  .articolo-meta {
+    margin: 0 0 20px;
+    color: var(--nero-secondario);
+    font-size: 0.95rem;
+  }
+  .articolo-sommario {
+    margin: 0 0 32px;
+    font-size: 1.2rem;
+    line-height: 1.55;
+    font-weight: var(--peso-medio);
+  }
+  .articolo-copertina {
+    margin: 0 0 40px;
+  }
+  .articolo-copertina img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--raggio-l);
+  }
+  /* Il corpo arriva da Markdown, quindi non ha classi: si stilano gli elementi. */
+  .articolo-corpo > p {
+    margin: 0 0 20px;
+    font-size: 1.08rem;
+    line-height: 1.7;
+  }
+  .articolo-corpo h2 {
+    font-size: 1.6rem;
+    font-weight: var(--peso-titolo);
+    line-height: 1.2;
+    margin: 44px 0 14px;
+  }
+  .articolo-corpo h3 {
+    font-size: 1.25rem;
+    font-weight: var(--peso-forte);
+    margin: 34px 0 10px;
+  }
+  .articolo-corpo ul,
+  .articolo-corpo ol {
+    margin: 0 0 22px 22px;
+    line-height: 1.7;
+  }
+  .articolo-corpo li {
+    margin-bottom: 8px;
+  }
+  .articolo-corpo blockquote {
+    margin: 26px 0;
+    padding: 4px 0 4px 18px;
+    border-left: 4px solid var(--verde);
+    color: var(--nero-secondario);
+  }
+  .articolo-corpo a {
+    color: var(--verde);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .articolo-corpo a:hover {
+    color: var(--verde-hover);
+  }
+  .articolo-corpo hr {
+    border: none;
+    border-top: 2px solid var(--bordo);
+    margin: 40px 0;
+  }
+  .articolo-corpo img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--raggio-m);
+  }
+</style>

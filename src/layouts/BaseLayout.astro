@@ -6,12 +6,51 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  /** Immagine per le anteprime social. Percorso assoluto dal sito, es. /images/... */
+  immagine?: string;
+  tipo?: 'website' | 'article';
+  /** Solo per gli articoli: data di pubblicazione in forma AAAA-MM-GG. */
+  pubblicatoIl?: string;
+  autore?: string;
+  /** Forza il noindex su una singola pagina, oltre alla regola sulle anteprime. */
+  noindex?: boolean;
 }
 
 const {
   title = "COG U · Sindacato e osservatorio sul lavoro cognitivo",
   description = "Sindacato in costruzione e osservatorio attivo sul lavoro cognitivo e sulle infrastrutture dell'AI: data center, energia, contratti. Documentiamo e mettiamo in comune quello che troviamo.",
+  immagine,
+  tipo = 'website',
+  pubblicatoIl,
+  autore,
+  noindex = false,
 } = Astro.props;
+
+/**
+ * Le anteprime non vanno indicizzate. Cloudflare passa il nome del ramo in
+ * CF_PAGES_BRANCH: se c'e' e non e' quello di produzione, questa build sta
+ * su un URL *.pages.dev che non deve finire nei motori di ricerca — altrimenti
+ * il lavoro in corso compare nelle ricerche accanto al sito vero.
+ *
+ * In locale CF_PAGES_BRANCH non esiste e non cambia niente. Il ramo di
+ * produzione si dichiara con BRANCH_PRODUZIONE nelle variabili del progetto
+ * Cloudflare: oggi il progetto Pages ha come produzione `feat/membership-v2-1`,
+ * quindi al cutover va impostata di conseguenza, non lasciata al valore
+ * predefinito.
+ */
+const ramo = import.meta.env.CF_PAGES_BRANCH ?? process.env?.CF_PAGES_BRANCH;
+const ramoProduzione = import.meta.env.BRANCH_PRODUZIONE ?? process.env?.BRANCH_PRODUZIONE ?? 'main';
+const anteprima = Boolean(ramo) && ramo !== ramoProduzione;
+const robots = noindex || anteprima ? 'noindex, nofollow' : 'index, follow';
+
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const immagineAssoluta = immagine && Astro.site ? new URL(immagine, Astro.site).href : immagine;
+
+const ogTitolo = tipo === 'article' ? title : 'COG U · Sindacato e osservatorio sul lavoro cognitivo';
+const ogDescrizione =
+  tipo === 'article'
+    ? description
+    : "Chi sta costruendo l'intelligenza artificiale, con quali soldi, a spese di cosa. E chi la sta costruendo in un altro modo.";
 ---
 
 <!DOCTYPE html>
@@ -23,16 +62,22 @@ const {
 
   <meta name="description" content={description}>
   <meta name="theme-color" content="#e5376a">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content={robots}>
+  {canonical && <link rel="canonical" href={canonical} />}
 
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="COG U · Sindacato e osservatorio sul lavoro cognitivo">
-  <meta property="og:description" content="Chi sta costruendo l'intelligenza artificiale, con quali soldi, a spese di cosa. E chi la sta costruendo in un altro modo.">
+  <meta property="og:type" content={tipo}>
+  <meta property="og:title" content={ogTitolo}>
+  <meta property="og:description" content={ogDescrizione}>
   <meta property="og:locale" content="it_IT">
+  {canonical && <meta property="og:url" content={canonical} />}
+  {immagineAssoluta && <meta property="og:image" content={immagineAssoluta} />}
+  {tipo === 'article' && pubblicatoIl && <meta property="article:published_time" content={pubblicatoIl} />}
+  {tipo === 'article' && autore && <meta property="article:author" content={autore} />}
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="COG U · Sindacato e osservatorio sul lavoro cognitivo">
-  <meta name="twitter:description" content="Documentiamo cosa succede al lavoro cognitivo e alle infrastrutture che lo reggono: data center, energia, contratti.">
+  <meta name="twitter:title" content={ogTitolo}>
+  <meta name="twitter:description" content={ogDescrizione}>
+  {immagineAssoluta && <meta name="twitter:image" content={immagineAssoluta} />}
 
   <script is:inline type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",

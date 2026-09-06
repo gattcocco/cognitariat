@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import CardArticolo from '../../components/CardArticolo.astro';
+import { articoliDaCostruire, bozzeVisibili } from '../../lib/articoli';
+
+/**
+ * Elenco degli articoli.
+ *
+ * Usa `articoliDaCostruire`, non `articoliPubblicati`: in una build normale le
+ * due liste coincidono, ma in sviluppo locale (o con MOSTRA_BOZZE=true) qui si
+ * vedono anche le bozze, marcate come tali. Ha senso: l'elenco e' anche lo
+ * strumento con cui la redazione controlla come viene un pezzo prima di
+ * pubblicarlo, e su una build pubblica le bozze semplicemente non esistono.
+ */
+const articoli = await articoliDaCostruire();
+const bozze = articoli.filter((a) => a.data.bozza).length;
+---
+<BaseLayout
+  title="Blog — COG U"
+  description="Analisi, manifesti e casi documentati dall'osservatorio sul lavoro cognitivo e sulle infrastrutture dell'AI."
+>
+  <Header />
+  <main id="contenuto" tabindex="-1" class="container" style="padding: 60px 0 90px;">
+    <div class="prosa">
+      <p class="occhiello">Osservatorio</p>
+      <h1 class="section-title">Blog</h1>
+      <p>
+        Quello che scriviamo: analisi, posizioni, casi documentati. I dossier con le mappe e le
+        fonti stanno invece su{' '}
+        <a class="link" href="https://gattcocco.github.io/mappa-e-contenuti/" rel="noopener">Resistenze AI</a>.
+      </p>
+    </div>
+
+    {bozzeVisibili && bozze > 0 && (
+      <p class="nota-metodo" style="margin-top: 28px;">
+        {bozze === 1
+          ? "Questa è un'anteprima locale: un articolo è ancora una bozza ed è visibile solo qui."
+          : `Questa è un'anteprima locale: ${bozze} articoli sono ancora bozze e sono visibili solo qui.`}
+        {' '}Sul sito costruito le bozze non compaiono da nessuna parte.
+      </p>
+    )}
+
+    {articoli.length === 0 ? (
+      <p class="prosa" style="margin-top: 40px;">
+        Non abbiamo ancora pubblicato niente qui. Nel frattempo c'è l'osservatorio.
+      </p>
+    ) : (
+      <div class="griglia-articoli">
+        {articoli.map((articolo) => <CardArticolo articolo={articolo} livello={2} />)}
+      </div>
+    )}
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style is:global>
+  .griglia-articoli {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+  }
+  @media (max-width: 700px) {
+    .griglia-articoli {
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+  }
+</style>

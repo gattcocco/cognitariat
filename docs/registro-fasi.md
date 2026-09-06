@@ -733,3 +733,181 @@ prima che finissero nella build: è esattamente il motivo per cui esiste.
 7. **`/admin`** (Sveltia CMS) è servito dal sito, `noindex` e non linkato, ma raggiungibile:
    punta al backend GitHub sul branch `main` e carica lo script da `unpkg.com`. Da confermare
    che l'accesso OAuth non sia configurato — o da proteggere — prima del lancio pubblico.
+
+---
+
+## Blog, CMS e primo articolo — 06/09/2026
+
+Ramo `dev`, quattro checkpoint in sequenza sullo stesso checkout. Nessun merge, nessun deploy
+production, nessuna modifica DNS.
+
+### A — Baseline
+
+`npm run verify` verde prima di toccare qualsiasi cosa: 0 errori, 0 warning, 0 hint, build,
+glifi, testi, 15/15 test. Working tree pulito, `dev` allineato con l'origine.
+
+Niente è stato rifatto: migrazioni, blocco dei pagamenti, font, icone, informativa e sezione
+«Perché ci preoccupa» erano già a posto dal giro precedente.
+
+**Cosa restava aperto, per area:**
+
+*Sito pubblico* — titolare del trattamento e dati legali dell'ente (l'informativa non è
+completa senza); `prefers-reduced-motion` con la preferenza attiva nel sistema operativo;
+lettore di schermo; schwa su un secondo sistema operativo; verifica del ramo di produzione
+Cloudflare **dalla configurazione** e non per confronto fra pagine.
+
+*Account membri* — configurazione Supabase da verificare con le credenziali vere
+(`npm run check:supabase`); site key Turnstile ancora quella di prova (`1x00000000…`);
+migration 0007 da applicare a mano alla riapertura; modulo di iscrizione da ricostruire con la
+dichiarazione di consenso; area membro mai provata con una sessione reale.
+
+*Pagamenti* — niente di rotto: i tre checkout rispondono 503 anche sulla preview pubblica. Alla
+riapertura restano da fare le variabili Stripe nell'ambiente, il ripristino dei pulsanti e di
+`hasOfferCatalog`, e la checklist di verifica del piano (SEPA, idempotenza del webhook, eventi
+fuori ordine, cleanup degli utenti non confermati).
+
+**Sul ramo di produzione**: la verifica per confronto di pagine non è una verifica della
+configurazione, ed è giusto non trattarla come tale. Quello che si sa adesso è di più di prima,
+perché il push di ieri è un esperimento vero: `dev` ha prodotto una preview su
+`dev.cognitariat.pages.dev` e la produzione (`cognitariat.pages.dev`, sha1 `dff6a90faf3c`) non è
+cambiata di un byte, né prima né dopo i due push di oggi. Resta che il valore impostato nel
+pannello nessuno l'ha letto: wrangler qui non è autenticato. Si chiude con
+`npx wrangler login` e `npx wrangler pages project list`, oppure guardando *Settings → Builds &
+deployments* del progetto `cognitariat`.
+
+### B — Modello dei contenuti, /blog, pagine articolo, richiamo in home
+
+Collection Astro `articles` con schema in `src/content.config.ts`, allineato campo per campo a
+`/admin/config.yml`: sono le due facce dello stesso contratto.
+
+Due scelte dello schema meritano di essere ricordate.
+
+**La data si legge a mano.** `z.coerce.date()` interpreta `2026-09-06` come mezzanotte UTC, e
+stampata con il fuso italiano quella data torna indietro di un giorno: il 6 settembre sarebbe
+comparso come 5. La stringa viene spezzata e ricomposta come data locale a mezzogiorno, così
+nessun fuso la sposta. Verificato sulla preview: «6 settembre 2026» in elenco, in home e in
+pagina.
+
+**La copertina obbliga a un testo alternativo.** Un campo facoltativo per l'accessibilità è un
+campo che si dimentica: qui, se c'è `cover` e manca `coverAlt`, la build fallisce.
+
+Il campo `bozza` non duplica l'editorial workflow del CMS: quello governa la revisione su Git,
+questo la visibilità sul sito costruito. Comportamento verificato in entrambi i versi:
+
+| | build normale | build con `MOSTRA_BOZZE=true` |
+|---|---|---|
+| pagina dell'articolo | **non generata** (404) | generata, con `noindex` |
+| elenco `/blog` | assente | presente, con etichetta «Bozza» |
+| richiamo in home | assente | **assente comunque** |
+| sitemap | assente | **assente comunque** |
+
+La home non mostra bozze nemmeno in locale: l'elenco serve anche a rivedere un pezzo, la vetrina
+no. E la pagina non viene proprio costruita, perché togliere il link non basta — un indirizzo
+indovinato o condiviso resterebbe raggiungibile.
+
+La sitemap è scritta a mano invece che col plugin proprio per questo: parte dagli articoli
+pubblicati, quindi le bozze non ci sono per costruzione e non per configurazione.
+
+**Anteprime non indicizzate**: se Cloudflare passa un `CF_PAGES_BRANCH` diverso da
+`BRANCH_PRODUZIONE` (predefinito `main`), le pagine escono con `noindex, nofollow`. Verificato
+sulla preview. Al cutover la variabile va impostata: oggi il progetto Pages ha come produzione
+`feat/membership-v2-1`, non `main`.
+
+Corretti strada facendo due difetti preesistenti: le voci di menu erano ancore relative
+(`#lavoro`), quindi da `/privacy` e `/account` metà del menu non faceva niente; e il layout non
+aveva metadati per pagina, così l'anteprima social di qualunque indirizzo mostrava il testo
+della home.
+
+### C — CMS
+
+Il CMS resta acceso e diventa usabile. Sveltia con backend GitHub ha bisogno di un servizio che
+completi lo scambio OAuth, perché il client secret non può stare nel browser: invece di un
+servizio di terzi, i due passaggi sono due Pages Function (`functions/api/cms-auth.ts` e
+`cms-callback.ts`).
+
+Verificato:
+
+| Controllo | Esito |
+|---|---|
+| `/admin/` carica e legge la nostra configurazione | sì: riconosce il repository `cognitariat` e offre «Sign In with GitHub» |
+| `/admin/config.yml` generata al build | sì, con `branch: dev` e `auth_endpoint: api/cms-auth` |
+| `/api/cms-auth` senza configurazione OAuth | 503 con pagina che spiega, non un errore grezzo |
+| `/api/cms-auth` con configurazione | 302 a `github.com/login/oauth/authorize`, `scope=repo`, `state` in cookie `HttpOnly; Secure; SameSite=Lax` |
+| callback con `state` non corrispondente | rifiutato: `authorization:github:error` |
+| callback senza codice | rifiutato allo stesso modo |
+| il client secret compare nel sito costruito? | **no**, cercato in tutto `dist/` |
+| token nei log | no: si registra il tipo di errore, mai il corpo della risposta di GitHub |
+| `postMessage` del token | indirizzato alla nostra origine, non a `*` |
+
+**Il branch passa da `main` a `dev`.** `main` serve il sito pubblico via GitHub Pages: il CMS non
+deve poterlo toccare. Da qui un articolo arriva alla preview; portarlo altrove resta un passaggio
+manuale e separato.
+
+**La versione di Sveltia è fissata** (`@sveltia/cms@0.206.1`). Era senza numero, cioè sempre
+l'ultima pubblicata: il programma che maneggia un token con permesso di scrittura sul repository
+poteva cambiare da solo, senza che nessuno lo decidesse.
+
+**Cosa non è stato verificato, e perché.** Il login vero e il salvataggio di un contenuto
+richiedono o un'applicazione OAuth su GitHub — che solo chi amministra l'organizzazione può
+creare — o un token personale, che non va chiesto né maneggiato da qui. La procedura è in
+`docs/redazione-cms.md` §4; finché non è fatta, la redazione può entrare con «Sign In Using
+Access Token», che è il meccanismo previsto da Sveltia e tiene il token nel browser di chi lo ha
+creato.
+
+L'accesso al CMS non ha niente in comune con gli account membri: qui ci si autentica su GitHub
+per scrivere nel repository, non si è iscritti e non si tocca Supabase.
+
+### D — Primo articolo
+
+«Manifesto Cognitario contro l'Oligarchia AI», firma Editoriale, 6 settembre 2026, slug
+`manifesto-cognitario-contro-oligarchia-ai`. Importato dal `.docx` **parola per parola**: sviste
+e formulazioni discutibili sono rimaste dov'erano, perché correggerle di nascosto avrebbe
+significato cambiare un testo firmato senza dirlo.
+
+Le verifiche editoriali stanno in `docs/manifesto-verifiche-editoriali.md`. In sintesi, tre punti
+da chiudere prima di qualunque pubblicazione sul sito pubblico: il nome sbagliato di Dario
+Amodei; «Costituito legalmente», che contraddice il «in costruzione» del resto del sito e il
+fatto che i dati legali per l'informativa non ci sono; e la chiamata all'iscrizione mentre il
+tesseramento è chiuso. Segnalati, senza toccarli, anche l'attribuzione senza citazione a due
+persone reali, la sovrapposizione fra «cabala», «grandi famiglie» e «strabiliardari», SpaceX
+elencata fra le aziende di AI, cinque modi diversi di scrivere le desinenze e cinque refusi.
+
+Scritti ex novo perché il modello li richiede e nel documento non c'erano: sommario e testo
+alternativo della copertina. Sono segnalati come tali.
+
+La copertina passa da 3,3 MB a 225 KB (WebP 1200 px) senza differenze visibili, con un JPEG di
+pari nome per le anteprime social, che non ovunque gestiscono il WebP. L'originale resta fuori
+dal repository.
+
+Pubblicato **sulla sola preview**. Verificato lì: compare in `/blog`, compare in home, entra
+nella sitemap, ha `og:type=article`, `og:image` e `article:published_time=2026-09-06`, e la data
+si legge «6 settembre 2026» senza slittamenti.
+
+### Controlli della pipeline
+
+`npm run verify` eseguito dopo ogni checkpoint, sempre verde. Due regressioni intercettate dai
+controlli e corrette prima del commit:
+
+- `check:glifi` ha fermato la freccia `←` (U+2190) nel link «Tutti gli articoli»: non è nei
+  sottoinsiemi dei font che ospitiamo e sarebbe stata disegnata dal font di sistema. Sostituita
+  con la chevron SVG che già usiamo altrove;
+- uno spazio mangiato nella nota sulle bozze in `/blog`, dallo stesso meccanismo di sempre.
+
+Smoke test sulla preview pubblica: `/`, `/blog/`, la pagina dell'articolo, `/sitemap.xml`,
+`/admin/`, `/admin/config.yml` tutte 200; un indirizzo inesistente 404 con la nostra pagina; i
+tre checkout 503. Produzione invariata: `cognitariat.pages.dev` e `cognitariatzone.org` hanno lo
+stesso sha1 di prima dei push.
+
+### Resta aperto
+
+Oltre a quanto elencato nel checkpoint A:
+
+1. **Configurazione OAuth del CMS** (`docs/redazione-cms.md` §4): applicazione GitHub e tre
+   variabili su Cloudflare, fra cui `CMS_AUTH_BASE_URL` puntata all'alias di ramo. Senza, il
+   login GitHub non parte e resta il token personale.
+2. **`BRANCH_PRODUZIONE`** da impostare al cutover, altrimenti il sito vero uscirebbe con
+   `noindex` — il valore predefinito `main` non è il ramo di produzione attuale del progetto
+   Pages.
+3. **Punti editoriali del manifesto**: i tre della sezione 1 di
+   `docs/manifesto-verifiche-editoriali.md`.
+4. **Verifica del ramo di produzione dal pannello**, non per confronto di pagine.

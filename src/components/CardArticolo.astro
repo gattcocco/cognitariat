@@ -55,6 +55,11 @@ const Titolo = `h${livello}` as 'h2' | 'h3';
   .card-articolo-figura {
     display: block;
     aspect-ratio: 3 / 2;
+    /* Con un solo articolo la scheda occupa tutta la riga e la copertina, a
+       proporzione libera, diventerebbe alta mezzo schermo: il tetto la tiene una
+       copertina invece che un manifesto. Con piu' schede in griglia non entra
+       mai in gioco, perche' la larghezza e' gia' minore. */
+    max-height: 340px;
     background: var(--giallo-tenue);
   }
   .card-articolo-figura img {

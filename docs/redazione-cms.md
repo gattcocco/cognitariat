@@ -91,11 +91,12 @@ nelle variabili del progetto Cloudflare, e le due Function `functions/api/cms-au
    - **Homepage URL**: `https://dev.cognitariat.pages.dev`
    - **Authorization callback URL**: `https://dev.cognitariat.pages.dev/api/cms-callback`
 2. Genera un **client secret** e copialo subito (GitHub non lo rimostra).
-3. Su Cloudflare, nel progetto Pages, aggiungi quattro variabili:
+3. Su Cloudflare, nel progetto Pages, aggiungi **due** variabili:
    - `GITHUB_OAUTH_CLIENT_ID` — in chiaro;
-   - `GITHUB_OAUTH_CLIENT_SECRET` — **cifrata**;
-   - `CMS_AUTH_BASE_URL` = `https://dev.cognitariat.pages.dev`;
-   - `CMS_BRANCH` = `dev` (vedi §8 per il rilascio).
+   - `GITHUB_OAUTH_CLIENT_SECRET` — **cifrata**.
+
+   `CMS_BRANCH` serve solo se il ramo non è `dev` (vedi §8), e `CMS_AUTH_BASE_URL` solo se
+   l'indirizzo del login non è l'alias di ramo — che il sito ricava da sé.
 4. Fai partire un nuovo deploy: le variabili si leggono al build, cambiarle non basta.
 5. Controlla che sia andata, da terminale:
 
@@ -123,11 +124,12 @@ login». Per pubblicare articoli su un repository pubblico serve solo il primo. 
 `gattcocco/cognitariat` diventasse privato, `public_repo` smetterebbe di funzionare e bisognerebbe
 tornare a `repo`: è l'unico caso in cui alzarlo.
 
-**Perché `CMS_AUTH_BASE_URL`.** GitHub accetta un solo indirizzo di callback per applicazione, e
-ogni deployment di Cloudflare ha un URL diverso (`28ae1fe2.cognitariat.pages.dev`). La variabile
-fissa l'indirizzo stabile del ramo, così il giro del login torna sempre nello stesso posto.
-Quando il sito passerà in produzione servirà una seconda applicazione OAuth, con il dominio
-vero, e la variabile impostata di conseguenza nell'ambiente di produzione.
+**Perché il callback è quello del ramo e non del deployment.** GitHub accetta un solo indirizzo
+di callback per applicazione, mentre ogni deployment di Cloudflare ha un URL diverso
+(`28ae1fe2.cognitariat.pages.dev`): con quello il login funzionerebbe per una build e si
+romperebbe alla successiva. Il sito ricava da sé l'alias stabile del ramo
+(`dev.cognitariat.pages.dev`) e lo dichiara al CMS; `CMS_AUTH_BASE_URL` resta come scavalco per
+i casi fuori standard. In produzione servirà una seconda applicazione OAuth, con il dominio vero.
 
 ---
 

@@ -1036,3 +1036,95 @@ Testo invariato, firma «Editoriale», data 6 settembre 2026. Le correzioni prop
 confronto puntuale in `docs/manifesto-verifiche-editoriali.md`: testo attuale, proposta, motivo.
 Niente è stato applicato. Restano da chiudere prima della produzione il nome di Dario Amodei
 (scritto «Claudio») e la chiamata all'iscrizione mentre il tesseramento è chiuso.
+
+---
+
+## Informativa, dati dell'ente, collaudo del CMS — 07/09/2026 (secondo giro)
+
+Ramo `dev`. Nessun merge, nessun deploy in produzione.
+
+### La sede smette di essere un tema pubblico
+
+L'indicazione era chiara e la seguo: la sede in attesa di conferma **non è un blocco al rilascio**
+e non deve comparire da nessuna parte, nemmeno come spiegazione.
+
+Le pagine ora non contengono né gli indirizzi né una nota che dica cosa manca. Il campo `sede` in
+`src/lib/associazione.ts` è vuoto, e le pagine rendono l'indirizzo **solo se valorizzato**: vuoto
+vuol dire «non ancora confermato», e chi legge non vede niente invece di vedere un cantiere.
+Quando la conferma arriva si scrive lì e si ricostruisce: nessuna pagina da toccare.
+
+La questione, con i riferimenti documentali e la nota sulla coincidenza con una residenza, è
+uscita dal repository pubblico e sta in `_local/sede-e-dati-riservati.md`, escluso da Git.
+
+**Una cosa da sapere.** Il commit `995ebaa` di stamattina — fatto prima di questa indicazione —
+ha portato entrambi gli indirizzi in `docs/dati-associazione.md` ed è già stato spinto: il file è
+stato ripulito, ma il contenuto **resta nella cronologia pubblica**. Le tre opzioni (lasciare,
+riscrivere la cronologia, chiedere a GitHub la rimozione delle cache) sono in
+`_local/sede-e-dati-riservati.md` §2. Non è stata presa nessuna iniziativa perché riscritture e
+force push sono stati vietati esplicitamente e `dev` è già pubblicato.
+
+### L'informativa è un'informativa
+
+`/privacy` non è più una nota sullo stato ma un testo ex art. 13 GDPR sui trattamenti che il sito
+fa **adesso**. Per ciascuno: finalità, base giuridica, destinatari, conservazione, diritti.
+
+| Trattamento | Base giuridica | Destinatari |
+|---|---|---|
+| Visita del sito, log tecnici | legittimo interesse (6.1.f) | Cloudflare (hosting) |
+| Video incorporati, solo arrivando alla sezione | legittimo interesse (6.1.f), modalità nocookie e caricamento differito | Google (USA) |
+| Corrispondenza: risposta | legittimo interesse (6.1.f) | Proton (Svizzera) |
+| Corrispondenza: pubblicazione di un caso in forma riconoscibile | consenso (6.1.a); senza, trattamento anonimo | — |
+| Accesso della redazione | legittimo interesse (6.1.f) | GitHub (USA) |
+
+Tesseramento e pagamenti **non** sono taciuti perché spenti: una sezione dice che le pagine
+esistono, che sono disattivate, che nessun dato passa di lì e che i loro trattamenti verranno
+descritti prima che il primo dato sia raccolto.
+
+Niente è stato dedotto dal codice: verificato sul sito online che non impostiamo cookie, che
+`localStorage` e `sessionStorage` restano vuoti e che l'unico host di terze parti contattato è
+`youtube-nocookie.com`. La conservazione della posta è descritta per quello che è — si tiene
+finché serve, si cancella su richiesta, non c'è cancellazione automatica — senza inventare un
+termine che nessuno ha deciso. Le decisioni che restano sono elencate in `_local/`, §4.
+
+Versione dell'informativa a `v3-2026-09-07`.
+
+### Dati dell'ente in un posto solo
+
+`src/lib/associazione.ts` alimenta informativa, footer e dati strutturati (`foundingDate`,
+`taxID`, `email`; l'indirizzo solo se valorizzato). Cambiano per via amministrativa, non
+editoriale: da qui in poi un dato nuovo è una riga cambiata, non una pagina riscritta.
+
+Il contatto pubblicato è `cognitariatz@proton.me`, che è l'indirizzo già in uso su tutto il sito e
+nella corrispondenza: non è stato inventato. PEC e partita IVA non risultano dai documenti e
+restano vuote — nessun recapito inventato.
+
+### CMS: quanto si è potuto collaudare, e cosa manca
+
+Nuovo `npm run check:cms-oauth <url>`: legge la configurazione servita al CMS e avvia il login
+**senza completarlo**, controllando client id, permesso richiesto, indirizzo di ritorno e
+attributi del cookie di stato. Oggi risponde 503 e stampa i passaggi esatti da fare
+nell'account. Non stampa segreti.
+
+Tolta una variabile dalla configurazione: l'origine del login non va più dichiarata a mano, il
+sito ricava l'alias stabile del ramo (`dev.cognitariat.pages.dev`). Con l'URL del singolo
+deployment il login avrebbe funzionato per una build e si sarebbe rotto alla successiva.
+Verificato costruendo nei tre contesti: locale → dominio pubblico, anteprima → alias di ramo,
+produzione → quello che si configura. Restano **due** variabili da impostare: client id e client
+secret.
+
+**Il collaudo end-to-end non è chiuso** e non lo sarà finché l'applicazione OAuth non esiste:
+accesso reale, creazione bozza, caricamento copertina, salvataggio, pubblicazione e comparsa nel
+blog. La simulazione del commit (18 controlli su 18) copre tutto il resto della catena, ma non
+l'interfaccia e non il login. Il passaggio che serve è uno solo ed è nell'account di chi
+amministra: creare l'applicazione OAuth e incollare due valori su Cloudflare.
+
+### Ramo di produzione: ancora non verificato dalla configurazione
+
+Wrangler non è autenticato qui; il pannello Cloudflare, aperto nel browser collegato, ha
+reindirizzato al login, e in un account non si entra per conto di qualcun altro. Il confronto fra
+pagine non vale come verifica e non viene usato come tale. Si chiude con
+`npx wrangler login && npx wrangler pages project list`, oppure dal pannello in *Workers & Pages →
+cognitariat → Settings → Builds & deployments*.
+
+Tutto il resto della preparazione alla produzione è già pronto e parametrico: `CMS_BRANCH`,
+`BRANCH_PRODUZIONE`, dominio pubblico e callback OAuth si impostano senza toccare il codice.

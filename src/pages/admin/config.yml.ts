@@ -17,9 +17,26 @@ import type { APIRoute } from 'astro';
  * anche qui, altrimenti la redazione non ha modo di compilarlo.
  */
 export const GET: APIRoute = ({ site }) => {
+  /**
+   * Origine del servizio di login. Deve essere **stabile**: GitHub accetta un
+   * solo indirizzo di callback per applicazione OAuth, e l'URL del singolo
+   * deployment cambia a ogni build — con quello, il login funzionerebbe per una
+   * build e si romperebbe alla successiva.
+   *
+   * Se non e' dichiarata a mano, si ricava l'alias di ramo di Cloudflare Pages,
+   * che e' stabile: <ramo>.<progetto>.pages.dev. La regola di normalizzazione e'
+   * quella di Cloudflare — minuscolo, tutto cio' che non e' lettera o cifra
+   * diventa un trattino, massimo 28 caratteri.
+   */
+  const ramoPerAlias = import.meta.env.CF_PAGES_BRANCH ?? process.env?.CF_PAGES_BRANCH;
+  const aliasDiRamo = ramoPerAlias
+    ? `https://${ramoPerAlias.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 28)}.cognitariat.pages.dev`
+    : undefined;
+
   const baseUrl =
     import.meta.env.CMS_AUTH_BASE_URL ??
     process.env?.CMS_AUTH_BASE_URL ??
+    aliasDiRamo ??
     (site ? site.origin : 'https://dev.cognitariat.pages.dev');
 
   /**

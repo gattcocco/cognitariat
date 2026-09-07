@@ -66,11 +66,11 @@ if (r.status === 503) {
       `     Homepage URL:              ${base}\n` +
       `     Authorization callback URL: ${base}/api/cms-callback\n` +
       '  2. Genera il client secret e copialo (GitHub non lo rimostra).\n' +
-      '  3. Cloudflare → progetto Pages → Variables:\n' +
+      '  3. Cloudflare → progetto Pages → Variables (ne bastano due):\n' +
       '     GITHUB_OAUTH_CLIENT_ID      (in chiaro)\n' +
       '     GITHUB_OAUTH_CLIENT_SECRET  (cifrata)\n' +
-      `     CMS_AUTH_BASE_URL           ${base}\n` +
-      '     CMS_BRANCH                  dev\n' +
+      '     Il ramo e l\'indirizzo del login il sito li ricava da sé: si dichiarano solo\n' +
+      '     se diversi dal ramo dev e dal suo alias.\n' +
       '  4. Nuovo deploy: le variabili si leggono al build.\n' +
       '\nPoi rilancia questo comando: deve rispondere 302.'
   );

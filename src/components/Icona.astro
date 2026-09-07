@@ -13,7 +13,7 @@
  * da un'etichetta, non resa "accessibile" aggiungendole un title.
  */
 interface Props {
-  nome: 'busta' | 'mappa' | 'video' | 'esci' | 'chevron-sinistra' | 'chevron-destra';
+  nome: 'busta' | 'mappa' | 'video' | 'esci' | 'chevron-sinistra' | 'chevron-destra' | 'link-esterno';
   /** Dimensione in em rispetto al testo accanto. */
   dimensione?: number;
 }
@@ -27,6 +27,11 @@ const forme: Record<Props['nome'], string> = {
   esci: '<path d="M10.5 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4.5"/><path d="m15.5 8 4 4-4 4M19.5 12H9.5"/>',
   'chevron-sinistra': '<path d="M15 5 8 12l7 7"/>',
   'chevron-destra': '<path d="m9 5 7 7-7 7"/>',
+  // Freccia che esce da un riquadro: segnala che il link porta fuori dal sito.
+  // Disegnata qui per lo stesso motivo delle altre, e perche' il carattere
+  // tipografico corrispondente (U+2197) non e' nei sottoinsiemi dei font che
+  // ospitiamo — comparirebbe come rettangolo vuoto. Vedi check:glifi.
+  'link-esterno': '<path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14.5V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V7.5A1.5 1.5 0 0 1 5 6h4.5"/>',
 };
 ---
 <svg

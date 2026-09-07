@@ -939,16 +939,16 @@ tesseramento online non è un paradosso, sono due cose diverse. A essere impreci
 diceva «sindacato in costruzione» in un modo leggibile come «non ancora esistente». Corretto in
 hero, footer e dati strutturati, dove ora compare anche `foundingDate`.
 
-**La sede resta in sospeso, e non è stata scelta.** L'atto (12/07) dice Via Papa Giovanni XXIII,
-Bresso; il verbale (03/09) dice Via Togliatti 57, Assago. Un verbale di nomina non è l'atto con
-cui si sposta una sede legale: se il trasferimento c'è stato serve la delibera, se non c'è stato
-la sede è quella dell'atto. Finché non arriva conferma, sul sito non compare nessun indirizzo e
-`/privacy` lo dice apertamente.
+**La sede resta in sospeso, e non è stata scelta.** L'atto costitutivo (12/07) e il verbale di
+nomina (03/09) indicano due indirizzi diversi. Un verbale di nomina non è l'atto con cui si sposta
+una sede legale: se il trasferimento c'è stato serve la delibera, se non c'è stato la sede è
+quella dell'atto. Finché non arriva conferma, sul sito non compare nessun indirizzo e `/privacy`
+lo dice apertamente.
 
-Da sapere prima di scegliere: **l'indirizzo di Assago coincide con la residenza del legale
-rappresentante**. Pubblicare quella sede significa pubblicare l'abitazione di una persona, su un
-sito che si occupa di conflitto. Non è un ostacolo giuridico — la sede legale è un dato pubblico —
-ma è una scelta da fare sapendolo.
+C'è inoltre un elemento da conoscere prima di scegliere, che riguarda una persona e non l'ente.
+*(Redatto il 07/09/2026: gli indirizzi e quell'elemento stavano scritti qui per esteso. Non è il
+posto — questo file è pubblico. Stanno in `_local/sede-e-dati-riservati.md`, che è escluso da Git
+e dal deploy.)*
 
 `/privacy` indica ora il titolare del trattamento: denominazione, forma giuridica, data di
 costituzione, codice fiscale. Era il buco principale ed è chiuso a metà: manca la sede, e mancano
@@ -1053,8 +1053,8 @@ Le pagine ora non contengono né gli indirizzi né una nota che dica cosa manca.
 vuol dire «non ancora confermato», e chi legge non vede niente invece di vedere un cantiere.
 Quando la conferma arriva si scrive lì e si ricostruisce: nessuna pagina da toccare.
 
-La questione, con i riferimenti documentali e la nota sulla coincidenza con una residenza, è
-uscita dal repository pubblico e sta in `_local/sede-e-dati-riservati.md`, escluso da Git.
+La questione, con i riferimenti documentali e quello che va saputo prima di scegliere, sta in
+`_local/sede-e-dati-riservati.md`, escluso da Git e dal deploy.
 
 **Una cosa da sapere.** Il commit `995ebaa` di stamattina — fatto prima di questa indicazione —
 ha portato entrambi gli indirizzi in `docs/dati-associazione.md` ed è già stato spinto: il file è
@@ -1190,3 +1190,129 @@ Il collaudo vero del CMS — accesso, bozza, copertina, salvataggio, pubblicazio
 non lo sarà finché l'applicazione OAuth non esiste. La simulazione del commit e il controllo del
 redirect coprono la catena intorno, non l'atto di pubblicare. Il ramo di produzione Cloudflare
 resta da leggere dalla configurazione.
+
+---
+
+## Video collegati invece che incorporati, conservazione, accessibilità — 07/09/2026 (quarto giro)
+
+Ramo `dev`. Nessun merge, nessun deploy in produzione, nessuna riscrittura della cronologia.
+
+### I video non sono più incorporati
+
+Erano tre `iframe` di `youtube-nocookie.com` con `loading="lazy"`. La modalità senza cookie e il
+caricamento differito riducono il problema ma non lo tolgono: **arrivare in fondo alla pagina
+bastava** a far conoscere a Google l'indirizzo IP di chi legge, senza che l'avesse chiesto. La
+decisione era già stata presa; qui è stata applicata.
+
+Adesso sono tre link. Conseguenze volute:
+
+- **Nessuna anteprima presa da `i.ytimg.com`.** È la scorciatoia ovvia e sarebbe la stessa
+  richiesta a Google, travestita da immagine. La copertina è disegnata in CSS: fondo nero, icona
+  gialla (14,47:1), pastiglia rosa con il triangolo nero (5,09:1).
+- **`rel="noreferrer"` oltre a `noopener`.** Senza, YouTube riceve comunque da quale pagina si
+  arriva.
+- **I titoli sono quelli veri**, non «Video 1». Le tre registrazioni sono della stessa assemblea,
+  quindi l'etichetta accessibile distingue con «video 1 di 3» — un fatto sull'elenco, non
+  un'invenzione sul contenuto. Da sapere: due dei tre video, **sul canale**, hanno il titolo con
+  un refuso («Assembla»); sul sito è scritto giusto, ma il refuso va corretto là.
+- **Se un giorno ci saranno fotogrammi nostri**, basta valorizzare `copertina` e `copertinaAlt`
+  nell'elenco del componente: devono essere file serviti dal nostro dominio.
+
+Verificato sul sito costruito, servito dal runtime vero: **zero `iframe`**, e nell'elenco delle
+richieste di rete **nessuna verso un host che non sia il nostro**. L'unico riferimento esterno
+nelle pagine pubbliche è `href`, cioè un link che parte solo se qualcuno lo clicca.
+
+### L'informativa segue il comportamento, non il contrario
+
+`/privacy` passa a **v4**. Google esce dai destinatari, ed è detto perché: prima c'era, ora no. La
+sezione sui video dice che non c'è niente da conservare perché non si raccoglie niente.
+
+Sulla conservazione, l'art. 13.2.a chiede un periodo **oppure** i criteri: sono alternative, non
+una il ripiego dell'altra. Ogni trattamento adesso dichiara l'uno o gli altri, e sono veri:
+
+| Trattamento | Cosa dice |
+|---|---|
+| Visita del sito | non esiste un nostro archivio: nessuna statistica, nessun log scaricato |
+| Video | niente da conservare |
+| Corrispondenza | criterio d'uso, cancellazione su richiesta, nessuna cancellazione automatica |
+| Redazione | l'attribuzione resta nella cronologia del repository a tempo indeterminato — è la natura dello strumento, ed è dichiarata |
+
+Quello che manca non è un testo: è una **delibera**. `docs/conservazione-dati.md` porta una
+proposta concreta sulla corrispondenza — 24 mesi per quella che si esaurisce in una risposta, 12
+mesi dopo la chiusura per i casi seguiti, valutazione caso per caso per le vertenze — e dice cosa
+comporta approvarla: una revisione annuale della casella, affidata a una persona precisa. Senza
+quella, il termine scritto online sarebbe falso, e sarebbe peggio del criterio di adesso. **Nessuna
+delibera è stata registrata**, e online non è scritto niente che la presupponga.
+
+### Accessibilità: quello che è stato eseguito
+
+Sul sito costruito, servito da `wrangler pages dev`, misurato nella pagina e non stimato:
+
+| Verifica | Esito |
+|---|---|
+| Contrasto delle schede video | titolo 21:1 · «Guarda su YouTube» 4,95:1 a peso 600 · nota 8,86:1 · icona 14,47:1 · pastiglia 5,09:1 |
+| Focus da tastiera | `Tab` porta sulla scheda, `:focus-visible` attivo, contorno nero 3px con 2px di scostamento |
+| Nome accessibile dei tre link | distinto: titolo + «video N di 3, si apre in una nuova scheda su youtube.com» |
+| Struttura | `ul` con tre `li`: un elenco di tre cose è un elenco |
+| Riflusso a 320px (WCAG 1.4.10) | **difetto trovato e corretto** |
+
+Il difetto: `.cards-grid` usava `minmax(310px, 1fr)`, e a 320px di finestra la colonna rigida
+sporgeva dal contenitore facendo comparire la barra orizzontale **su tutta la pagina** —
+tesseramento e merch, non i video. Corretto con `minmax(min(310px, 100%), 1fr)`, stessa cosa per
+la griglia dei video. Misurato prima: `scrollWidth` 330 su `clientWidth` 320. Dopo: 320 e 320.
+
+**Non eseguite, e non si spacciano per fatte**: lettore di schermo reale, `prefers-reduced-motion`
+attivato dal sistema operativo (la regola CSS c'è e lo script dell'intro si ferma, ma questo si
+legge nel codice, non si è provato), schwa su un secondo sistema operativo. Gli **screenshot non
+sono stati acquisiti**: il pannello di anteprima restituisce fotogrammi bianchi anche a pagina
+renderizzata — verificato che è un difetto della cattura e non della pagina, misurando le schede
+nel documento (280×285px, sezione visibile, nessun pannello sopra). Un fotogramma bianco non è una
+verifica, e non viene presentato come tale.
+
+### Una nota della redazione, pronta e non applicata
+
+Gli articoli hanno ora un campo facoltativo `notaRedazione`, stampato in coda dentro un riquadro
+che si distingue dal testo, e presente nel modulo del CMS. Serve per il manifesto: chiama
+all'iscrizione mentre il tesseramento non è aperto, e il testo non va toccato. Una nota dice a chi
+legge quello che gli serve senza mettere in bocca all'associazione parole che non ha scritto.
+
+**Il meccanismo c'è, il testo no**: la proposta sta in `docs/manifesto-verifiche-editoriali.md`
+§5.2, insieme alla correzione «Claudio» → «Dario» (§5.1), pronta come cerca-e-sostituisci. Il
+manifesto online resta parola per parola quello originale.
+
+### Il ramo di produzione, per quanto si può sapere da fuori
+
+Non serve entrare nel pannello per farsi un'idea: Cloudflare scrive da sé, nei propri controlli su
+GitHub, la forma di ogni deployment. `dev` ha *Preview URL* **e** *Branch Preview URL*; il ramo
+`feat/membership-v2-1` ha **solo** *Preview URL*, che è la forma di un deployment di produzione —
+vive sull'indirizzo del progetto e non ha alias di ramo; `main` non ha nessun controllo di
+Cloudflare, cioè non viene proprio costruito.
+
+Coincide con `PROVISIONING.md`. **Non è la stessa cosa che leggerlo nel campo «Production
+branch»**, ed è dedotto dalla forma, non letto: va confermato con `npx wrangler pages project
+list` o dal pannello, e serve un accesso che non c'è. Quello che si può già escludere è `main` — e
+conta, perché `BRANCH_PRODUZIONE` ha `main` come valore predefinito, e lasciarlo tale al cutover
+manderebbe online il sito con `noindex`.
+
+La procedura di rilascio e di ripristino sta in `docs/rilascio-e-ripristino.md`: due minuti di
+controlli prima, due dopo, e il ritorno indietro in tre gesti dal pannello di Cloudflare — con
+l'avvertenza che il rollback rimette online la build vecchia ma non toglie un commit già fatto.
+
+### Gli indirizzi: un errore mio, corretto
+
+Avevo scritto che nessun file tracciato conteneva più gli indirizzi. **Non era vero.**
+`docs/dati-associazione.md` era stato ripulito, `docs/registro-fasi.md` no: conteneva entrambi gli
+indirizzi e la frase che collega uno di essi alla residenza del legale rappresentante, ed è un file
+pubblico come gli altri. Redatto adesso, con un commit normale. Verificato con `git grep` su
+indirizzi, comuni, «residenza» e «abitazione»: **nessun file tracciato li contiene più**.
+
+Resta la cronologia, e non si tocca: nessun force push. Le opzioni — con quello che ciascuna
+ottiene davvero e il limite che vale per tutte, cioè che riscrivere Git non cancella le copie già
+uscite — stanno in `_local/sede-e-dati-riservati.md` §2. Il punto da non archiviare: la sede **non
+è confermata**, quindi non è ancora «un dato pubblico dell'ente», e il commit non contiene un
+indirizzo ma un collegamento fra un indirizzo e una persona.
+
+### Cosa resta
+
+Il collaudo vero del CMS, che dipende dall'applicazione OAuth. Nient'altro è bloccato da un
+accesso.

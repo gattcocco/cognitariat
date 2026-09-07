@@ -145,6 +145,16 @@ collections:
       - label: Corpo
         name: body
         widget: markdown
+
+      - label: Nota della redazione
+        name: notaRedazione
+        widget: text
+        required: false
+        hint: >-
+          Facoltativa. Compare in coda all'articolo, in un riquadro separato dal
+          testo. Serve per aggiungere un contesto senza toccare il testo di
+          qualcun altro: per esempio dire che una cosa annunciata nell'articolo
+          non e' ancora disponibile.
 `;
 
   return new Response(yaml, {

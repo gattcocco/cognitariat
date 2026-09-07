@@ -83,7 +83,9 @@ grant select on public.privacy_versions to authenticated, anon;
 
 insert into public.privacy_versions (version, pubblicata_il, note) values
   ('v1-2026-08-20', '2026-08-20', 'Bozza dell''informativa estesa, mai pubblicata: conteneva campi legali da completare.'),
-  ('v2-2026-09-05', '2026-09-05', 'Nota pubblica sullo stato attuale: nessun dato raccolto, iscrizioni e pagamenti chiusi.')
+  ('v2-2026-09-05', '2026-09-05', 'Nota pubblica sullo stato attuale: nessun dato raccolto, iscrizioni e pagamenti chiusi.'),
+  ('v3-2026-09-07', '2026-09-07', 'Informativa ex art. 13 sui trattamenti attivi al rilascio editoriale: visita del sito, video incorporati, corrispondenza, accesso della redazione.'),
+  ('v4-2026-09-07', '2026-09-07', 'Video non piu'' incorporati ma collegati: Google esce dai destinatari. Tempi di conservazione dichiarati per criterio in ogni trattamento.')
 on conflict (version) do nothing;
 
 -- -----------------------------------------------------------------------------

@@ -301,9 +301,14 @@ section {
   max-width: 700px;
   font-size: 1.1rem;
 }
+/* min(310px, 100%) e non 310px secco: sotto i 350px di finestra — cioe' a 320px,
+   la larghezza minima su cui WCAG 1.4.10 chiede che il contenuto scorra solo in
+   verticale — una colonna rigida da 310px sporgeva dal contenitore e faceva
+   comparire la barra orizzontale su tutta la pagina. Verificato a 320x800:
+   scrollWidth 330 su clientWidth 320, prima; uguali, dopo. */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(310px, 100%), 1fr));
   gap: 32px;
 }
 .card {
@@ -437,38 +442,111 @@ section {
   .assembly-banner { height: 280px; background-position: center bottom; }
 }
 
-/* Video & Interviste */
+/* Video & Interviste — schede-link, non incorporamenti.
+   Gli iframe di YouTube sono stati tolti: anche in modalita' nocookie bastava
+   scorrere fino a qui per far partire una richiesta a Google. Adesso la scheda
+   e' un link, e la copertina e' disegnata in casa — nessuna anteprima presa da
+   i.ytimg.com, che sarebbe la stessa richiesta travestita da immagine.
+   Vedi src/components/VideoInterviews.astro. */
+.video-nota {
+  color: var(--nero-secondario);
+  font-size: 0.92rem;
+  margin: -8px 0 24px;
+  max-width: 62ch;
+}
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
   gap: 32px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 .video-card {
+  display: flex;
+  flex-direction: column;
   background: var(--bianco);
   border-radius: 28px;
   padding: 16px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.02);
   border: 1px solid var(--bordo);
+  color: inherit;
+  text-decoration: none;
+  height: 100%;
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
-.video-embed {
+.video-card:hover {
+  box-shadow: 0 14px 30px var(--ombra);
+  transform: translateY(-2px);
+}
+.video-copertina {
   position: relative;
+  display: grid;
+  place-items: center;
   width: 100%;
-  aspect-ratio: 9 / 16;
+  aspect-ratio: 16 / 9;
   border-radius: 20px;
   overflow: hidden;
   background: var(--nero);
 }
-.video-embed iframe {
+.video-copertina img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  border: 0;
+  object-fit: cover;
 }
-.video-card h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
+/* Copertina disegnata: si vede solo quando non c'e' un'immagine locale.
+   Giallo su nero e' 14,47:1 — decorativa, ma non deve comunque sparire. */
+.video-copertina-disegnata {
+  display: grid;
+  place-items: center;
+  color: var(--giallo);
+  opacity: 0.9;
+}
+.video-play {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--rosa);
+  color: var(--nero);
+}
+.video-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin: 16px 4px 4px;
+}
+.video-titolo {
+  font-size: 1.05rem;
+  font-weight: var(--peso-forte);
+  line-height: 1.35;
+}
+.video-meta {
+  font-size: 0.85rem;
+  font-weight: var(--peso-medio);
+  color: var(--verde);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.video-card:hover .video-meta,
+.video-card:focus-visible .video-meta {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.video-canale {
+  margin-top: 28px;
+  font-size: 0.95rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .video-card { transition: none; }
+  .video-card:hover { transform: none; }
 }
 
 /* visually-hidden helper for a11y */

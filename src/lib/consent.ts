@@ -26,4 +26,14 @@
 // v3: da nota sullo stato attuale a informativa vera e propria ex art. 13 GDPR,
 // sui trattamenti effettivamente attivi al rilascio editoriale — visita del sito,
 // video incorporati, corrispondenza, accesso della redazione.
-export const PRIVACY_POLICY_VERSION = 'v3-2026-09-07';
+//
+// v4: i video non sono più incorporati ma collegati. Cambia un trattamento, non
+// una virgola: Google esce dall'elenco dei destinatari e il sito pubblico non
+// contatta più nessuna terza parte. Nella stessa versione ogni trattamento
+// dichiara un tempo di conservazione o il criterio con cui si determina, come
+// chiede l'art. 13.2.a — vedi docs/conservazione-dati.md per le decisioni che
+// restano da deliberare.
+//
+// Le versioni note al server stanno in supabase/migrations/0007_consenso_privacy_esplicito.sql,
+// che NON è ancora applicata al database remoto: v3 e v4 sono state aggiunte lì.
+export const PRIVACY_POLICY_VERSION = 'v4-2026-09-07';

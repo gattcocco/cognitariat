@@ -142,3 +142,55 @@ Pubblicato sulla preview di `dev`, testo originale. Prima di portarlo sul sito p
 converrebbe chiudere almeno **1.1** (il nome sbagliato) e **1.3** (la chiamata all'iscrizione
 mentre è chiusa): il primo è un errore verificabile, il secondo manda le persone contro una porta
 che non si apre.
+
+---
+
+## 5. Come si applicano le due prioritarie — pronte, non applicate
+
+Il testo dell'articolo non è stato toccato. Quello che segue è preparato in modo che accettare una
+proposta sia un gesto solo, non un lavoro.
+
+### 5.1 «Claudio» → «Dario» (proposta 1.1)
+
+Una parola, in `src/content/articles/manifesto-cognitario-contro-oligarchia-ai.md`, riga 17:
+
+| | |
+|---|---|
+| **Cerca** | `Sam Altman e Claudio Amodei lo dichiarano apertamente` |
+| **Sostituisci** | `Sam Altman e Dario Amodei lo dichiarano apertamente` |
+
+Si può fare anche dal CMS, aprendo l'articolo e correggendo nel corpo: è l'occasione buona per il
+primo collaudo vero della redazione, perché è una modifica minima con un esito visibile.
+
+### 5.2 La nota sul tesseramento (proposta 1.3)
+
+**Il meccanismo è pronto e il testo no**, di proposito: la nota è una dichiarazione
+dell'associazione, non una scelta tecnica.
+
+Gli articoli hanno ora un campo facoltativo `notaRedazione`. Se c'è, compare in coda all'articolo
+dentro un riquadro che si distingue dal testo — fondo giallo diluito, etichetta «Nota della
+redazione» — così che si veda a colpo d'occhio che è un'aggiunta e non una riga del manifesto. Se
+non c'è, non compare niente. Nel CMS è l'ultimo campo del modulo, sotto il corpo.
+
+Testo proposto, da confermare o riscrivere:
+
+> Il tesseramento online non è ancora aperto: non c'è un modulo da compilare e non si raccolgono
+> adesioni. Nel frattempo si può scrivere a cognitariatz@proton.me — raccontare un caso,
+> segnalare un progetto, dare una mano.
+
+Per applicarla si aggiunge una riga al frontmatter del file, oppure si compila il campo nel CMS:
+
+```yaml
+notaRedazione: "Il tesseramento online non è ancora aperto: ..."
+```
+
+**Perché una nota e non una modifica.** Il manifesto è il testo con cui l'associazione si
+presenta: cambiarne la chiamata finale vorrebbe dire cambiare quello che dice. Una nota della
+redazione dice quello che serve a chi legge — che il pulsante non c'è ancora — senza mettere in
+bocca all'associazione parole che non ha scritto. Quando il tesseramento aprirà, si toglie il
+campo e il manifesto resta identico a com'era.
+
+### 5.3 Le altre proposte
+
+Da 1.2 a 1.8 e la sezione 2 restano come sono: sono scelte editoriali e politiche, non errori da
+correggere. Nessuna è bloccante per la pubblicazione.

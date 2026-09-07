@@ -68,3 +68,7 @@ _local/licenze-e-originali/
 # verifiche restano invece versionati.
 /testi-sito.md
 /info regole nuovi testi/
+
+# Configurazione locale dello strumento di lavoro (avvio dell'anteprima e simili).
+# Non fa parte del sito e cambia da macchina a macchina.
+.claude/

@@ -56,6 +56,16 @@ const articles = defineCollection({
      */
     coverAlt: z.string().optional(),
 
+    /**
+     * Nota della redazione, stampata in coda all'articolo dentro un riquadro che
+     * la distingue dal testo. Serve quando il testo va lasciato com'e' ma manca
+     * al lettore un'informazione di contesto: e' il caso del manifesto, che
+     * chiama all'iscrizione mentre il tesseramento online non e' ancora aperto.
+     * Aggiungere una nota non e' modificare il testo — ed e' esattamente per non
+     * doverlo modificare che il campo esiste.
+     */
+    notaRedazione: z.string().optional(),
+
     /** Fuori dagli elenchi pubblici, dalla home e dalla sitemap finche' e' true. */
     bozza: z.boolean().default(false),
   }).refine((d) => !d.cover || (d.coverAlt && d.coverAlt.trim().length > 0), {

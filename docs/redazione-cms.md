@@ -219,8 +219,12 @@ dicesse «produzione» vorrebbe dire che una variabile è già sbagliata.
 
 La pagina `/admin` carica il programma del CMS da `unpkg.com` e, mentre lavora, contatta
 `cdn.jsdelivr.net` e `www.githubstatus.com`. Riguarda solo chi entra in redazione: **il sito
-pubblico non contatta nessuno di questi**, e gli unici servizi esterni che tocca sono i video
-YouTube.
+pubblico non contatta nessuno di questi**.
+
+Dal 07/09/2026 il sito pubblico non contatta **nessuna** terza parte. I video di YouTube erano
+l'ultima rimasta — erano incorporati in modalita' nocookie, ma bastava scorrere fino a quella
+sezione perche' l'indirizzo IP di chi legge arrivasse a Google. Ora sono link: la richiesta parte
+solo se qualcuno clicca, cioe' quando ha deciso di andare su YouTube.
 
 La versione del CMS è fissata di proposito (`@sveltia/cms@0.206.1` in `public/admin/index.html`).
 Prima era senza numero, cioè sempre l'ultima pubblicata: il programma che maneggia un token con

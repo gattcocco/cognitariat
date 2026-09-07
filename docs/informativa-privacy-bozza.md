@@ -99,7 +99,8 @@ bozza il sito contatta:]
   qualificabile come strettamente necessario (da confermare in sede di audit);
 - il widget Cloudflare Turnstile e i cookie impostati da Stripe sul proprio dominio durante il
   pagamento (pagina ospitata da Stripe, non dal nostro sito);
-- gli embed video YouTube in modalità "nocookie".
+- ~~gli embed video YouTube in modalità "nocookie"~~ — **tolti il 07/09/2026**: i video sono
+  link, non incorporamenti, e da una pagina del sito non parte piu' nessuna richiesta a Google.
 
 Font e icone non sono più fra le terze parti: dalla Fase 5 sono serviti dal nostro dominio.
 

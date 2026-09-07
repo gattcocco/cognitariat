@@ -12,8 +12,16 @@ import { associazione, haSede, haPec } from '../lib/associazione';
  *
  * Quello che c'è scritto è stato verificato sul sito costruito e sul sito
  * online, non dedotto dal codice: nessun cookie impostato da noi, niente scritto
- * in localStorage o sessionStorage, e un solo host di terze parti contattato
- * (youtube-nocookie.com, e solo arrivando alla sezione video).
+ * in localStorage o sessionStorage e — da questa versione — nessun host di terze
+ * parti contattato. I video di YouTube erano l'ultimo rimasto: erano incorporati
+ * in modalità nocookie e caricati in differita, ma arrivare in fondo alla pagina
+ * bastava a mandare a Google l'indirizzo IP di chi legge. Ora sono link.
+ *
+ * I tempi di conservazione dichiarati qui descrivono la pratica reale di oggi.
+ * Dove un termine numerico non è ancora stato deliberato dall'associazione, la
+ * pagina dice il criterio invece di inventare una politica: la proposta da
+ * confermare sta in docs/conservazione-dati.md, e quando è approvata si scrive
+ * qui il numero.
  *
  * La sede non compare: è un aggiornamento amministrativo pendente e il campo in
  * src/lib/associazione.ts è vuoto. Quando ci sarà, comparirà da sola. Il perché
@@ -74,30 +82,40 @@ const versione = PRIVACY_POLICY_VERSION;
           sicuro il proprio sito (art. 6.1.f).
         </li>
         <li>
-          <strong>Conservazione</strong>: quei dati stanno nei sistemi del fornitore e seguono i suoi
-          tempi; noi non ne conserviamo copia e non li usiamo per altro.
+          <strong>Conservazione</strong>: <strong>noi non teniamo un archivio di quei dati</strong>.
+          Non abbiamo un registro delle visite, non usiamo strumenti di statistica e non scarichiamo
+          i log del fornitore: non c'è un nostro termine perché non c'è un nostro archivio. Nei
+          sistemi di Cloudflare i dati tecnici delle richieste seguono i tempi di conservazione del
+          fornitore, descritti nella sua documentazione, e servono a far funzionare e proteggere il
+          servizio.
         </li>
       </ul>
 
       <h2>3. I video</h2>
       <p>
-        Nella sezione «Video &amp; Interviste» ci sono tre riquadri di YouTube, incorporati in
-        modalità <em>nocookie</em> e caricati solo quando arrivi a quel punto della pagina: finché
-        non ci arrivi, verso Google non parte nessuna richiesta.
+        Nella sezione «Video &amp; Interviste» <strong>non ci sono riquadri di YouTube</strong>:
+        ci sono dei link. Finché non ne clicchi uno, da questo sito non parte nessuna richiesta
+        verso Google — né quando apri la pagina, né quando scorri fino a quel punto.
       </p>
       <p>
-        Da quel momento in poi è <strong>Google</strong> a ricevere la tua richiesta — indirizzo IP
-        compreso — e a trattarla con le proprie regole e sui propri server, anche fuori
-        dall'Unione Europea. Noi non riceviamo niente di quel passaggio e non possiamo vedere cosa
-        Google registri. Se preferisci evitarlo, basta non aprire quella sezione.
+        Prima erano incorporati, in modalità <em>nocookie</em> e caricati in differita. Anche così,
+        arrivare in fondo alla pagina bastava a far conoscere a Google il tuo indirizzo IP senza
+        che tu avessi chiesto niente. Li abbiamo tolti: adesso quel passaggio lo decidi tu.
+      </p>
+      <p>
+        Quando clicchi, esci da questo sito e vai su <strong>youtube.com</strong>: da lì in poi vale
+        l'informativa di Google, non la nostra, e noi non riceviamo niente di quella visita. I link
+        sono impostati in modo da non comunicare a YouTube nemmeno da quale pagina arrivi
+        (<code>rel="noreferrer"</code>).
       </p>
       <ul class="elenco-progetto">
-        <li><strong>Finalità</strong>: mostrare i video dell'osservatorio dentro le pagine.</li>
         <li>
-          <strong>Base giuridica</strong>: legittimo interesse a pubblicare i propri contenuti nella
-          forma in cui sono ospitati (art. 6.1.f). Abbiamo scelto la modalità senza cookie e il
-          caricamento differito proprio per ridurre al minimo quello che parte senza che tu lo
-          chieda.
+          <strong>Dati trattati da noi</strong>: nessuno. Un link non è un trattamento: finché non
+          lo apri, non succede niente.
+        </li>
+        <li>
+          <strong>Conservazione</strong>: non c'è niente da conservare, perché non raccogliamo
+          niente.
         </li>
       </ul>
 
@@ -120,9 +138,16 @@ const versione = PRIVACY_POLICY_VERSION;
           il tuo consenso esplicito (art. 6.1.a): senza, lo trattiamo in forma anonima.
         </li>
         <li>
-          <strong>Conservazione</strong>: teniamo la corrispondenza finché serve a seguire la
-          questione, e la cancelliamo se ce lo chiedi. Non c'è cancellazione automatica: se vuoi
-          che sparisca, scrivilo e lo facciamo.
+          <strong>Conservazione</strong>: il criterio è l'uso, non un termine uguale per tutti. Un
+          messaggio a cui abbiamo risposto e che non ha seguito resta nella casella finché la si
+          riordina; un caso che l'osservatorio sta seguendo resta finché quel lavoro è aperto e
+          finché può ancora servire a far valere o difendere un diritto. Quando il materiale
+          diventa anonimo — è la forma in cui i casi finiscono nei dossier — non è più un dato che
+          ti riguarda e smette di rientrare qui.
+        </li>
+        <li>
+          <strong>Cancellazione</strong>: non c'è cancellazione automatica. Puoi chiedere in
+          qualsiasi momento che cancelliamo la tua corrispondenza, e lo facciamo.
         </li>
       </ul>
       <p>
@@ -156,6 +181,13 @@ const versione = PRIVACY_POLICY_VERSION;
           personale resta nel browser di chi ha fatto l'accesso: non passa da nessun nostro archivio
           e non viene registrato da nessuna parte.
         </li>
+        <li>
+          <strong>Conservazione</strong>: l'attribuzione di ogni modifica resta nella cronologia del
+          repository <strong>a tempo indeterminato</strong>, perché è la cronologia stessa a essere
+          il registro di chi ha scritto cosa: è la natura dello strumento, e chi entra in redazione
+          lo sa. Il codice di accesso vale per la sessione e si può revocare quando si vuole dalle
+          impostazioni del proprio account GitHub.
+        </li>
       </ul>
 
       <h2>6. Tesseramento e pagamenti</h2>
@@ -175,14 +207,15 @@ const versione = PRIVACY_POLICY_VERSION;
         <li><strong>Cloudflare</strong> — hosting del sito e dati tecnici delle richieste.</li>
         <li><strong>Proton</strong> (Svizzera) — la casella di posta a cui scrivi.</li>
         <li>
-          <strong>Google / YouTube</strong> (Stati Uniti) — solo se arrivi alla sezione video, e solo
-          per quel passaggio.
-        </li>
-        <li>
           <strong>GitHub</strong> (Stati Uniti) — solo per chi fa parte della redazione, per
           l'accesso all'area di pubblicazione.
         </li>
       </ul>
+      <p>
+        <strong>Google non è più in questo elenco.</strong> Finché i video erano incorporati lo
+        era, per chi arrivava in fondo alla pagina. Adesso sono link: se ne apri uno vai su
+        YouTube di tua iniziativa, e non è un trattamento che facciamo noi.
+      </p>
       <p>
         Non vendiamo, non cediamo e non scambiamo dati con nessun altro, e non li usiamo per
         pubblicità.

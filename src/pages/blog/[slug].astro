@@ -23,7 +23,7 @@ export async function getStaticPaths() {
 }
 
 const { articolo } = Astro.props;
-const { title, excerpt, autore, date, cover, coverAlt, bozza } = articolo.data;
+const { title, excerpt, autore, date, cover, coverAlt, bozza, notaRedazione } = articolo.data;
 const { Content } = await render(articolo);
 
 // og:image: si preferisce il JPEG allo stesso nome, se c'e'. Alcuni scraper
@@ -70,6 +70,13 @@ const immagineSocial = cover?.replace(/\.webp$/i, '.jpg') ?? undefined;
       <div class="articolo-corpo prosa">
         <Content />
       </div>
+
+      {notaRedazione && (
+        <aside class="articolo-nota" aria-label="Nota della redazione">
+          <p class="articolo-nota-etichetta">Nota della redazione</p>
+          <p>{notaRedazione}</p>
+        </aside>
+      )}
     </article>
   </main>
   <Footer />
@@ -159,5 +166,24 @@ const immagineSocial = cover?.replace(/\.webp$/i, '.jpg') ?? undefined;
     max-width: 100%;
     height: auto;
     border-radius: var(--raggio-m);
+  }
+
+  /* Nota della redazione: deve leggersi come una voce diversa da quella
+     dell'articolo, altrimenti sembra che il testo sia stato riscritto.
+     Fondo giallo diluito e testo nero: 21:1, e il giallo non porta testo. */
+  .articolo-nota {
+    margin: 40px 0 0;
+    padding: 20px 24px;
+    background: var(--giallo-tenue);
+    border-left: 4px solid var(--rosa);
+    border-radius: 0 var(--raggio-s) var(--raggio-s) 0;
+  }
+  .articolo-nota p { margin: 0; }
+  .articolo-nota-etichetta {
+    font-size: 0.8rem;
+    font-weight: var(--peso-forte);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px !important;
   }
 </style>

@@ -25,6 +25,7 @@ nella build né nei log.
 | Data di costituzione | **12 luglio 2026**, a Milano | atto costitutivo |
 | Registrazione | Agenzia delle Entrate, Direzione provinciale II — Ufficio territoriale Milano 6 | timbri sull'atto |
 | Codice fiscale | **98031460151** | verbale del 3 settembre 2026 |
+| Partita IVA | **non esiste** | confermato dall'associazione il 07/09/2026 |
 | Durata | a tempo indeterminato | atto costitutivo, art. 7 |
 | Patrimonio iniziale | 100 € versati dai soci fondatori | atto costitutivo, art. 6 |
 | Contatto | `cognitariatz@proton.me` | indirizzo già in uso sul sito e nella corrispondenza |
@@ -43,10 +44,13 @@ sul sito non compare né l'indirizzo né una nota che spieghi cosa manca.
 - **Sede legale** — aggiornamento amministrativo pendente. La questione, con i riferimenti
   documentali, sta nella documentazione interna in `_local/`, fuori dal repository.
 - **PEC** — non risulta dai documenti letti. Se esiste, si aggiunge.
-- **Partita IVA** — non risulta; plausibilmente non c'è, trattandosi di associazione senza fini di
-  lucro. Da confermare, non da dedurre.
 
-Nessuno di questi impedisce la pubblicazione del sito: l'art. 13 GDPR chiede identità e dati di
+La **partita IVA non è fra questi**: non è in attesa, non esiste — confermato dall'associazione,
+non dedotto dall'assenza nei documenti. Nel modulo centrale è rappresentata come `null`, che negli
+altri campi facoltativi significa «verificato che non c'è», distinto dalla stringa vuota che
+significa «non ancora confermato». Il codice fiscale resta un dato diverso e non la sostituisce.
+
+Nessuno dei campi in attesa impedisce la pubblicazione del sito: l'art. 13 GDPR chiede identità e dati di
 contatto del titolare, e sono pubblicati — denominazione, forma giuridica, data di costituzione,
 codice fiscale e un indirizzo email attivo a cui esercitare i diritti.
 

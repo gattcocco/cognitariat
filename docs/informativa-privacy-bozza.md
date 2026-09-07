@@ -15,9 +15,9 @@ facoltativo, aggiornamento amministrativo pendente) e la PEC, se esiste.
 
 ## Cosa serve prima di pubblicare questa parte
 
-1. **Dati dell'ente ancora mancanti** — sede legale (aggiornamento amministrativo pendente),
-   partita IVA se esiste, PEC se esiste. Denominazione, forma giuridica, data di costituzione e
-   codice fiscale sono già in `src/lib/associazione.ts` e online.
+1. **Dati dell'ente ancora mancanti** — sede legale (aggiornamento amministrativo pendente) e PEC,
+   se esiste. Denominazione, forma giuridica, data di costituzione e codice fiscale sono già in
+   `src/lib/associazione.ts` e online; la partita IVA non esiste, confermato il 07/09/2026.
 2. **Base giuridica art. 9** — va verificato con chi segue la compliance se la forma giuridica
    e le attività reali di COG U rientrano nell'eccezione dell'art. 9.2.d (organizzazione con
    finalità sindacale, dati dei propri iscritti). Non è un'assunzione automatica.
@@ -34,10 +34,9 @@ facoltativo, aggiornamento amministrativo pendente) e la PEC, se esiste.
 
 ## 1. Titolare del trattamento
 
-Il titolare del trattamento è **[Denominazione legale completa dell'associazione]**, con sede in
-**[Sede legale]**, Codice Fiscale **[CF]** [/ Partita IVA **[P.IVA]**], contattabile
-all'indirizzo cognitariatz@proton.me [ed alla PEC [PEC], se presente].
-[Referente/DPO per la privacy: [nominativo e contatto], se nominato.]
+Il titolare è già pubblicato su `/privacy` con i dati di `src/lib/associazione.ts`: denominazione,
+forma giuridica, data di costituzione, codice fiscale e contatto. Non c'è partita IVA. Restano da
+aggiungere la sede quando confermata e la PEC se esiste.
 
 ## 2. Quali dati raccogliamo
 

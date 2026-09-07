@@ -1128,3 +1128,65 @@ cognitariat → Settings → Builds & deployments*.
 
 Tutto il resto della preparazione alla produzione è già pronto e parametrico: `CMS_BRANCH`,
 `BRANCH_PRODUZIONE`, dominio pubblico e callback OAuth si impostano senza toccare il codice.
+
+---
+
+## Partita IVA confermata assente, e collaudo del cutover — 07/09/2026 (terzo giro)
+
+Ramo `dev`. Nessun merge, nessun deploy in produzione.
+
+### Partita IVA: da «da verificare» a dato
+
+L'associazione ha confermato che **non ha partita IVA**. Non era deducibile: l'assenza in un atto
+non prova l'assenza del dato, ed era infatti annotata come da verificare. Ora è un dato.
+
+Nel modulo centrale è rappresentata come `null`, e la convenzione dei campi facoltativi diventa a
+tre stati invece di due:
+
+| Valore | Significato | Cosa succede sul sito |
+|---|---|---|
+| stringa piena | il dato c'è | compare |
+| stringa vuota | non ancora confermato | non compare niente, nemmeno una nota |
+| `null` | verificato che non esiste | non compare niente |
+
+La differenza fra gli ultimi due non si vede in pagina ma si vede leggendo il file, ed è quella
+che evita che qualcuno ricontrolli due volte la stessa cosa o inventi un valore per riempire il
+buco.
+
+**Il codice fiscale non la sostituisce.** Nei dati strutturati `taxID` porta il codice fiscale e
+`vatID` non c'è, con un commento che dice di non aggiungerlo. Verificato sul sito costruito: la
+stringa «partita IVA» non compare da nessuna parte, nel footer c'è solo il C.F., e nessun campo
+vuoto viene reso visibile.
+
+Tolta dai punti aperti in `docs/dati-associazione.md`, in `docs/informativa-privacy-bozza.md` e
+nella documentazione interna. Sede e PEC restano dove stavano: la conferma sulla partita IVA non
+le tocca.
+
+### Collaudo del cutover, in un comando
+
+`npm run check:produzione <url> [--produzione] [--ramo-cms <nome>]` guarda un sito pubblicato e
+dice se è configurato come anteprima o come produzione, e se corrisponde a quello che ci si
+aspetta. Serve due volte: prima del cutover puntandolo alla preview — deve dire «anteprima» —, e
+dopo puntandolo al dominio vero.
+
+Controlla: meta robots, robots.txt (aperto/chiuso, esclusione di `/admin/`, sitemap dichiarata),
+dominio dichiarato in canonical e sitemap, assenza di bozze in elenco e sitemap, ramo e origine
+del login del CMS, stato del login, e che i tre checkout rispondano ancora 503. È in sola lettura:
+le uniche POST sono ai checkout, che devono rifiutare.
+
+Sulla preview passa **11 controlli su 12**. L'unico rosso è il login del CMS non configurato, che
+è esattamente il passaggio che richiede l'account di chi amministra.
+
+Due falsi allarmi corretti mentre lo si scriveva, che valgono più del resto: il controllo sulle
+bozze cercava `card-articolo-bozza` e trovava la **regola CSS**, che c'è sempre — ora cerca
+l'attributo `class`, che c'è solo se una scheda è davvero marcata; e il controllo sul dominio
+pretendeva l'uguaglianza esatta anche in anteprima, dove Cloudflare dà a ogni deployment un
+indirizzo diverso e il sito dichiara quello. Un controllo che grida al lupo viene disattivato dopo
+la seconda volta.
+
+### Cosa resta, invariato rispetto a ieri
+
+Il collaudo vero del CMS — accesso, bozza, copertina, salvataggio, pubblicazione — non è chiuso e
+non lo sarà finché l'applicazione OAuth non esiste. La simulazione del commit e il controllo del
+redirect coprono la catena intorno, non l'atto di pubblicare. Il ramo di produzione Cloudflare
+resta da leggere dalla configurazione.

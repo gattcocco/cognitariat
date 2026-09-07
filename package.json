@@ -20,7 +20,8 @@
     "check:testi": "node scripts/verifica-testi.mjs",
     "check:supabase": "node scripts/verifica-supabase.mjs",
     "check:cms": "node scripts/verifica-cms.mjs",
-    "check:cms-oauth": "node scripts/verifica-cms-oauth.mjs"
+    "check:cms-oauth": "node scripts/verifica-cms-oauth.mjs",
+    "check:produzione": "node scripts/verifica-produzione.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

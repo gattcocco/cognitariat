@@ -204,6 +204,17 @@ Fatto questo, la redazione pubblica da sola: scrive nel CMS, toglie la spunta «
 resto — commit, build, messa online — succede senza che nessuno tocchi niente a mano. È il punto:
 dopo il rilascio non deve più servire un intervento tecnico per mandare online un articolo.
 
+Per controllare che il passaggio sia riuscito, da terminale:
+
+```
+npm run check:produzione https://cognitariatzone.org --produzione --ramo-cms <ramo>
+```
+
+Dice se il sito si dichiara produzione o anteprima e se è coerente: indicizzazione, dominio in
+canonical e sitemap, bozze fuori, ramo del CMS, stato del login e pagamenti ancora spenti. Lo
+stesso comando senza `--produzione` va puntato alla preview, che deve dire «anteprima»: se
+dicesse «produzione» vorrebbe dire che una variabile è già sbagliata.
+
 ## 9. Nota sulle terze parti
 
 La pagina `/admin` carica il programma del CMS da `unpkg.com` e, mentre lavora, contatta

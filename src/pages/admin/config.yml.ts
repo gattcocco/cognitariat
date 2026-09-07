@@ -22,16 +22,25 @@ export const GET: APIRoute = ({ site }) => {
     process.env?.CMS_AUTH_BASE_URL ??
     (site ? site.origin : 'https://dev.cognitariat.pages.dev');
 
+  /**
+   * Ramo su cui il CMS scrive. Oggi `dev`, perche' e' il ramo della preview.
+   * Al rilascio va messo il ramo che serve il sito pubblico: e' una variabile e
+   * non un valore scritto nel codice proprio per quello — cambiare ambiente non
+   * deve richiedere una modifica al programma, altrimenti al momento del
+   * passaggio la redazione continuerebbe a scrivere sul ramo sbagliato e non
+   * capirebbe perche' gli articoli non compaiono.
+   */
+  const ramo = import.meta.env.CMS_BRANCH ?? process.env?.CMS_BRANCH ?? 'dev';
+
   const yaml = `# File generato da src/pages/admin/config.yml.ts: non modificarlo a mano,
 # le modifiche verrebbero sovrascritte al prossimo build.
 
 backend:
   name: github
   repo: gattcocco/cognitariat
-  # Si scrive su dev, mai su main. main e' il ramo che serve il sito pubblico
-  # tramite GitHub Pages: il CMS non deve poterlo toccare. Da dev il contenuto
-  # arriva alla preview, e da li' si decide se e quando portarlo altrove.
-  branch: dev
+  # Ramo su cui scrive il CMS, da CMS_BRANCH. Oggi e' il ramo della preview;
+  # al rilascio si cambia la variabile, non questo file.
+  branch: ${ramo}
   base_url: ${baseUrl}
   auth_endpoint: api/cms-auth
   commit_messages:

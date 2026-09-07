@@ -56,10 +56,13 @@ export const onRequestGet: PagesFunction<Ambiente> = async (context) => {
   const github = new URL('https://github.com/login/oauth/authorize');
   github.searchParams.set('client_id', clientId);
   github.searchParams.set('redirect_uri', `${origine}/api/cms-callback`);
-  // `repo` e' il minimo che serve per leggere e scrivere i contenuti e aprire
-  // le pull request dell'editorial workflow. Niente scope su organizzazioni,
-  // utenti o azioni.
-  github.searchParams.set('scope', 'repo');
+  // Il permesso piu' piccolo che basta. `gattcocco/cognitariat` e' un repository
+  // pubblico, e `public_repo` da' scrittura sui soli repository pubblici:
+  // `repo`, che si usa di solito, darebbe accesso anche a tutti i repository
+  // privati di chi fa il login — roba che con gli articoli non c'entra niente.
+  // Se un giorno il repository diventasse privato, `public_repo` smetterebbe di
+  // funzionare e servirebbe tornare a `repo`: e' l'unico caso in cui rialzarlo.
+  github.searchParams.set('scope', 'public_repo');
   github.searchParams.set('state', stato);
 
   return new Response(null, {

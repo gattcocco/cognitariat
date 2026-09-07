@@ -10,9 +10,10 @@ Due cose da sapere prima di cominciare.
 perché scrivere un articolo significa scrivere nel repository. Il tesseramento, quando aprirà,
 userà un'altra cosa (un link via email) e non darà accesso a questa pagina.
 
-**Il CMS scrive solo su `dev`.** Il ramo `main` — quello che serve il sito pubblico su
-cognitariatzone.org — non è raggiungibile da qui, di proposito. Dal CMS un articolo arriva alla
-preview; portarlo sul sito pubblico è un passaggio separato, che si fa a mano.
+**Adesso il CMS scrive su `dev`**, il ramo della preview: il ramo che serve il sito pubblico non
+è raggiungibile da qui, finché siamo in preparazione. Al rilascio si cambia una variabile e il
+CMS scrive direttamente sul ramo pubblicato — da quel momento pubblicare non richiede più nessun
+intervento tecnico. Come si fa è nella sezione 8.
 
 ---
 
@@ -70,6 +71,13 @@ Chi lavora al sito può costruire una copia locale che mostra anche le bozze, pe
 davvero impaginato prima di pubblicarlo (`MOSTRA_BOZZE=true npm run build`). Quella copia gira
 sul computer di chi la fa e non finisce online.
 
+**Su un sito ospitato quella variabile non basta e viene ignorata.** Una preview su Cloudflare ha
+un indirizzo pubblico: non chiede credenziali, e chiunque ce l'abbia può aprirla. Il `noindex`
+tiene fuori i motori di ricerca, non le persone — sono due cose diverse, e solo un controllo
+d'accesso rende privata una bozza. Se un giorno servirà una preview protetta si mette davanti
+Cloudflare Access e lo si dichiara con `BOZZE_AMBIENTE_PROTETTO=true`; finché quella variabile
+non c'è, su Cloudflare le bozze non vengono costruite, punto.
+
 ---
 
 ## 4. Configurazione OAuth — per chi amministra, una volta sola
@@ -83,20 +91,29 @@ nelle variabili del progetto Cloudflare, e le due Function `functions/api/cms-au
    - **Homepage URL**: `https://dev.cognitariat.pages.dev`
    - **Authorization callback URL**: `https://dev.cognitariat.pages.dev/api/cms-callback`
 2. Genera un **client secret** e copialo subito (GitHub non lo rimostra).
-3. Su Cloudflare, nel progetto Pages, aggiungi tre variabili:
+3. Su Cloudflare, nel progetto Pages, aggiungi quattro variabili:
    - `GITHUB_OAUTH_CLIENT_ID` — in chiaro;
    - `GITHUB_OAUTH_CLIENT_SECRET` — **cifrata**;
-   - `CMS_AUTH_BASE_URL` = `https://dev.cognitariat.pages.dev`.
+   - `CMS_AUTH_BASE_URL` = `https://dev.cognitariat.pages.dev`;
+   - `CMS_BRANCH` = `dev` (vedi §8 per il rilascio).
 4. Fai partire un nuovo deploy: le variabili si leggono al build, cambiarle non basta.
+
+Il segreto non va incollato in chat, non va messo in un file del repository e non compare nei
+log: sta solo fra GitHub e le variabili cifrate di Cloudflare. Le due Function lo leggono a
+runtime e non lo scrivono da nessuna parte — quando lo scambio con GitHub fallisce registrano il
+tipo di errore, mai la risposta, che contiene la credenziale.
+
+**Il permesso richiesto è `public_repo`**, non `repo`. È la differenza fra «può scrivere nei
+repository pubblici» e «può leggere e scrivere in tutti i repository, anche privati, di chi fa il
+login». Per pubblicare articoli su un repository pubblico serve solo il primo. Se un giorno
+`gattcocco/cognitariat` diventasse privato, `public_repo` smetterebbe di funzionare e bisognerebbe
+tornare a `repo`: è l'unico caso in cui alzarlo.
 
 **Perché `CMS_AUTH_BASE_URL`.** GitHub accetta un solo indirizzo di callback per applicazione, e
 ogni deployment di Cloudflare ha un URL diverso (`28ae1fe2.cognitariat.pages.dev`). La variabile
 fissa l'indirizzo stabile del ramo, così il giro del login torna sempre nello stesso posto.
 Quando il sito passerà in produzione servirà una seconda applicazione OAuth, con il dominio
 vero, e la variabile impostata di conseguenza nell'ambiente di produzione.
-
-Lo scope richiesto è `repo`, il minimo per leggere e scrivere i contenuti. Nessun permesso su
-organizzazioni, utenti o azioni.
 
 ---
 
@@ -147,7 +164,31 @@ Altrimenti guarda se l'ultima build di Cloudflare è fallita.
 
 ---
 
-## 8. Nota sulle terze parti
+## 8. Al rilascio: come si allineano CMS e ramo pubblicato
+
+Oggi il CMS scrive su `dev`, che è il ramo della preview. Quando il sito passerà in produzione il
+ramo pubblicato sarà un altro, e **se il CMS continuasse a scrivere su `dev` la redazione
+pubblicherebbe nel vuoto**: l'articolo verrebbe salvato, la preview si aggiornerebbe, il sito
+pubblico no. Nessun messaggio d'errore, solo un articolo che non compare.
+
+Perché non succeda, il ramo non è scritto nel codice ma in una variabile, `CMS_BRANCH`. Al
+cutover si cambia lì, insieme alle altre due che riguardano l'ambiente:
+
+| Variabile | Oggi (preview) | Al rilascio |
+|---|---|---|
+| `CMS_BRANCH` | `dev` | il ramo che serve il sito pubblico |
+| `BRANCH_PRODUZIONE` | non impostata | lo stesso ramo, così le pagine non escono con `noindex` |
+| `CMS_AUTH_BASE_URL` | `https://dev.cognitariat.pages.dev` | il dominio pubblico |
+
+Servirà anche una **seconda applicazione OAuth** su GitHub, con Homepage e callback sul dominio
+vero: GitHub accetta un solo indirizzo di callback per applicazione, quindi quella della preview
+non può servire anche la produzione.
+
+Fatto questo, la redazione pubblica da sola: scrive nel CMS, toglie la spunta «Bozza», salva. Il
+resto — commit, build, messa online — succede senza che nessuno tocchi niente a mano. È il punto:
+dopo il rilascio non deve più servire un intervento tecnico per mandare online un articolo.
+
+## 9. Nota sulle terze parti
 
 La pagina `/admin` carica il programma del CMS da `unpkg.com` e, mentre lavora, contatta
 `cdn.jsdelivr.net` e `www.githubstatus.com`. Riguarda solo chi entra in redazione: **il sito

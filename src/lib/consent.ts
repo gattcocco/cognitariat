@@ -23,4 +23,7 @@
 // privacy_version e privacy_accepted in options.data di signInWithOtp(), con una casella di
 // consenso separata e non pre-spuntata. Senza quei campi non viene registrato niente — è
 // voluto: meglio nessuna prova che una prova finta.
-export const PRIVACY_POLICY_VERSION = 'v2-2026-09-05';
+// v3: da nota sullo stato attuale a informativa vera e propria ex art. 13 GDPR,
+// sui trattamenti effettivamente attivi al rilascio editoriale — visita del sito,
+// video incorporati, corrispondenza, accesso della redazione.
+export const PRIVACY_POLICY_VERSION = 'v3-2026-09-07';

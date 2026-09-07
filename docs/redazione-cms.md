@@ -97,6 +97,20 @@ nelle variabili del progetto Cloudflare, e le due Function `functions/api/cms-au
    - `CMS_AUTH_BASE_URL` = `https://dev.cognitariat.pages.dev`;
    - `CMS_BRANCH` = `dev` (vedi §8 per il rilascio).
 4. Fai partire un nuovo deploy: le variabili si leggono al build, cambiarle non basta.
+5. Controlla che sia andata, da terminale:
+
+   ```
+   npm run check:cms-oauth https://dev.cognitariat.pages.dev
+   ```
+
+   Legge la configurazione servita al CMS e avvia il login **senza completarlo**: dice se il
+   client id è arrivato, se il permesso richiesto è quello giusto, se il ritorno previsto coincide
+   con il callback registrato su GitHub e se il cookie di stato ha gli attributi di sicurezza.
+   Finché la configurazione manca risponde 503 e ristampa questa lista. Non stampa segreti.
+
+Dopo che risponde a posto, resta un ultimo passaggio a mano che nessuno script può fare: aprire
+`/admin/`, entrare con GitHub, creare una bozza con copertina e testo alternativo, salvarla,
+togliere la spunta «Bozza» e vedere l'articolo comparire nel blog e in home dopo il deploy.
 
 Il segreto non va incollato in chat, non va messo in un file del repository e non compare nei
 log: sta solo fra GitHub e le variabili cifrate di Cloudflare. Le due Function lo leggono a

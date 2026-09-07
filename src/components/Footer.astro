@@ -1,4 +1,5 @@
 ---
+import { associazione } from '../lib/associazione';
 // Fase 4: il footer diceva due cose non vere. «Sindacato del Cognitariato» da
 // solo nascondeva meta' dell'identita' (l'osservatorio e' l'attivita' che esiste
 // gia'), e «GDPR compliant · crittografia end-to-end» era una promessa tecnica
@@ -13,8 +14,9 @@ import Icona from './Icona.astro';
         <p class="footer-firma">COG U — Sindacato e osservatorio sul lavoro cognitivo</p>
         <p>Documentiamo cosa succede al lavoro cognitivo e alle infrastrutture che lo reggono.</p>
         <p>
-          © 2026 COG U — Sindacato del Cognitariato, associazione sindacale costituita il
-          12 luglio 2026. Tesseramento e servizi online in preparazione.
+          © 2026 {associazione.denominazione}, {associazione.formaGiuridica}, costituita il{' '}
+          {associazione.costituitaIlTesto} · C.F. {associazione.codiceFiscale}.
+          Tesseramento e servizi online in preparazione.
         </p>
       </div>
       <div>

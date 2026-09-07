@@ -19,7 +19,8 @@
     "verify": "npm run check:all && npm run build && npm run check:glifi && npm run check:testi && npm run check:cms && npm run test:functions",
     "check:testi": "node scripts/verifica-testi.mjs",
     "check:supabase": "node scripts/verifica-supabase.mjs",
-    "check:cms": "node scripts/verifica-cms.mjs"
+    "check:cms": "node scripts/verifica-cms.mjs",
+    "check:cms-oauth": "node scripts/verifica-cms-oauth.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

@@ -1,20 +1,23 @@
-# Informativa privacy — bozza completa, da pubblicare quando aprono le iscrizioni
+# Informativa privacy — la parte che riguarda tesseramento e pagamenti
 
-Questo è il testo lungo, pensato per il momento in cui COG U raccoglierà davvero dati
-(tesseramento aperto, pagamenti attivi). **Non è pubblicato**: la pagina `/privacy` del sito
-mostra oggi una nota breve e vera, che descrive quello che il sito fa adesso — cioè quasi
-niente — senza campi da riempire.
+**L'informativa del sito è pubblicata**: `/privacy` è oggi un'informativa ex art. 13 GDPR sui
+trattamenti realmente attivi — visita del sito e log dell'hosting, video incorporati,
+corrispondenza, accesso della redazione — con titolare, finalità, basi giuridiche, destinatari,
+conservazione e diritti.
 
-Il motivo è semplice: la versione lunga contiene campi tra `[…]` che solo l'associazione può
-compilare (denominazione, sede, codice fiscale, PEC, referente privacy) e due sezioni che
-dipendono da verifiche non ancora fatte. Pubblicarla così com'era significava mettere online
-un documento legale con i buchi in vista, per descrivere trattamenti che oggi non avvengono.
+Questo file conserva la parte che **non** è ancora pubblicata perché riguarda trattamenti che non
+avvengono: iscrizione, quota associativa, area membro. Va aggiunta all'informativa **prima** che
+il primo dato di tesseramento venga raccolto, non dopo.
 
-## Cosa serve prima di pubblicarla
+Denominazione, forma giuridica, data di costituzione e codice fiscale non sono più fra i campi da
+completare: sono in `src/lib/associazione.ts` e già online. Restano da valorizzare la sede (campo
+facoltativo, aggiornamento amministrativo pendente) e la PEC, se esiste.
 
-1. **Dati legali dell'ente** — denominazione completa, sede legale, codice fiscale ed
-   eventuale partita IVA, PEC se presente, referente privacy o DPO se nominato.
-   Sono gli stessi dati della checklist §5 del piano.
+## Cosa serve prima di pubblicare questa parte
+
+1. **Dati dell'ente ancora mancanti** — sede legale (aggiornamento amministrativo pendente),
+   partita IVA se esiste, PEC se esiste. Denominazione, forma giuridica, data di costituzione e
+   codice fiscale sono già in `src/lib/associazione.ts` e online.
 2. **Base giuridica art. 9** — va verificato con chi segue la compliance se la forma giuridica
    e le attività reali di COG U rientrano nell'eccezione dell'art. 9.2.d (organizzazione con
    finalità sindacale, dati dei propri iscritti). Non è un'assunzione automatica.

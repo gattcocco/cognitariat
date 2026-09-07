@@ -3,113 +3,210 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { PRIVACY_POLICY_VERSION } from '../lib/consent';
+import { associazione, haSede, haPec } from '../lib/associazione';
 
 /**
- * Fase 5. Questa pagina conteneva l'informativa lunga, con i campi legali ancora
- * tra parentesi quadre e una nota in cima che diceva «non pubblicare così com'è».
- * Era un documento giuridico con i buchi in vista, che descriveva trattamenti che
- * oggi non avvengono: non ci sono moduli, non si aprono iscrizioni, non si
- * incassa niente.
+ * Informativa ai sensi dell'art. 13 GDPR, scritta sui trattamenti che il sito
+ * fa davvero adesso — non su quelli che farà quando apriranno tesseramento e
+ * pagamenti.
  *
- * Qui resta quello che è vero adesso. Il testo lungo è in
- * docs/informativa-privacy-bozza.md, con l'elenco di cosa serve per completarlo:
- * va pubblicato prima di raccogliere il primo dato, non dopo.
+ * Quello che c'è scritto è stato verificato sul sito costruito e sul sito
+ * online, non dedotto dal codice: nessun cookie impostato da noi, niente scritto
+ * in localStorage o sessionStorage, e un solo host di terze parti contattato
+ * (youtube-nocookie.com, e solo arrivando alla sezione video).
+ *
+ * La sede non compare: è un aggiornamento amministrativo pendente e il campo in
+ * src/lib/associazione.ts è vuoto. Quando ci sarà, comparirà da sola. Il perché
+ * manchi non è affare di chi legge: sta nella documentazione interna.
  */
+const versione = PRIVACY_POLICY_VERSION;
 ---
 <BaseLayout
   title="Privacy e trattamento dei dati — COG U"
-  description="Cosa fa e cosa non fa il sito di COG U con i dati di chi lo visita."
+  description="Chi tratta i dati di chi visita il sito di COG U, per quali finalità, con quale base giuridica e per quanto tempo."
 >
   <Header />
-  <main id="contenuto" tabindex="-1" class="container" style="padding: 60px 0; max-width: 820px;">
+  <main id="contenuto" tabindex="-1" class="container" style="padding: 60px 0 90px; max-width: 820px;">
     <div class="prosa">
-    <h1 class="section-title">Privacy e trattamento dei dati</h1>
-    <p class="section-sub">Aggiornata alla versione {PRIVACY_POLICY_VERSION}</p>
+      <h1 class="section-title">Privacy e trattamento dei dati</h1>
+      <p class="section-sub">
+        Informativa ai sensi dell'articolo 13 del Regolamento (UE) 2016/679 — versione {versione}
+      </p>
 
-    <p class="occhiello occhiello--progetto">Iscrizioni chiuse</p>
+      <h2>1. Chi tratta i dati</h2>
+      <p>
+        Il titolare del trattamento è <strong>{associazione.denominazione}</strong>,
+        {' '}{associazione.formaGiuridica}, costituita il{' '}
+        <strong>{associazione.costituitaIlTesto}</strong> ai sensi degli articoli 36 e seguenti del
+        Codice Civile e dell'articolo 39 della Costituzione. Codice fiscale{' '}
+        <strong>{associazione.codiceFiscale}</strong>.
+      </p>
+      {haSede && <p>Sede: {associazione.sede}.</p>}
+      <p>
+        Per qualunque cosa riguardi i tuoi dati — chiedere, correggere, cancellare, opporti — il
+        riferimento è{' '}
+        <a class="link" href={`mailto:${associazione.email}`}>{associazione.email}</a>{haPec ? ',' : '.'}
+        {haPec && <> oppure la PEC {associazione.pec}.</>}
+      </p>
+      <p>
+        Non è stato nominato un responsabile della protezione dei dati: per la dimensione e le
+        attività dell'associazione non è obbligatorio. Le richieste arrivano all'indirizzo qui
+        sopra e le gestisce il titolare.
+      </p>
 
-    <h2>In breve</h2>
-    <p>
-      Questo sito non raccoglie dati personali. Non ci sono moduli da compilare, il tesseramento
-      non è aperto, non stiamo incassando quote né vendendo nulla. Non usiamo strumenti di
-      statistica, non profiliamo chi legge e non installiamo cookie nostri.
-    </p>
+      <h2>2. Quando visiti il sito</h2>
+      <p>
+        Il sito è statico: pagine, caratteri tipografici e icone arrivano dal nostro dominio, senza
+        passare da servizi di terzi. <strong>Non usiamo strumenti di statistica, non profiliamo chi
+        legge, non impostiamo cookie e non scriviamo niente nella memoria del tuo browser</strong>
+        — è stato verificato sul sito online, non solo nel codice.
+      </p>
+      <p>
+        Resta quello che fa qualunque server quando gli chiedi una pagina: il nostro hosting,{' '}
+        <strong>Cloudflare Pages</strong>, registra i dati tecnici della richiesta — indirizzo IP,
+        data e ora, pagina richiesta, tipo di browser — per consegnare le pagine, tenere in piedi
+        il servizio e difenderlo dagli abusi.
+      </p>
+      <ul class="elenco-progetto">
+        <li><strong>Finalità</strong>: erogare il sito e proteggerlo da attacchi e abusi.</li>
+        <li>
+          <strong>Base giuridica</strong>: legittimo interesse del titolare a rendere disponibile e
+          sicuro il proprio sito (art. 6.1.f).
+        </li>
+        <li>
+          <strong>Conservazione</strong>: quei dati stanno nei sistemi del fornitore e seguono i suoi
+          tempi; noi non ne conserviamo copia e non li usiamo per altro.
+        </li>
+      </ul>
 
-    <h2>Chi tratta i dati</h2>
-    <p>
-      Il titolare del trattamento è <strong>COG U — Sindacato del Cognitariato</strong>,
-      associazione sindacale non riconosciuta senza fini di lucro, costituita il{' '}
-      <strong>12 luglio 2026</strong> ai sensi degli articoli 36 e seguenti del Codice Civile e
-      dell'articolo 39 della Costituzione. Codice fiscale <strong>98031460151</strong>.
-    </p>
-    <p>
-      La sede legale è in corso di aggiornamento e verrà indicata qui appena confermata: preferiamo
-      lasciare lo spazio vuoto piuttosto che scrivere un indirizzo che potrebbe non essere più
-      quello giusto. Per qualunque cosa riguardi i tuoi dati il riferimento è{' '}
-      <a class="link" href="mailto:cognitariatz@proton.me">cognitariatz@proton.me</a>.
-    </p>
+      <h2>3. I video</h2>
+      <p>
+        Nella sezione «Video &amp; Interviste» ci sono tre riquadri di YouTube, incorporati in
+        modalità <em>nocookie</em> e caricati solo quando arrivi a quel punto della pagina: finché
+        non ci arrivi, verso Google non parte nessuna richiesta.
+      </p>
+      <p>
+        Da quel momento in poi è <strong>Google</strong> a ricevere la tua richiesta — indirizzo IP
+        compreso — e a trattarla con le proprie regole e sui propri server, anche fuori
+        dall'Unione Europea. Noi non riceviamo niente di quel passaggio e non possiamo vedere cosa
+        Google registri. Se preferisci evitarlo, basta non aprire quella sezione.
+      </p>
+      <ul class="elenco-progetto">
+        <li><strong>Finalità</strong>: mostrare i video dell'osservatorio dentro le pagine.</li>
+        <li>
+          <strong>Base giuridica</strong>: legittimo interesse a pubblicare i propri contenuti nella
+          forma in cui sono ospitati (art. 6.1.f). Abbiamo scelto la modalità senza cookie e il
+          caricamento differito proprio per ridurre al minimo quello che parte senza che tu lo
+          chieda.
+        </li>
+      </ul>
 
-    <h2>Cosa succede quando apri una pagina</h2>
-    <ul class="elenco-progetto">
-      <li>
-        <strong>Il sito è statico.</strong> Le pagine, i caratteri tipografici e le icone
-        arrivano dal nostro dominio: non passi da servizi di terzi per leggere.
-      </li>
-      <li>
-        <strong>I video sono su YouTube.</strong> Nella sezione «Video &amp; Interviste» ci sono
-        tre riquadri incorporati in modalità <em>nocookie</em>. Si caricano solo quando arrivi a
-        quel punto della pagina; da lì in poi la tua richiesta arriva a Google, che la tratta
-        con le proprie regole e i propri server, anche fuori dall'Unione Europea. Noi non
-        riceviamo niente di quel passaggio. Se preferisci evitarlo, basta non aprire quella
-        sezione: finché non ci arrivi, verso Google non parte nessuna richiesta.
-      </li>
-      <li>
-        <strong>Il sito è ospitato su Cloudflare Pages</strong>, che come qualunque hosting
-        registra i dati tecnici della richiesta — indirizzo IP, momento, pagina, browser — per
-        consegnare le pagine, tenere in piedi il servizio e difenderlo dagli abusi. Noi non
-        aggiungiamo strumenti di statistica nostri.
-      </li>
-    </ul>
+      <h2>4. Se ci scrivi</h2>
+      <p>
+        Scrivere a{' '}
+        <a class="link" href={`mailto:${associazione.email}`}>{associazione.email}</a> è, oggi,
+        l'unico modo per farci arrivare dei dati. La casella è ospitata da <strong>Proton</strong>
+        {' '}(Proton AG, Svizzera): i messaggi stanno sui suoi server, come per qualunque posta
+        elettronica.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Finalità</strong>: risponderti e, se ci hai raccontato un caso, usarlo per il
+          lavoro dell'osservatorio.
+        </li>
+        <li>
+          <strong>Base giuridica</strong>: legittimo interesse a dare seguito a chi ci scrive
+          (art. 6.1.f) per la risposta. Per pubblicare un caso in forma riconoscibile serve invece
+          il tuo consenso esplicito (art. 6.1.a): senza, lo trattiamo in forma anonima.
+        </li>
+        <li>
+          <strong>Conservazione</strong>: teniamo la corrispondenza finché serve a seguire la
+          questione, e la cancelliamo se ce lo chiedi. Non c'è cancellazione automatica: se vuoi
+          che sparisca, scrivilo e lo facciamo.
+        </li>
+      </ul>
+      <p>
+        Non usiamo quell'indirizzo per mandarti altro: niente newsletter, niente liste, nessuna
+        comunicazione che non sia la risposta a quello che hai scritto.
+      </p>
 
-    <h2>Se ci scrivi</h2>
-    <p>
-      L'unico modo per darci dei dati, oggi, è scriverci a{' '}
-      <a class="link" href="mailto:cognitariatz@proton.me">cognitariatz@proton.me</a>. In quel
-      caso trattiamo quello che ci mandi per risponderti e, se ci hai raccontato un caso, per il
-      lavoro dell'osservatorio — in forma anonima, salvo tuo diverso accordo esplicito. Puoi
-      chiederci in ogni momento di cancellare quello che ci hai scritto.
-    </p>
-    <p>
-      La casella è ospitata da <strong>Proton</strong> (Proton AG, Svizzera): i messaggi stanno
-      sui suoi server, come per qualunque posta elettronica. Non usiamo quell'indirizzo per
-      inviarti altro: niente newsletter, niente liste.
-    </p>
+      <h2>5. Chi scrive sul sito</h2>
+      <p>
+        Gli articoli si pubblicano da un'area di redazione che sta sul sito stesso. Chi ci entra si
+        autentica con il proprio account <strong>GitHub</strong>, perché pubblicare un articolo
+        significa scrivere nel repository del sito. Riguarda solo le persone della redazione, non
+        chi legge.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Dati trattati</strong>: nome utente GitHub e le informazioni che GitHub associa
+          alle modifiche (autore e data di ogni contributo, che restano nella cronologia pubblica
+          del repository).
+        </li>
+        <li>
+          <strong>Finalità</strong>: permettere alla redazione di pubblicare e tenere traccia di chi
+          ha scritto cosa.
+        </li>
+        <li>
+          <strong>Base giuridica</strong>: legittimo interesse dell'associazione a gestire il
+          proprio sito (art. 6.1.f), nell'ambito del rapporto associativo con chi collabora.
+        </li>
+        <li>
+          <strong>Dove stanno</strong>: su GitHub (GitHub Inc., Stati Uniti). Il codice di accesso
+          personale resta nel browser di chi ha fatto l'accesso: non passa da nessun nostro archivio
+          e non viene registrato da nessuna parte.
+        </li>
+      </ul>
 
-    <h2>L'area membro</h2>
-    <p>
-      La pagina <a class="link" href="/account">area membro</a> esiste già nel sito ma non ha
-      ancora nessuno dentro: non essendo aperto il tesseramento, non ci sono tessere né account
-      da mostrare. Quando aprirà, l'accesso avverrà con un link via email e comparirà un cookie
-      tecnico di sessione — ma prima di allora pubblicheremo l'informativa completa.
-    </p>
+      <h2>6. Tesseramento e pagamenti</h2>
+      <p>
+        Il sito contiene le pagine del tesseramento e del merchandising, ma <strong>sono
+        disattivate</strong>: non c'è nessun modulo da compilare, non si raccolgono adesioni e non
+        si incassa niente. Le richieste di pagamento vengono rifiutate dal server prima di
+        raggiungere qualunque fornitore. Nessun dato viene raccolto per queste vie.
+      </p>
+      <p>
+        Quando apriranno, i trattamenti relativi — dati di iscrizione, quota, fornitore dei
+        pagamenti — saranno descritti qui <strong>prima</strong> che il primo dato venga raccolto.
+      </p>
 
-    <h2>Prima di aprire le iscrizioni</h2>
-    <p>
-      Quando il tesseramento aprirà pubblicheremo qui l'informativa estesa. Il titolare è già
-      indicato qui sopra; restano da mettere per iscritto la sede una volta confermata, le basi
-      giuridiche di ciascun trattamento, i tempi di conservazione e il rapporto con i fornitori.
-      Non raccoglieremo un solo dato prima che quel testo sia online: preferiamo dirlo così invece
-      di pubblicare adesso un documento con gli spazi da riempire.
-    </p>
+      <h2>7. A chi arrivano i dati</h2>
+      <ul class="elenco-progetto">
+        <li><strong>Cloudflare</strong> — hosting del sito e dati tecnici delle richieste.</li>
+        <li><strong>Proton</strong> (Svizzera) — la casella di posta a cui scrivi.</li>
+        <li>
+          <strong>Google / YouTube</strong> (Stati Uniti) — solo se arrivi alla sezione video, e solo
+          per quel passaggio.
+        </li>
+        <li>
+          <strong>GitHub</strong> (Stati Uniti) — solo per chi fa parte della redazione, per
+          l'accesso all'area di pubblicazione.
+        </li>
+      </ul>
+      <p>
+        Non vendiamo, non cediamo e non scambiamo dati con nessun altro, e non li usiamo per
+        pubblicità.
+      </p>
 
-    <h2>Diritti e reclami</h2>
-    <p>
-      Anche adesso puoi chiederci accesso, rettifica o cancellazione di qualsiasi cosa ti
-      riguardi scrivendo a{' '}
-      <a class="link" href="mailto:cognitariatz@proton.me">cognitariatz@proton.me</a>. Se pensi
-      che qualcosa non vada, puoi rivolgerti al Garante per la protezione dei dati personali
-      (<a class="link" href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>).
-    </p>
+      <h2>8. I tuoi diritti</h2>
+      <p>
+        Puoi chiederci accesso, rettifica, cancellazione, limitazione e portabilità dei dati che ti
+        riguardano, e opporti al trattamento fondato sul legittimo interesse. Dove abbiamo chiesto
+        il tuo consenso puoi ritirarlo quando vuoi, senza che questo tocchi quello che è stato
+        fatto prima. Si scrive a{' '}
+        <a class="link" href={`mailto:${associazione.email}`}>{associazione.email}</a>.
+      </p>
+      <p>
+        Se pensi che qualcosa non vada puoi rivolgerti al Garante per la protezione dei dati
+        personali (<a class="link" href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>).
+      </p>
+
+      <h2>9. Aggiornamenti</h2>
+      <p>
+        Questa informativa descrive il sito come è oggi. Cambierà quando cambieranno i trattamenti
+        — a cominciare dall'apertura del tesseramento — e la versione in cima serve a distinguere
+        una stesura dall'altra.
+      </p>
     </div>
   </main>
   <Footer />

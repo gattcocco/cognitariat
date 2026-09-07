@@ -911,3 +911,128 @@ Oltre a quanto elencato nel checkpoint A:
 3. **Punti editoriali del manifesto**: i tre della sezione 1 di
    `docs/manifesto-verifiche-editoriali.md`.
 4. **Verifica del ramo di produzione dal pannello**, non per confronto di pagine.
+
+---
+
+## Verso il primo rilascio — 07/09/2026
+
+Ramo `dev`. Perimetro: nuova grafica, nuovi testi, blog roll in home, blog, CMS utilizzabile.
+Pagamenti e registrazioni membri restano spenti, la struttura Stripe intatta. Nessun merge in
+produzione, nessuna modifica DNS.
+
+### Fase 1 — Documenti dell'associazione
+
+Letti in sola lettura atto costitutivo registrato, statuto e verbale di nomina. Le scansioni non
+avevano uno strato di testo e sulla macchina non c'era né OCR né Ghostscript: le pagine sono state
+estratte come immagini con una libreria temporanea installata fuori dal repository, lette, e le
+copie cancellate subito dopo. Nel repository non è entrato nessun documento firmato, nessun nome
+di socio fondatore e nessun dato personale del legale rappresentante.
+
+Quello che è documentato e quello che manca sta in `docs/dati-associazione.md`. In sintesi:
+l'associazione esiste dal **12 luglio 2026** come **associazione sindacale non riconosciuta** ex
+artt. 36 ss. c.c. e art. 39 Cost., senza fini di lucro, atto registrato all'Agenzia delle Entrate,
+codice fiscale **98031460151**, durata indeterminata.
+
+**Un punto ritirato, ed era mio.** Avevo segnalato «Costituito legalmente» nel manifesto come in
+contraddizione con il sito. Non lo è: un'associazione costituita che non ha ancora aperto il
+tesseramento online non è un paradosso, sono due cose diverse. A essere impreciso era il sito, che
+diceva «sindacato in costruzione» in un modo leggibile come «non ancora esistente». Corretto in
+hero, footer e dati strutturati, dove ora compare anche `foundingDate`.
+
+**La sede resta in sospeso, e non è stata scelta.** L'atto (12/07) dice Via Papa Giovanni XXIII,
+Bresso; il verbale (03/09) dice Via Togliatti 57, Assago. Un verbale di nomina non è l'atto con
+cui si sposta una sede legale: se il trasferimento c'è stato serve la delibera, se non c'è stato
+la sede è quella dell'atto. Finché non arriva conferma, sul sito non compare nessun indirizzo e
+`/privacy` lo dice apertamente.
+
+Da sapere prima di scegliere: **l'indirizzo di Assago coincide con la residenza del legale
+rappresentante**. Pubblicare quella sede significa pubblicare l'abitazione di una persona, su un
+sito che si occupa di conflitto. Non è un ostacolo giuridico — la sede legale è un dato pubblico —
+ma è una scelta da fare sapendolo.
+
+`/privacy` indica ora il titolare del trattamento: denominazione, forma giuridica, data di
+costituzione, codice fiscale. Era il buco principale ed è chiuso a metà: manca la sede, e mancano
+tempi di conservazione, basi giuridiche e rapporti con i fornitori, che sono decisioni da prendere
+più che dati da trovare.
+
+Sulla base giuridica dell'art. 9 GDPR la documentazione ora dice qualcosa di preciso: ente con
+finalità sindacali statutarie ex art. 39 Cost., cioè la fattispecie che l'art. 9.2.d contempla.
+Resta una valutazione di chi segue la compliance, ma non è più un'ipotesi campata in aria.
+
+### Fase 2 — CMS
+
+| Verifica | Esito |
+|---|---|
+| Percorso completo simulando il commit del CMS: bozza con copertina e alt → build pubblica | invisibile ovunque: nessuna pagina, fuori da elenco, home e sitemap |
+| Stessa bozza, build locale con `MOSTRA_BOZZE=true` | visibile solo lì, con `noindex`, comunque fuori da home e sitemap |
+| Stessa bozza, build con `CF_PAGES_BRANCH` impostata | **ignorata**: su un ambiente ospitato la variabile da sola non basta |
+| Spunta «Bozza» tolta | pagina costruita, alt in pagina, JPEG per i social, data senza slittamenti, elenco, home, sitemap, indicizzabile |
+| Totale | **18 controlli su 18** |
+
+**Permesso ridotto.** Lo scope OAuth passa da `repo` a `public_repo`, dopo aver verificato che il
+repository è pubblico. È la differenza fra «può scrivere nei repository pubblici» e «può leggere e
+scrivere in tutti i repository, anche privati, di chi fa il login».
+
+**MOSTRA_BOZZE limitata all'ambiente locale.** Una preview su Cloudflare ha un indirizzo pubblico:
+non chiede credenziali e chiunque ce l'abbia può aprirla. Il `noindex` tiene fuori i motori di
+ricerca, non le persone. Su Cloudflare le bozze non si costruiscono, a meno che non si dichiari
+con `BOZZE_AMBIENTE_PROTETTO=true` che davanti c'è un vero controllo d'accesso. Se la variabile è
+impostata comunque, la build lo scrive nei log invece di ignorarla in silenzio.
+
+**Il ramo del CMS è una variabile** (`CMS_BRANCH`, oggi `dev`). Al rilascio il ramo pubblicato non
+sarà più `dev`, e un CMS fermo lì farebbe pubblicare la redazione nel vuoto: articolo salvato,
+preview aggiornata, sito pubblico no, nessun errore. Con la variabile il passaggio è una riga
+nelle impostazioni, non una modifica al programma. Procedura in `docs/redazione-cms.md` §8.
+
+**Nuovo `check:cms`**, dentro `npm run verify`: tiene allineati i campi del CMS e quelli dello
+schema, e sorveglia il formato della data. Provato manomettendo la configurazione: intercetta
+campo mancante, campo di troppo e formato data sbagliato.
+
+**Non verificato**: il login OAuth vero e l'interfaccia del CMS. Richiedono un'applicazione OAuth
+su GitHub, che può creare solo chi amministra l'account. Istruzioni in `docs/redazione-cms.md` §4.
+Nel frattempo la redazione può entrare con un token personale, che è il meccanismo previsto da
+Sveltia e resta nel browser di chi lo crea.
+
+### Fase 3 — Dominio, indicizzazione, rilascio
+
+**Un tranello disinnescato.** `site` usava `CF_PAGES_URL`, che sembra la variabile giusta e non lo
+è: contiene l'URL del *deployment*, anche in produzione. Il sito pubblico avrebbe dichiarato come
+canonico un indirizzo `*.pages.dev` invece di cognitariatzone.org, e la sitemap avrebbe elencato
+quello — un modo silenzioso di regalare il proprio posizionamento a un dominio di servizio. Ora la
+regola è: **la produzione dichiara il dominio pubblico, l'anteprima dichiara se stessa.**
+
+Verificato costruendo nei tre contesti:
+
+| Contesto | canonical | robots.txt | meta robots |
+|---|---|---|---|
+| locale | `cognitariatzone.org` | `Allow: /` + sitemap | index |
+| anteprima (`CF_PAGES_BRANCH=dev`) | URL del deployment | `Disallow: /` | noindex |
+| produzione (`CF_PAGES_BRANCH=main`) | `cognitariatzone.org` | `Allow: /` + sitemap | index |
+
+Aggiunto `robots.txt`: mancava. Il `noindex` nelle pagine e il robots fanno due cose diverse e
+servono entrambe — il primo dice «hai letto, non pubblicare», il secondo «non passare proprio».
+Su produzione esclude `/admin/`, che non è contenuto da indicizzare.
+
+**Sito editoriale e CMS non dipendono da pagamenti e registrazioni.** Verificato sul costruito:
+home, blog, articolo, privacy e 404 non caricano né Supabase né Turnstile. L'articolo non carica
+nemmeno un byte di JavaScript. I tre checkout continuano a rispondere 503.
+
+**Il ramo di produzione non è stato verificato dalla configurazione.** Wrangler non è autenticato
+su questa postazione e il pannello Cloudflare, aperto nel browser, ha reindirizzato al login: non
+si entra in un account per conto di qualcun altro. La verifica per confronto di pagine non vale
+come verifica della configurazione, e non viene spacciata per tale. Si chiude in un minuto in uno
+dei due modi:
+
+```
+npx wrangler login && npx wrangler pages project list
+```
+
+oppure dal pannello: *Workers & Pages → cognitariat → Settings → Builds & deployments →
+Production branch*.
+
+### Manifesto
+
+Testo invariato, firma «Editoriale», data 6 settembre 2026. Le correzioni proposte sono un
+confronto puntuale in `docs/manifesto-verifiche-editoriali.md`: testo attuale, proposta, motivo.
+Niente è stato applicato. Restano da chiudere prima della produzione il nome di Dario Amodei
+(scritto «Claudio») e la chiamata all'iscrizione mentre il tesseramento è chiuso.

@@ -44,6 +44,13 @@ interface ImportMetaEnv {
    * va puntata all'alias di ramo e non all'URL del singolo deployment.
    */
   readonly CMS_AUTH_BASE_URL?: string;
+  /** Ramo su cui il CMS scrive. Al rilascio diventa il ramo pubblicato. */
+  readonly CMS_BRANCH?: string;
+  /** Dominio pubblico del sito: usato per canonical, og:image e sitemap. */
+  readonly SITO_PUBBLICO_URL?: string;
+  /** "true" solo se davanti all'anteprima c'e' un vero controllo d'accesso. */
+  readonly BOZZE_AMBIENTE_PROTETTO?: string;
+  readonly CF_PAGES?: string;
 }
 
 interface ImportMeta {

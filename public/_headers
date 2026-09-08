@@ -1,0 +1,67 @@
+# Regole di cache, dichiarate da noi invece che lasciate al valore predefinito
+# della piattaforma.
+#
+# PERCHE' ESISTE QUESTO FILE
+# L'08/09/2026 due articoli cancellati dal CMS continuavano a rispondere sul loro
+# indirizzo, e non era la cache del browser: era la cache di bordo di Cloudflare.
+# Le risposte lo dicevano da sole —
+#
+#   GET /blog/prova-cms/
+#   HTTP/1.1 200 OK
+#   CF-Cache-Status: HIT
+#   Age: 12425
+#   Cache-Control: public, s-maxage=604800
+#
+# — cioe' una copia conservata da tre ore e mezza, con il permesso di restare per
+# sette giorni, servita a chiunque colpisse quel nodo. Un indirizzo mai esistito
+# rispondeva invece 404 con no-store, e un articolo vivo 200 con max-age=0: la
+# differenza non era il contenuto, era che quelle due pagine erano finite in
+# cache mentre esistevano e ci erano rimaste dopo.
+#
+# La correzione e' `s-maxage=0` sulle pagine: le cache condivise possono tenersi
+# una copia, ma devono chiedere se e' ancora buona prima di servirla. Cosi' una
+# pagina cancellata smette di esistere quando viene cancellata, senza che nessuno
+# in redazione debba rifare un deployment o svuotare qualcosa a mano.
+#
+# ATTENZIONE ALLA FORMA DELLE REGOLE
+# Le regole che corrispondono allo stesso indirizzo **si sommano**, non si
+# sostituiscono: con `/*` in cima e `/fonts/*` sotto, un file di font riceveva
+# `Cache-Control: public, max-age=0, must-revalidate, s-maxage=0, public,
+# max-age=86400` — due direttive in conflitto nella stessa intestazione, e la
+# cache lunga di fatto annullata. Per questo qui non c'e' nessun `/*`: le pagine
+# si indicano per la barra finale, che gli asset non hanno.
+
+# Le pagine HTML: tutti gli indirizzi che finiscono con la barra, cioe' la home,
+# /blog/, /privacy/, ogni articolo. Piu' la pagina di errore, servita quando un
+# indirizzo non c'e' (o non c'e' piu').
+/
+  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+
+/*/
+  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+
+/404.html
+  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+
+# Sitemap e robots cambiano quando cambia il sito: stessa regola.
+/sitemap.xml
+  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+
+/robots.txt
+  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+
+# I file con l'impronta nel nome non cambiano mai contenuto a parita' di nome: se
+# cambia il contenuto cambia il nome. Si possono tenere per sempre, ed e' quello
+# che rende veloce la seconda visita.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# I caratteri tipografici hanno nome stabile ma cambiano quasi mai.
+/fonts/*
+  Cache-Control: public, max-age=86400
+
+# Le immagini degli articoli le carica la redazione con un nome scelto da lei, e
+# un nome puo' essere riusato per un'immagine diversa: un'ora basta a non
+# riscaricarle a ogni pagina e non basta a far vedere quella vecchia per giorni.
+/images/*
+  Cache-Control: public, max-age=3600

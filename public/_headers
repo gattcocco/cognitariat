@@ -25,12 +25,30 @@
 # 20 richieste su 20, con CF-Cache-Status: HIT e la nostra stessa intestazione
 # s-maxage=0 nella risposta. Un tempo di scadenza non e' un divieto.
 #
-# CORREZIONE: `private`. Non e' un tempo, e' una destinazione: quella copia e' del
-# browser di chi legge, e nessuna cache condivisa deve tenerla. Il browser la
-# conserva e la rivalida a ogni visita (max-age=0, must-revalidate), quindi non si
-# perde ne' il "torna indietro" ne' le risposte 304. Cosi' una pagina cancellata
-# smette di esistere quando viene cancellata, senza che nessuno in redazione debba
-# rifare un deployment o svuotare qualcosa a mano.
+# SECONDO TENTATIVO, ANCHE QUESTO INSUFFICIENTE: `private, max-age=0,
+# must-revalidate`. Non e' un tempo ma una destinazione — "questa copia e' del
+# browser, le cache condivise non la tengano" — e sarebbe la scelta piu' leggera,
+# perche' lascia al browser il "torna indietro" e le risposte 304. Misurato con
+# lo stesso metodo, su un secondo articolo di prova: cancellato e ridistribuito,
+# rispondeva ancora 200 su 25 richieste su 25, CF-Cache-Status: HIT, Age 93, con
+# `private` scritto nella risposta stessa. Su questo host le direttive
+# dell'origine non governano la cache di bordo.
+#
+# CORREZIONE: `no-store`. E' l'unica che questa piattaforma dimostra di
+# rispettare, e la prova e' nel suo stesso comportamento: le risposte 404 escono
+# con `no-store` e non finiscono mai in cache — un indirizzo mai esistito
+# risponde 404 a ogni richiesta, da ogni nodo, senza un solo HIT.
+#
+# COSA COSTA, detto chiaramente. `no-store` vieta di conservare la pagina anche
+# al browser: si perdono le risposte 304 e, su Chrome, il ripristino istantaneo
+# col tasto "indietro". Su un sito di poche pagine statiche e' un prezzo piccolo —
+# l'HTML pesa decine di kilobyte e gli asset, che sono il grosso, restano in cache
+# per un anno. In cambio una pagina cancellata sparisce quando viene cancellata,
+# che e' la cosa che deve funzionare senza che nessuno ci pensi.
+#
+# Se un giorno il sito passasse su una zona dell'account — il dominio pubblico lo
+# sara' — si potra' governare la cache di bordo con una regola di zona e tornare a
+# `private`, che e' piu' efficiente. Su `pages.dev` quella leva non c'e'.
 #
 # ATTENZIONE ALLA FORMA DELLE REGOLE
 # Le regole che corrispondono allo stesso indirizzo **si sommano**, non si
@@ -43,20 +61,20 @@
 # /blog/, /privacy/, ogni articolo. Piu' la pagina di errore, servita quando un
 # indirizzo non c'e' (o non c'e' piu').
 /
-  Cache-Control: private, max-age=0, must-revalidate
+  Cache-Control: no-store
 
 /*/
-  Cache-Control: private, max-age=0, must-revalidate
+  Cache-Control: no-store
 
 /404.html
-  Cache-Control: private, max-age=0, must-revalidate
+  Cache-Control: no-store
 
 # Sitemap e robots cambiano quando cambia il sito: stessa regola.
 /sitemap.xml
-  Cache-Control: private, max-age=0, must-revalidate
+  Cache-Control: no-store
 
 /robots.txt
-  Cache-Control: private, max-age=0, must-revalidate
+  Cache-Control: no-store
 
 # I file con l'impronta nel nome non cambiano mai contenuto a parita' di nome: se
 # cambia il contenuto cambia il nome. Si possono tenere per sempre, ed e' quello

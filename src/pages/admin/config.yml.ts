@@ -128,19 +128,31 @@ collections:
           Due o tre righe. Si legge nell'elenco, nel richiamo in home e
           nell'anteprima quando qualcuno condivide il link.
 
-      - label: Immagine di copertina
-        name: cover
-        widget: image
+      - label: Copertina
+        name: copertina
+        widget: object
         required: false
-        hint: Facoltativa. Se c'e', va compilato anche il testo alternativo qui sotto.
-
-      - label: Testo alternativo della copertina
-        name: coverAlt
-        widget: string
-        required: false
+        collapsed: false
         hint: >-
-          Descrivi l'immagine per chi non la vede. Obbligatorio quando c'e' una
-          copertina: senza, il sito si rifiuta di costruire l'articolo.
+          Facoltativa. Se la aggiungi servono tutte e due le cose, l'immagine e
+          la descrizione: e' il modo per non pubblicare una figura che una parte
+          delle persone non puo' vedere. Per toglierla, togli la spunta qui
+          sopra.
+        fields:
+          - label: Immagine
+            name: file
+            widget: image
+            required: true
+            hint: >-
+              Rimpiccioliscila prima di caricarla: 1200 pixel di larghezza
+              bastano. WebP per la pagina, e un JPEG con lo stesso nome accanto
+              se vuoi che si veda bene quando qualcuno condivide il link.
+
+          - label: Testo alternativo
+            name: alt
+            widget: string
+            required: true
+            hint: Descrivi la copertina per chi non puo' vederla.
 
       - label: Corpo
         name: body

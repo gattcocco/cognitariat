@@ -46,14 +46,35 @@ const articles = defineCollection({
     /** Sommario: usato nell'elenco, in home e nei metadati social. */
     excerpt: z.string(),
 
-    /** Percorso pubblico della copertina, es. /images/articoli/nome.webp */
-    cover: z.string().optional(),
+    /**
+     * Copertina: immagine e testo alternativo insieme, o niente.
+     *
+     * Stanno in un gruppo e non come due campi affiancati perche' e' l'unico
+     * modo, nella versione di Sveltia che usiamo, di ottenere «obbligatorio solo
+     * se c'e' l'immagine»: il CMS mostra una casella «Aggiungi Copertina», e
+     * finche' non la si spunta i due campi non esistono, quindi non possono
+     * essere obbligatori. Spuntandola compaiono entrambi obbligatori.
+     * Vedi docs/redazione-cms.md §5.
+     *
+     * Il controllo e' ripetuto qui alla costruzione del sito: il CMS non e'
+     * l'unico modo di scrivere un file, e una regola che vale solo
+     * nell'interfaccia non e' una regola.
+     */
+    copertina: z
+      .object({
+        /** Percorso pubblico, es. /images/articoli/nome.webp */
+        file: z.string(),
+        alt: z.string(),
+      })
+      .optional(),
 
     /**
-     * Testo alternativo della copertina. Obbligatorio quando c'e' una copertina:
-     * un'immagine senza alternativa testuale e' un buco per chi non la vede, e
-     * lasciare il campo facoltativo significa che verra' dimenticato.
+     * Forma precedente, due campi affiancati. Restano dichiarati solo per
+     * accorgersene: un file rimasto indietro non deve costruire in silenzio,
+     * perche' il CMS non conosce piu' questi due nomi e al primo salvataggio li
+     * toglierebbe — cioe' farebbe sparire la copertina senza dirlo a nessuno.
      */
+    cover: z.string().optional(),
     coverAlt: z.string().optional(),
 
     /**
@@ -68,10 +89,44 @@ const articles = defineCollection({
 
     /** Fuori dagli elenchi pubblici, dalla home e dalla sitemap finche' e' true. */
     bozza: z.boolean().default(false),
-  }).refine((d) => !d.cover || (d.coverAlt && d.coverAlt.trim().length > 0), {
-    message: 'Se c\'e\' una copertina serve anche coverAlt: descrivi l\'immagine per chi non la vede.',
-    path: ['coverAlt'],
-  }),
+  })
+    .superRefine((d, ctx) => {
+      if (d.cover !== undefined || d.coverAlt !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['copertina'],
+          message:
+            'Forma vecchia della copertina. Sostituisci "cover" e "coverAlt" con un solo gruppo:\n' +
+            '  copertina:\n    file: /images/articoli/....webp\n    alt: descrizione dell\'immagine\n' +
+            'Lasciarli com\'erano non e\' innocuo: il CMS non conosce piu\' quei due nomi e al primo ' +
+            'salvataggio li toglierebbe, facendo sparire la copertina senza dirlo a nessuno.',
+        });
+      }
+      if (d.copertina && d.copertina.alt.trim().length === 0) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['copertina', 'alt'],
+          message: 'Descrivi la copertina per chi non puo\' vederla: senza, l\'immagine non si pubblica.',
+        });
+      }
+      if (d.copertina && d.copertina.file.trim().length === 0) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['copertina', 'file'],
+          message: 'C\'e\' il testo alternativo ma non l\'immagine: aggiungi il file, oppure togli il gruppo.',
+        });
+      }
+    })
+    /**
+     * Le pagine continuano a leggere `cover` e `coverAlt`: cambiare il modo in
+     * cui il dato si scrive non deve costringere a toccare ogni componente che
+     * lo mostra.
+     */
+    .transform((d) => ({
+      ...d,
+      cover: d.copertina?.file,
+      coverAlt: d.copertina?.alt,
+    })),
 });
 
 export const collections = { articles };

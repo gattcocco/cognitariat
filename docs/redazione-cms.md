@@ -121,9 +121,9 @@ Resta da rifare, identico, sul dominio pubblico dopo il cutover: è un'altra app
 un altro ramo (§8).
 
 Una parte non è stata esercitata e va detto: **il caricamento di un'immagine dal CMS**. L'articolo
-di prova non aveva copertina (`cover` vuoto), quindi il percorso «carico un file → finisce in
+di prova non aveva copertina, quindi il percorso «carico un file → finisce in
 `public/images/articoli/` → si vede in pagina» non è ancora stato provato da nessuno. È la cosa da
-fare al primo articolo vero con una foto — vedi §5 e l'avvertenza sul testo alternativo in §6.
+fare al primo articolo vero con una foto — vedi §5.
 
 Il segreto non va incollato in chat, non va messo in un file del repository e non compare nei
 log: sta solo fra GitHub e le variabili cifrate di Cloudflare. Le due Function lo leggono a
@@ -145,7 +145,42 @@ i casi fuori standard. In produzione servirà una seconda applicazione OAuth, co
 
 ---
 
-## 5. Immagini
+## 5. La copertina
+
+Nel modulo la copertina è **un blocco solo**, con una casella «Aggiungi Copertina». Finché non la
+spunti non esiste: l'articolo si salva senza, e non ti viene chiesto niente. Se la spunti compaiono
+due campi, **tutti e due obbligatori**: l'immagine e la sua descrizione. Per toglierla si toglie
+la spunta, e spariscono insieme.
+
+**Perché insieme e non due campi affiancati.** Un'immagine senza descrizione è invisibile a chi
+usa un lettore di schermo, e prima era possibile metterne una e dimenticare l'altra: il salvataggio
+riusciva, poi la costruzione del sito falliva con un messaggio che nessuno in redazione va a
+leggere, e l'articolo semplicemente non compariva. Ora il CMS non ti lascia salvare, e te lo dice
+mentre stai scrivendo — non mezz'ora dopo.
+
+Uno spazio non conta come descrizione: il campo viene ripulito prima di essere controllato.
+
+**Il limite tecnico, per chi si chiedesse perché è fatto così.** Nella versione di Sveltia che
+usiamo (0.206.1) non esiste un modo di dire «obbligatorio *solo se* un altro campo è pieno»: non
+ci sono condizioni fra campi. Quello che c'è è il gruppo facoltativo, e funziona per la ragione
+giusta — finché la casella non è spuntata i due campi **non esistono**, quindi non possono essere
+obbligatori; quando è spuntata esistono entrambi e lo sono. Verificato sul programma vero, non
+dedotto dalla documentazione.
+
+### Come si scrive nel file
+
+```yaml
+copertina:
+  file: /images/articoli/nome.webp
+  alt: descrizione dell'immagine per chi non la vede
+```
+
+La forma vecchia — `cover:` e `coverAlt:` affiancati — **non è più valida** e fa fallire la
+costruzione con un messaggio che spiega come sostituirla. Non è pignoleria: il CMS non conosce più
+quei due nomi, e al primo salvataggio di quell'articolo li toglierebbe, facendo sparire la
+copertina senza dirlo a nessuno.
+
+### Il file
 
 Le immagini caricate dal CMS finiscono in `public/images/articoli/` e sono raggiungibili da
 `/images/articoli/…`.
@@ -168,10 +203,10 @@ file di lavoro.
 
 1. Il CMS fa un commit su `dev` con un messaggio del tipo `Articolo: aggiorna "…"`.
 2. Cloudflare se ne accorge **da sola** e ricostruisce: ci vuole un minuto o due.
-3. Se il controllo automatico trova un problema — per esempio una copertina senza testo
-   alternativo, o un carattere che i nostri font non contengono — **la build fallisce e la
-   preview resta com'era**. L'articolo è salvato su Git ma non va online finché il problema non
-   è risolto. È voluto: meglio una preview vecchia che una rotta.
+3. Se il controllo automatico trova un problema — per esempio un carattere che i nostri font non
+   contengono — **la build fallisce e la preview resta com'era**. L'articolo è salvato su Git ma
+   non va online finché il problema non è risolto. È voluto: meglio una preview vecchia che una
+   rotta.
 
 **Il punto 2 non richiede niente da parte tua.** Chi scrive articoli non deve entrare in
 Cloudflare, mai: né per pubblicare, né per cancellare. Il commit del CMS fa partire da solo il
@@ -203,18 +238,15 @@ Se una modifica del CMS non sembra arrivare online:
 
 **Non premere Retry su un deployment vecchio per «forzare l'aggiornamento».** Fa l'opposto.
 
-### La copertina senza testo alternativo ferma la build
+### La copertina senza testo alternativo: ora te lo dice il CMS
 
-È l'errore più facile da fare e il più scomodo da riconoscere, perché **dal CMS non si vede**: il
-salvataggio riesce, il commit parte, e poi la build fallisce senza dirtelo. In pagina non succede
-niente — l'articolo semplicemente non compare.
+Era l'errore più facile da fare e il più scomodo da riconoscere: il salvataggio riusciva, il commit
+partiva, la build falliva senza dirtelo e l'articolo non compariva. Dall'08/09/2026 non succede
+più — il CMS blocca il salvataggio e mostra l'errore accanto al campo (§5).
 
-Il messaggio, che sta nel registro della build su Cloudflare, è:
-`coverAlt: Se c'e' una copertina serve anche coverAlt: descrivi l'immagine per chi non la vede.`
-
-Si risolve riaprendo l'articolo e compilando il testo alternativo. La regola non si toglie: una
-copertina senza alternativa testuale è un buco per chi non vede l'immagine. Ma vale la pena
-saperlo prima di trovarcisi: **se hai messo una copertina, compila anche l'alt, sempre.**
+Il controllo alla costruzione del sito **resta**, e non è un doppione: il CMS non è l'unico modo di
+scrivere un file — si può sempre modificarlo a mano su Git — e una regola che vale solo
+nell'interfaccia non è una regola.
 
 ---
 
@@ -228,8 +260,7 @@ personale.
 tempo (il collegamento vale dieci minuti). Ricomincia dal pulsante.
 
 **L'articolo non compare sul sito** — quasi sempre è l'interruttore *Bozza* ancora acceso.
-Altrimenti guarda se l'ultima build di Cloudflare è fallita: la causa più frequente è una
-copertina senza testo alternativo (§6). Non usare *Retry deployment* per forzare
+Altrimenti guarda se l'ultima build di Cloudflare è fallita. Non usare *Retry deployment* per forzare
 l'aggiornamento — ricostruisce il commit vecchio e riporta indietro il sito (§6).
 
 **Un articolo cancellato è ricomparso** — è quasi certamente *Retry deployment* premuto su un

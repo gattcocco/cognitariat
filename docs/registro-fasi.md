@@ -1518,3 +1518,90 @@ Tre conseguenze che non sono tecniche e vanno decise:
 E una che è tecnica: abbassare il TTL dei record **qualche ora prima** del cutover restringe la
 finestra in cui i due siti convivono da ore a minuti. Farlo al momento del cambio non serve — i
 resolver hanno già in cache il valore vecchio con il TTL vecchio.
+
+---
+
+## La copertina non si salva più senza descrizione — 08/09/2026
+
+Ramo `dev`. Nessun merge, nessun deploy in produzione, nessuna modifica al DNS.
+
+### Il limite di Sveltia, verificato sul programma vero
+
+Serviva «obbligatorio solo se c'è l'immagine». Nella versione che usiamo — 0.206.1, fissata — **non
+esiste un modo di condizionare un campo a un altro**: nessuna opzione `condition`, `conditions` o
+`show_if` nella configurazione. Verificato scaricando il bundle che serviamo e leggendolo, non
+dedotto dalla documentazione del progetto, che è scritta sull'ultima versione.
+
+Due cose che quella lettura ha chiarito, e che cambiano cosa si può usare:
+
+- **`required` confronta il valore già ripulito dagli spazi.** Un campo con soli spazi conta come
+  vuoto: non serve aggiungere niente per soddisfare «un valore composto solo da spazi non è
+  valido».
+- **`pattern` non scatta sui campi vuoti.** Sembrava la via per un messaggio in italiano — accetta
+  una coppia espressione/messaggio — ma su un campo vuoto non viene proprio valutato. Provato:
+  salva lo stesso. Quindi `pattern` non può sostituire `required`, e il messaggio d'errore resta
+  quello di Sveltia, in inglese.
+
+Non è quindi vero che manchi una soluzione: quella supportata è il **gruppo facoltativo**, e
+funziona per la ragione giusta invece che per un trucco. La copertina diventa un `object` con
+`required: false`: il CMS mostra una casella «Aggiungi Copertina» e, finché non è spuntata, i due
+campi **non esistono** — quindi non possono essere obbligatori. Spuntandola compaiono entrambi, e
+sono obbligatori tutti e due.
+
+Il prezzo è che i due campi si annidano: `cover` e `coverAlt` affiancati diventano
+
+```yaml
+copertina:
+  file: /images/articoli/nome.webp
+  alt: descrizione dell'immagine
+```
+
+### Le pagine non se ne sono accorte
+
+Lo schema normalizza il gruppo verso i nomi di prima, così `[slug].astro` e `CardArticolo.astro`
+non sono stati toccati. Cambiare il modo in cui un dato si scrive non deve costringere a rivedere
+ogni componente che lo mostra.
+
+La forma vecchia resta **dichiarata apposta per fallire**: se un file rimane indietro, la
+costruzione si ferma e dice come sostituirla. Il motivo non è la pulizia — è che il CMS non conosce
+più quei due nomi, e al primo salvataggio di quell'articolo **li toglierebbe**, facendo sparire la
+copertina senza dirlo a nessuno. Un file che sbaglia forma deve fermare la build, non perdere un
+pezzo in silenzio. Il manifesto è stato migrato: unico articolo esistente.
+
+`check:cms` ora sa del gruppo e controlla che i due sottocampi ci siano **e siano obbligatori**;
+controlla anche che `cover` e `coverAlt` non tornino nel CMS, perché due modi di scrivere la stessa
+cosa che convivono sono peggio di nessuno dei due. Provato al contrario: rimettendo `required:
+false` sul testo alternativo, il controllo fallisce con il messaggio giusto.
+
+### Prove fatte davvero, e su cosa
+
+Sul programma vero, stessa versione fissata, con un banco di prova locale e il backend
+`test-repo` — cioè l'interfaccia autentica di Sveltia, senza toccare il repository:
+
+| Prova | Esito |
+|---|---|
+| Nessuna copertina, nessuna descrizione | **salva** |
+| Copertina aggiunta, campi vuoti | **bloccato**, «This field is required.» accanto a entrambi, «2 fields have errors» in basso |
+| Copertina aggiunta, descrizione di **soli spazi** | **bloccato** allo stesso modo |
+| Spunta tolta | **salva**: la descrizione torna facoltativa |
+
+In tutti i casi bloccati il titolo e la spunta restano dove erano: non si perde niente e si può
+correggere il campo o togliere la copertina. Sotto il campo resta visibile «Descrivi la copertina
+per chi non può vederla», che è il messaggio chiesto — l'errore in sé lo scrive Sveltia, in
+inglese, e in 0.206.1 non è sostituibile.
+
+Alla costruzione del sito, sul repository vero:
+
+| Caso | Esito |
+|---|---|
+| `copertina` con `alt` di soli spazi | build fermata: «Descrivi la copertina per chi non puo' vederla: senza, l'immagine non si pubblica.» |
+| Forma vecchia `cover`/`coverAlt` | build fermata, con l'istruzione per sostituirla |
+| Nessuna copertina | costruisce |
+| Manifesto migrato | copertina in pagina con il suo `alt`, `og:image` sul JPEG affiancato |
+
+### Cosa resta da provare, e serve la sessione di chi amministra
+
+**Il caricamento vero di un'immagine dal CMS**: file scelto, salvato in `public/images/articoli/`,
+visibile nell'articolo in anteprima con l'`alt` giusto. È il punto 3 dei quattro chiesti, l'unico
+che non si può fare da un banco di prova, perché richiede un accesso autenticato e un commit sul
+repository. Gli altri tre sono chiusi qui sopra.

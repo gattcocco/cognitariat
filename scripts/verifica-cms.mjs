@@ -22,6 +22,26 @@ const SCHEMA = 'src/content.config.ts';
 /** Il corpo Markdown non e' un campo del frontmatter: sta nel file, non sopra. */
 const SOLO_NEL_CMS = new Set(['body']);
 
+/**
+ * Campi che lo schema dichiara di proposito senza un corrispettivo nel CMS.
+ * `cover` e `coverAlt` sono la forma vecchia della copertina: restano nello
+ * schema solo per far fallire la build se un file e' rimasto indietro, non per
+ * essere compilati. Nel CMS non devono esserci — se ci tornassero, i due modi
+ * di scrivere la copertina convivrebbero e nessuno saprebbe quale vince.
+ */
+const SOLO_NEL_SITO = new Set(['cover', 'coverAlt']);
+
+/**
+ * Gruppi del CMS e i sottocampi che devono contenere. La copertina e' un gruppo
+ * e non due campi affiancati perche' e' l'unico modo, in questa versione di
+ * Sveltia, di rendere il testo alternativo obbligatorio *solo* quando c'e'
+ * l'immagine: finche' la casella «Aggiungi Copertina» non e' spuntata i due
+ * campi non esistono. Se qualcuno li riappiattisse, la descrizione tornerebbe
+ * facoltativa senza che nessuno se ne accorga: e' quello che questo controllo
+ * impedisce.
+ */
+const GRUPPI = { copertina: ['file', 'alt'] };
+
 const problemi = [];
 
 let config;
@@ -35,13 +55,18 @@ const schema = await readFile(SCHEMA, 'utf8');
 
 // --- Campi dichiarati nel CMS ------------------------------------------------
 const campiCms = new Set(
-  [...config.matchAll(/^\s{6,}name:\s*([A-Za-z][A-Za-z0-9_]*)\s*$/gm)].map((m) => m[1])
+  [...config.matchAll(/^\s{8}name:\s*([A-Za-z][A-Za-z0-9_]*)\s*$/gm)].map((m) => m[1])
+);
+
+// Sottocampi: piu' indentati, cioe' dentro un gruppo.
+const sottocampiCms = [...config.matchAll(/^\s{12,}name:\s*([A-Za-z][A-Za-z0-9_]*)\s*$/gm)].map(
+  (m) => m[1]
 );
 
 // --- Campi dichiarati nello schema del sito ---------------------------------
 const corpoSchema = schema.slice(schema.indexOf('z.object({'));
 const campiSchema = new Set(
-  [...corpoSchema.matchAll(/^\s{4}([A-Za-z][A-Za-z0-9_]*):\s*z\./gm)].map((m) => m[1])
+  [...corpoSchema.matchAll(/^\s{4}([A-Za-z][A-Za-z0-9_]*):\s*z\b/gm)].map((m) => m[1])
 );
 
 if (campiCms.size === 0) problemi.push(`Nessun campo trovato in ${CONFIG}: il formato e' cambiato?`);
@@ -55,7 +80,37 @@ for (const c of campiCms) {
     );
   }
 }
+for (const [gruppo, attesi] of Object.entries(GRUPPI)) {
+  if (!campiCms.has(gruppo)) continue;
+  const mancanti = attesi.filter((c) => !sottocampiCms.includes(c));
+  if (mancanti.length) {
+    problemi.push(
+      `Il gruppo "${gruppo}" del CMS non contiene ${mancanti.map((c) => `"${c}"`).join(' e ')}: ` +
+        `lo schema del sito se li aspetta dentro quel gruppo.`
+    );
+  }
+  const richiesti = [...config.matchAll(/^\s{12}name:\s*([A-Za-z][A-Za-z0-9_]*)[\s\S]{0,200}?^\s{12}required:\s*(\S+)/gm)];
+  for (const c of attesi) {
+    const riga = richiesti.find((m) => m[1] === c);
+    if (!riga || riga[2] !== 'true') {
+      problemi.push(
+        `Nel gruppo "${gruppo}" il campo "${c}" non e' obbligatorio. E' proprio il punto del ` +
+          `gruppo: quando la copertina c'e', servono tutte e due le parti.`
+      );
+    }
+  }
+}
+
 for (const c of campiSchema) {
+  if (SOLO_NEL_SITO.has(c)) {
+    if (campiCms.has(c)) {
+      problemi.push(
+        `"${c}" e' la forma vecchia della copertina ed e' tornato nel CMS: i due modi di ` +
+          `scriverla convivrebbero e nessuno saprebbe quale vince.`
+      );
+    }
+    continue;
+  }
   if (!campiCms.has(c)) {
     problemi.push(
       `Lo schema prevede "${c}", ma nel CMS non c'e' nessun campo per compilarlo: la redazione\n` +

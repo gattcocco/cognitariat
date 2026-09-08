@@ -18,37 +18,45 @@
 # differenza non era il contenuto, era che quelle due pagine erano finite in
 # cache mentre esistevano e ci erano rimaste dopo.
 #
-# La correzione e' `s-maxage=0` sulle pagine: le cache condivise possono tenersi
-# una copia, ma devono chiedere se e' ancora buona prima di servirla. Cosi' una
-# pagina cancellata smette di esistere quando viene cancellata, senza che nessuno
-# in redazione debba rifare un deployment o svuotare qualcosa a mano.
+# PRIMO TENTATIVO, INSUFFICIENTE: `s-maxage=0`. Sembra dire "le cache condivise
+# rivalidino sempre", e invece Cloudflare lo legge come "cacheabile con TTL zero"
+# e ci applica il proprio tempo di bordo. Misurato: pubblicato un articolo di
+# prova, scaldata la cache, cancellato e ridistribuito, rispondeva ancora 200 su
+# 20 richieste su 20, con CF-Cache-Status: HIT e la nostra stessa intestazione
+# s-maxage=0 nella risposta. Un tempo di scadenza non e' un divieto.
+#
+# CORREZIONE: `private`. Non e' un tempo, e' una destinazione: quella copia e' del
+# browser di chi legge, e nessuna cache condivisa deve tenerla. Il browser la
+# conserva e la rivalida a ogni visita (max-age=0, must-revalidate), quindi non si
+# perde ne' il "torna indietro" ne' le risposte 304. Cosi' una pagina cancellata
+# smette di esistere quando viene cancellata, senza che nessuno in redazione debba
+# rifare un deployment o svuotare qualcosa a mano.
 #
 # ATTENZIONE ALLA FORMA DELLE REGOLE
 # Le regole che corrispondono allo stesso indirizzo **si sommano**, non si
 # sostituiscono: con `/*` in cima e `/fonts/*` sotto, un file di font riceveva
-# `Cache-Control: public, max-age=0, must-revalidate, s-maxage=0, public,
-# max-age=86400` — due direttive in conflitto nella stessa intestazione, e la
-# cache lunga di fatto annullata. Per questo qui non c'e' nessun `/*`: le pagine
+# la regola delle pagine attaccata alla propria, cioe' due direttive in conflitto
+# nella stessa intestazione e la cache lunga di fatto annullata. Per questo qui non c'e' nessun `/*`: le pagine
 # si indicano per la barra finale, che gli asset non hanno.
 
 # Le pagine HTML: tutti gli indirizzi che finiscono con la barra, cioe' la home,
 # /blog/, /privacy/, ogni articolo. Piu' la pagina di errore, servita quando un
 # indirizzo non c'e' (o non c'e' piu').
 /
-  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+  Cache-Control: private, max-age=0, must-revalidate
 
 /*/
-  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+  Cache-Control: private, max-age=0, must-revalidate
 
 /404.html
-  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+  Cache-Control: private, max-age=0, must-revalidate
 
 # Sitemap e robots cambiano quando cambia il sito: stessa regola.
 /sitemap.xml
-  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+  Cache-Control: private, max-age=0, must-revalidate
 
 /robots.txt
-  Cache-Control: public, max-age=0, must-revalidate, s-maxage=0
+  Cache-Control: private, max-age=0, must-revalidate
 
 # I file con l'impronta nel nome non cambiano mai contenuto a parita' di nome: se
 # cambia il contenuto cambia il nome. Si possono tenere per sempre, ed e' quello

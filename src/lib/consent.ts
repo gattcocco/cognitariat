@@ -34,6 +34,16 @@
 // chiede l'art. 13.2.a — vedi docs/conservazione-dati.md per le decisioni che
 // restano da deliberare.
 //
+// v5: la sezione sui log diceva, di fatto, «non scarichiamo i log» in un modo che
+// si poteva leggere come «non esistono log». Non e' cosi': i log del fornitore
+// esistono. Ora la pagina separa quello che conserva l'associazione (niente, e
+// per un motivo verificabile: l'esportazione dei log e' una funzione Enterprise
+// disattivata di default) da quello che conserva Cloudflare (lo decide
+// Cloudflare, che dichiara quattro ore per la maggior parte dei clienti), e dice
+// apertamente che quale dei due tempi si applichi al nostro progetto non siamo in
+// grado di verificarlo. Nella stessa versione compaiono le intestazioni NEL della
+// piattaforma, che erano vere e non erano dette.
+//
 // Le versioni note al server stanno in supabase/migrations/0007_consenso_privacy_esplicito.sql,
-// che NON è ancora applicata al database remoto: v3 e v4 sono state aggiunte lì.
-export const PRIVACY_POLICY_VERSION = 'v4-2026-09-07';
+// che NON è ancora applicata al database remoto: v3, v4 e v5 sono state aggiunte lì.
+export const PRIVACY_POLICY_VERSION = 'v5-2026-09-08';

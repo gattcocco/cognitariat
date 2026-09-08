@@ -1316,3 +1316,94 @@ indirizzo ma un collegamento fra un indirizzo e una persona.
 
 Il collaudo vero del CMS, che dipende dall'applicazione OAuth. Nient'altro è bloccato da un
 accesso.
+
+---
+
+## Tre correzioni a quello che avevo scritto ieri — 08/09/2026
+
+Ramo `dev`. Nessuna riscrittura, nessun force push, nessuna modifica al DNS.
+
+### 1. «Non scarichiamo i log» non vuol dire «non ci sono log»
+
+L'informativa, alla sezione 2, diceva che non teniamo un archivio delle visite e che «nei sistemi
+di Cloudflare i dati seguono i tempi del fornitore». Formalmente vero, e leggibile come «di fatto
+non resta traccia di niente». **Quei log esistono.** Che noi non li scarichiamo non li fa sparire.
+
+`/privacy` passa a **v5** e separa le due cose.
+
+**Verificato da noi, sul sito online:**
+
+| Cosa | Esito |
+|---|---|
+| Cookie impostati dalle risposte | nessuno: nessuna intestazione `Set-Cookie` |
+| Cloudflare Web Analytics | non attiva: nessun beacon nelle pagine |
+| Intestazioni `NEL` / `Report-To` | **presenti**, verso `a.nel.cloudflare.com`, con `success_fraction: 0.0` |
+| Esportazione dei log a nostra disposizione | nessuna: è una funzione Enterprise, disattivata di default |
+
+Le intestazioni NEL erano lì da sempre e non erano dette. Chiedono al browser di segnalare a
+Cloudflare gli **errori** di rete — solo i fallimenti, non le visite riuscite —, le imposta la
+piattaforma e su un indirizzo `pages.dev` non sono nostre da togliere. Cloudflare è il nostro
+responsabile del trattamento, non una terza parte, ma «nessuna terza parte» non è la stessa cosa
+di «nessun altro host», e la formula assoluta nascondeva la differenza.
+
+**Dichiarato da Cloudflare, non verificabile da noi**: che i log di accesso siano scartati entro
+quattro ore per la maggior parte dei clienti, e conservati tre giorni di default per i clienti
+Enterprise che ne chiedono l'esportazione. La sua informativa non fissa un termine numerico
+generale. **Quale di questi tempi si applichi al nostro progetto non lo sappiamo**, nessuno
+strumento a nostra disposizione lo mostra, e ora la pagina lo dice invece di lasciarlo intendere.
+Se servisse una risposta certa, va chiesta a Cloudflare per iscritto.
+
+### 2. Il ramo di produzione torna a «non confermato»
+
+Ieri avevo osservato che nei controlli che Cloudflare pubblica su GitHub il ramo `dev` mostra un
+*Branch Preview URL* e `feat/membership-v2-1` no, e che `main` non ha proprio controlli — e ne
+avevo tratto che `main` si potesse escludere.
+
+**Non regge.** Quei controlli dicono cosa Cloudflare ha costruito e dove l'ha messo; non dicono
+quale ramo sia configurato come produzione. L'assenza di un controllo su un ramo può avere altre
+cause: impostazioni di build, esclusioni, nessun push da quando l'integrazione è attiva. Dedurre
+una configurazione dall'assenza di una riga è lo stesso errore di dedurla dall'uguaglianza di due
+pagine — quello segnalato il 05/09.
+
+**Stato: sconosciuto. Nessun ramo escluso, `main` compreso.** Si legge da
+`npx wrangler pages project list` o dal pannello, e serve un accesso che non c'è. Il commento in
+`BaseLayout.astro` è stato riscritto di conseguenza: dice che il valore predefinito `main` non va
+lasciato decidere alla riga di codice.
+
+### 3. Il dominio pubblico non è su Cloudflare
+
+Emerso mentre si verificavano i log, e cambia la forma del cutover:
+
+| Cosa | Valore rilevato |
+|---|---|
+| `cognitariatzone.org` → IP | `185.199.108–111.153`, cioè **GitHub Pages** |
+| `Server` nella risposta | `GitHub.com` |
+| Nameserver | `ns23`/`ns24.domaincontrol.com`, cioè **GoDaddy** |
+
+Cloudflare oggi **non è nel percorso del sito pubblico** e non gestisce il DNS. Il sito online è
+quello vecchio, su GitHub Pages. Il cutover richiede quindi anche di aggiungere il dominio al
+progetto Pages e cambiare i record su GoDaddy — modifica al DNS, fuori perimetro adesso, ma è un
+passaggio del rilascio e non un dettaglio.
+
+Conseguenza sul ripristino, che avevo scritto male: «il dominio non va toccato» vale finché si
+resta dentro Cloudflare. Se il problema arriva **dopo** il cambio di DNS e si vuole tornare al
+sito precedente, quello non sta su Cloudflare: ci si torna rimettendo i record, con i tempi di
+propagazione invece di un minuto. `docs/rilascio-e-ripristino.md` ha ora un §0.1 su questo, e il
+§2 comincia con «annotare i valori attuali prima di cambiarli».
+
+### 4. Le opzioni sulla cronologia: due affermazioni sbagliate, tolte
+
+- **«Un repository nuovo toglie il contenuto dalla portata di GitHub».** Falso: creare un
+  repository nuovo **non elimina quello vecchio**. Finché il vecchio esiste, il commit è
+  raggiungibile come prima. Cancellarlo o renderlo privato è un'azione ulteriore e distinta. Quindi
+  l'opzione D è in realtà due decisioni, e solo la seconda ha un effetto.
+- **«Confermare la sede risolve la questione».** No: risolve la questione *futura* — quale
+  indirizzo si pubblica. Il commit già uscito continua a collegare un indirizzo alla residenza di
+  una persona, e una decisione presa dopo non torna indietro a modificarlo.
+
+`_local/sede-e-dati-riservati.md` §2.5 tiene ora le due questioni separate: il futuro si decide
+confermando la sede; il passato è una decisione della persona interessata, con l'avvertenza — da
+dirle prima e non dopo — che nessuna delle opzioni disponibili può garantirle che il collegamento
+sparisca del tutto.
+
+Niente eseguito: nessuna riscrittura, nessun force push, nessuna cancellazione.

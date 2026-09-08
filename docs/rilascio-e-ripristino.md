@@ -13,11 +13,35 @@ quella di prima.
 | | |
 |---|---|
 | Progetto Cloudflare Pages | `cognitariat` |
-| Ramo di produzione | `feat/membership-v2-1` — vedi §5 |
-| Dominio pubblico | `cognitariatzone.org` |
+| Ramo di produzione | **non confermato** — vedi §5 |
+| Dominio pubblico | `cognitariatzone.org`, **oggi servito da GitHub Pages**, non da Cloudflare — vedi §0.1 |
 | Ramo in lavorazione | `dev`, preview su `https://dev.cognitariat.pages.dev` |
 | Pagamenti | spenti (`PAGAMENTI_ATTIVI` non impostata) |
 | Iscrizioni | chiuse: il modulo non esiste |
+
+## 0.1 Il dominio non è su Cloudflare (verificato l'08/09/2026)
+
+Va scritto qui perché cambia la forma del cutover, e la procedura di ieri lo dava per scontato
+nel modo sbagliato.
+
+| Cosa | Valore rilevato |
+|---|---|
+| `cognitariatzone.org` → indirizzi IP | `185.199.108.153`, `.109.153`, `.110.153`, `.111.153` — sono di **GitHub Pages** |
+| Intestazione `Server` della risposta | `GitHub.com` |
+| Nameserver del dominio | `ns23.domaincontrol.com`, `ns24.domaincontrol.com` — **GoDaddy** |
+| File `CNAME` nel repository | `cognitariatzone.org` (è il meccanismo del dominio personalizzato di GitHub Pages) |
+
+Cioè: **Cloudflare oggi non è nel percorso del sito pubblico**, e non gestisce nemmeno il DNS. Il
+sito online è quello vecchio, servito da GitHub Pages.
+
+Conseguenza per il cutover: oltre ai passaggi del §2 serve **aggiungere il dominio personalizzato
+al progetto Pages e cambiare i record DNS su GoDaddy**. È una modifica al DNS, quindi fuori dal
+perimetro di adesso — ma è un passaggio del rilascio, non un dettaglio, e va deciso e programmato:
+fra il cambio dei record e la propagazione c'è un intervallo in cui i due siti convivono, e chi
+arriva vede l'uno o l'altro a seconda del resolver.
+
+Da decidere insieme al cutover: se il vecchio sito su GitHub Pages resta acceso come rete di
+sicurezza (e per quanto), o se si spegne.
 
 ## 1. Prima del cutover — tre minuti
 
@@ -34,7 +58,9 @@ Poi, a occhio, sulla preview: la home, un articolo, `/privacy`, e `/admin/` con 
 
 ## 2. Il cutover
 
-Nessuno di questi passaggi è nel repository: sono tutti nel pannello di Cloudflare.
+Nessuno di questi passaggi è nel repository: sono nel pannello di Cloudflare, tranne il DNS che è
+su GoDaddy (§0.1). **Prima di cambiare qualsiasi cosa, annotare i valori attuali**: ramo di
+produzione, variabili, record DNS. Senza quelli il ripristino del §4 diventa una ricostruzione.
 
 1. **Ramo di produzione** del progetto Pages → il ramo che deve servire il sito pubblico.
 2. **Variabili** del progetto (ambiente Production):
@@ -52,6 +78,9 @@ Nessuno di questi passaggi è nel repository: sono tutti nel pannello di Cloudfl
    `https://cognitariatzone.org/api/cms-callback`. GitHub accetta un solo callback per
    applicazione: quella della preview non può servire anche la produzione.
 4. **Nuovo deploy.** Le variabili si leggono al build: cambiarle senza ricostruire non fa niente.
+5. **Dominio personalizzato e DNS** (§0.1): aggiungere `cognitariatzone.org` al progetto Pages e
+   cambiare i record su GoDaddy. È l'ultimo passaggio, non il primo: prima si verifica che la
+   build di produzione sia giusta, poi le si manda il dominio.
 
 ## 3. Subito dopo — due minuti
 
@@ -76,7 +105,9 @@ funzionava e si usa **Rollback**. Torna online in meno di un minuto, senza build
 Il ripristino completo è in tre gesti, nell'ordine:
 
 1. **Rollback del deployment** — il sito torna a quello di prima.
-2. **Ramo di produzione** riportato a `feat/membership-v2-1`, se era stato cambiato.
+2. **Ramo di produzione** riportato al valore che aveva prima — che va **letto e annotato prima**
+   di cambiarlo, insieme ai valori precedenti delle variabili. È l'unico modo per tornare indietro
+   senza tirare a indovinare, e oggi quel valore non è confermato (§5).
 3. **Variabili** riportate ai valori di prima: `CMS_BRANCH` a `dev`, `BRANCH_PRODUZIONE` rimossa,
    `CMS_AUTH_BASE_URL` all'alias della preview.
 
@@ -84,29 +115,40 @@ Il ripristino completo è in tre gesti, nell'ordine:
 repository: il rollback rimette online la build vecchia, ma il commit resta. Se l'articolo non
 doveva uscire, va tolto con un commit nuovo — non riscrivendo la cronologia.
 
-Il dominio non va toccato in nessuno di questi passaggi: il DNS punta al progetto Pages, non a un
-deployment. È il motivo per cui il rollback è veloce.
+Il dominio non va toccato in nessuno di questi passaggi: il rollback agisce sul deployment servito
+dal progetto Pages, non su dove punta il DNS. È il motivo per cui è veloce.
 
-## 5. Il ramo di produzione — cosa sappiamo e cosa manca
+**Ma attenzione al verso.** Il rollback riporta indietro il sito *dentro* Cloudflare. Se il
+problema si manifesta dopo il cambio di DNS (§0.1) e la scelta è tornare al sito precedente, quello
+non sta su Cloudflare: sta su GitHub Pages, e ci si torna rimettendo i record DNS di prima. È un
+passaggio diverso, con i tempi di propagazione del DNS invece di un minuto.
+
+## 5. Il ramo di produzione — **non confermato**
 
 `PROVISIONING.md` e `STATO-BUILD-1.0.md` dichiarano `feat/membership-v2-1`, definito «temporaneo e
-voluto». Al 07/09/2026 questo trova conferma nei dati che Cloudflare pubblica da sé sul
-repository, senza bisogno di entrare nel pannello:
+voluto». È documentazione interna, scritta ad agosto: dice cosa era stato impostato allora, non
+cosa è impostato adesso.
 
-| Ramo | Cosa scrive Cloudflare nel proprio controllo su GitHub |
-|---|---|
-| `dev` (`e82643c`) | *Preview URL* **e** *Branch Preview URL* (`dev.cognitariat.pages.dev`) — la forma di un deployment di anteprima |
-| `feat/membership-v2-1` (`428b5b5`) | solo *Preview URL*, **nessun** *Branch Preview URL* — la forma di un deployment di produzione, che vive sull'indirizzo del progetto e non ha un alias di ramo |
-| `main` (`f7bb999`) | nessun controllo di Cloudflare: non viene costruito |
+Il 07/09 avevo aggiunto qui un'osservazione sulla forma dei controlli che Cloudflare pubblica su
+GitHub — quali deployment mostrano un *Branch Preview URL* e quali no — e ne avevo tratto che
+`main` si potesse escludere. **Non regge, e l'ho tolta.** Quei controlli dicono cosa Cloudflare ha
+costruito e dove l'ha messo; non dicono quale ramo il progetto abbia configurato come produzione,
+e l'assenza di un controllo su un ramo può avere altre cause — impostazioni di build, esclusioni,
+semplicemente nessun push da quando l'integrazione è attiva. Dedurre una configurazione
+dall'assenza di una riga è lo stesso errore di dedurla dall'uguaglianza di due pagine.
 
-Non è la stessa cosa che leggerlo nella configurazione, ed è bene dirlo: è la deduzione dalla
-**forma** dei deployment, non dal campo «Production branch». Va confermato con
+**Quindi: sconosciuto.** Nessun ramo è escluso, `main` compreso. Si legge dalla configurazione, e
+in un modo solo:
 
 ```
 npx wrangler login
 npx wrangler pages project list
 ```
 
-oppure aprendo il progetto nel pannello. Serve un accesso all'account Cloudflare, che chi scrive
-non ha. **Quello che si può già escludere è `main`**: e conta, perché `BRANCH_PRODUZIONE` ha come
-valore predefinito `main`, e lasciarlo tale al cutover manderebbe online il sito con `noindex`.
+oppure aprendo il progetto nel pannello, alla voce del ramo di produzione. Serve un accesso
+all'account Cloudflare, che chi scrive non ha.
+
+**Perché non è un dettaglio.** `BRANCH_PRODUZIONE` ha `main` come valore predefinito. Se il ramo di
+produzione reale è un altro e la variabile non viene impostata, il sito pubblico esce con
+`noindex` e nessuno se ne accorge finché non sparisce dai motori di ricerca. Il controllo
+`check:produzione` lo intercetta subito dopo il cutover — è per questo che va eseguito.

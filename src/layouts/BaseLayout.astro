@@ -35,9 +35,15 @@ const {
  *
  * In locale CF_PAGES_BRANCH non esiste e non cambia niente. Il ramo di
  * produzione si dichiara con BRANCH_PRODUZIONE nelle variabili del progetto
- * Cloudflare: oggi il progetto Pages ha come produzione `feat/membership-v2-1`,
- * quindi al cutover va impostata di conseguenza, non lasciata al valore
- * predefinito.
+ * Cloudflare.
+ *
+ * ATTENZIONE al valore predefinito `main`: quale sia davvero il ramo di
+ * produzione del progetto Pages NON e' confermato — la documentazione interna
+ * dice `feat/membership-v2-1`, ma si legge solo dalla configurazione Cloudflare
+ * e nessuno l'ha ancora letta (vedi docs/rilascio-e-ripristino.md §5). Se al
+ * cutover la variabile resta al predefinito e il ramo reale e' un altro, il sito
+ * pubblico esce con noindex. Va impostata esplicitamente, non lasciata decidere
+ * a questa riga.
  */
 const ramo = import.meta.env.CF_PAGES_BRANCH ?? process.env?.CF_PAGES_BRANCH;
 const ramoProduzione = import.meta.env.BRANCH_PRODUZIONE ?? process.env?.BRANCH_PRODUZIONE ?? 'main';

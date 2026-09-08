@@ -17,6 +17,18 @@ import { associazione, haSede, haPec } from '../lib/associazione';
  * in modalità nocookie e caricati in differita, ma arrivare in fondo alla pagina
  * bastava a mandare a Google l'indirizzo IP di chi legge. Ora sono link.
  *
+ * «Nessuna terza parte» non vuol dire «nessun altro host»: le risposte portano le
+ * intestazioni NEL/Report-To della piattaforma, che chiedono al browser di
+ * segnalare a a.nel.cloudflare.com gli errori di rete (success_fraction 0, cioè
+ * solo i fallimenti). Cloudflare è il nostro responsabile, non una terza parte, e
+ * su pages.dev quelle intestazioni non sono nostre da togliere — ma vanno dette,
+ * non nascoste dentro una formula assoluta.
+ *
+ * I log del fornitore ESISTONO: che noi non li scarichiamo non li fa sparire. La
+ * sezione 2 distingue quello che conserva l'associazione (niente) da quello che
+ * conserva Cloudflare (lo decide Cloudflare), e dice apertamente quale parte non
+ * siamo in grado di verificare.
+ *
  * I tempi di conservazione dichiarati qui descrivono la pratica reale di oggi.
  * Dove un termine numerico non è ancora stato deliberato dall'associazione, la
  * pagina dice il criterio invece di inventare una politica: la proposta da
@@ -73,7 +85,16 @@ const versione = PRIVACY_POLICY_VERSION;
         Resta quello che fa qualunque server quando gli chiedi una pagina: il nostro hosting,{' '}
         <strong>Cloudflare Pages</strong>, registra i dati tecnici della richiesta — indirizzo IP,
         data e ora, pagina richiesta, tipo di browser — per consegnare le pagine, tenere in piedi
-        il servizio e difenderlo dagli abusi.
+        il servizio e difenderlo dagli abusi. <strong>Quei log esistono.</strong> Il fatto che noi
+        non li scarichiamo non li fa sparire, e sarebbe scorretto lasciartelo credere.
+      </p>
+      <p>
+        Cloudflare tratta quei dati come <em>responsabile</em> per nostro conto, come dichiara nella
+        propria informativa. Le nostre pagine arrivano dalla sua rete anche quando ti rispondono
+        delle intestazioni che chiedono al browser di segnalare a Cloudflare stessa
+        (<code>a.nel.cloudflare.com</code>) gli <strong>errori</strong> di rete: sono impostate
+        dalla piattaforma, riguardano solo le richieste fallite, e su un indirizzo{' '}
+        <code>pages.dev</code> non possiamo disattivarle.
       </p>
       <ul class="elenco-progetto">
         <li><strong>Finalità</strong>: erogare il sito e proteggerlo da attacchi e abusi.</li>
@@ -82,12 +103,21 @@ const versione = PRIVACY_POLICY_VERSION;
           sicuro il proprio sito (art. 6.1.f).
         </li>
         <li>
-          <strong>Conservazione</strong>: <strong>noi non teniamo un archivio di quei dati</strong>.
-          Non abbiamo un registro delle visite, non usiamo strumenti di statistica e non scarichiamo
-          i log del fornitore: non c'è un nostro termine perché non c'è un nostro archivio. Nei
-          sistemi di Cloudflare i dati tecnici delle richieste seguono i tempi di conservazione del
-          fornitore, descritti nella sua documentazione, e servono a far funzionare e proteggere il
-          servizio.
+          <strong>Conservazione presso di noi: nessuna.</strong> Non teniamo un archivio delle
+          visite, non usiamo strumenti di statistica, non abbiamo attivato l'analitica di Cloudflare
+          e non esportiamo i log. Non è una scelta di facciata: l'esportazione dei log delle
+          richieste è una funzione riservata ai piani Enterprise e disattivata per impostazione
+          predefinita, quindi con il piano che usiamo <strong>non possiamo</strong> né consultarli
+          né conservarli.
+        </li>
+        <li>
+          <strong>Conservazione presso Cloudflare</strong>: la decide Cloudflare. Pubblicamente
+          dichiara di scartare i log di accesso <strong>entro quattro ore</strong> per la maggior
+          parte dei clienti, e di conservarli per impostazione predefinita tre giorni per i clienti
+          Enterprise che ne chiedono l'esportazione; la sua informativa non fissa invece un termine
+          numerico generale. <strong>Non possiamo verificare quale di questi tempi si applichi al
+          nostro progetto</strong>: nessuno strumento a nostra disposizione lo mostra. Riportiamo
+          quello che il fornitore dichiara, e diciamo che è quello che dichiara lui.
         </li>
       </ul>
 
@@ -204,7 +234,10 @@ const versione = PRIVACY_POLICY_VERSION;
 
       <h2>7. A chi arrivano i dati</h2>
       <ul class="elenco-progetto">
-        <li><strong>Cloudflare</strong> — hosting del sito e dati tecnici delle richieste.</li>
+        <li>
+          <strong>Cloudflare</strong> (responsabile del trattamento) — hosting del sito, dati
+          tecnici delle richieste e segnalazione degli errori di rete.
+        </li>
         <li><strong>Proton</strong> (Svizzera) — la casella di posta a cui scrivi.</li>
         <li>
           <strong>GitHub</strong> (Stati Uniti) — solo per chi fa parte della redazione, per

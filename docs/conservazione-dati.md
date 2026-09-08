@@ -18,11 +18,42 @@ applicata né è descritta online come se fosse in vigore.**
 
 | Trattamento | Cosa dice `/privacy` oggi | Serve una decisione? |
 |---|---|---|
-| Visita del sito (dati tecnici, Cloudflare) | Non esiste un nostro archivio: nessuna statistica, nessun log scaricato. Presso il fornitore valgono i suoi tempi. | **No.** Non c'è niente di nostro da conservare. Diventa una decisione solo se un giorno si accende uno strumento di statistica. |
+| Visita del sito (dati tecnici, Cloudflare) | Presso di noi: niente, e non per scelta di stile — l'esportazione dei log è una funzione Enterprise, disattivata di default, quindi con il nostro piano non possiamo consultarli. Presso Cloudflare: i log **esistono**, e i tempi li decide Cloudflare. | **No**, ma vedi §1.1: quello che il fornitore fa non è una nostra decisione, ed è la parte che non possiamo verificare. |
 | Video | Nessun dato: sono link, non incorporamenti. | **No.** |
 | Corrispondenza | Criterio d'uso: finché serve a seguire la questione; cancellazione su richiesta; nessuna cancellazione automatica. | **Sì** — §2. |
 | Accesso della redazione (GitHub) | Attribuzione nella cronologia del repository a tempo indeterminato; il codice di accesso è revocabile dal proprio account. | **No.** È la natura di un sistema di versionamento, ed è dichiarata. |
 | Tesseramento e pagamenti | Disattivati, nessun dato raccolto. | **Sì, ma dopo** — §3, prima della riapertura. |
+
+### 1.1 Cosa è verificato e cosa no, sui log di Cloudflare
+
+La distinzione che conta non è fra «conserviamo» e «non conserviamo»: è fra **il nostro archivio**
+(che non esiste) e **quello del fornitore** (che esiste, e non lo governiamo noi).
+
+**Verificato da noi, sul sito online l'08/09/2026:**
+
+- nessun cookie impostato (nessuna intestazione `Set-Cookie` nelle risposte);
+- nessun beacon di Cloudflare Web Analytics nelle pagine: l'analitica non è attiva;
+- le risposte portano le intestazioni `NEL` e `Report-To` della piattaforma, che chiedono al
+  browser di segnalare gli **errori** di rete a `a.nel.cloudflare.com`, con
+  `success_fraction: 0.0` — cioè solo i fallimenti, non le visite riuscite. Le imposta Cloudflare,
+  non noi, e su un indirizzo `pages.dev` non sono nostre da togliere.
+
+**Dichiarato da Cloudflare, non verificabile da noi:**
+
+- che i log di accesso siano scartati **entro quattro ore** per la maggior parte dei clienti, e
+  conservati per impostazione predefinita tre giorni per i clienti Enterprise che ne chiedono
+  l'esportazione (dichiarazione pubblica di Cloudflare);
+- la sua informativa **non fissa** un termine numerico generale: parla di conservazione «per il
+  tempo coerente con le finalità e con gli obblighi di legge».
+
+**Quello che non sappiamo, e che non va scritto come se lo sapessimo**: quale di questi tempi si
+applichi in concreto al nostro progetto. Nessuno strumento a nostra disposizione lo mostra. Il
+piano gratuito di Pages non espone né i log delle richieste né la loro configurazione di
+conservazione.
+
+Se un giorno servisse una risposta certa — per esempio perché qualcuno esercita un diritto e
+chiede quanto restano i dati della sua visita — l'unica strada è chiederla a Cloudflare per
+iscritto, come responsabile del trattamento. Non è una cosa che si deduce da fuori.
 
 ## 2. La corrispondenza — proposta da confermare
 

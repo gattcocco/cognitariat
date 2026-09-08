@@ -1605,3 +1605,116 @@ Alla costruzione del sito, sul repository vero:
 visibile nell'articolo in anteprima con l'`alt` giusto. È il punto 3 dei quattro chiesti, l'unico
 che non si può fare da un banco di prova, perché richiede un accesso autenticato e un commit sul
 repository. Gli altri tre sono chiusi qui sopra.
+
+---
+
+## L'articolo cancellato che restava online: era la cache di Cloudflare — 08/09/2026
+
+Ramo `dev`. Nessun merge, nessun deploy in produzione, nessuna modifica al DNS.
+
+### Non era il browser, ed era peggio
+
+Ieri avevo scritto che il 404 con `no-store` chiudeva la questione. Non la chiudeva: quel `no-store`
+riguarda la risposta di errore, non la copia da 200 che era già stata messa via prima. La
+segnalazione era giusta.
+
+La prova sta nelle intestazioni, chieste dal terminale e non dal browser:
+
+```
+GET /blog/prova-cms/
+HTTP/1.1 200 OK
+CF-Cache-Status: HIT
+Age: 12425
+Cache-Control: public, s-maxage=604800
+```
+
+`HIT` vuol dire che la risposta arriva dalla cache di bordo di Cloudflare. `Age: 12425` che quella
+copia stava lì da tre ore e mezza. `s-maxage=604800` che aveva il permesso di restarci **sette
+giorni**. E il corpo, controllato, era l'articolo: `<title>Prova CMS — COG U</title>`. Non la
+pagina di errore: proprio l'articolo cancellato.
+
+Il confronto che isola la causa:
+
+| Indirizzo | Risposta |
+|---|---|
+| `/blog/prova-cms/` (cancellato ieri) | 200, `HIT`, `Age` 12 400, `s-maxage=604800` — tre volte di fila |
+| `/blog/prova-copertina/` (cancellato oggi) | 404 da un nodo, 200 `HIT` da un altro |
+| `/blog/mai-esistito-31766/` | 404 `no-store`, sempre |
+| `/blog/<articolo vivo>/` | 200 `max-age=0, must-revalidate`, mai un `HIT` |
+
+Un indirizzo mai esistito risponde bene; uno che è esistito no. La differenza non è il contenuto:
+è che quelle due pagine erano finite in cache **mentre esistevano** e ci sono rimaste dopo.
+
+Questo spiega anche i due depistaggi di ieri. Il parametro anticache «funzionava» perché cambia la
+chiave di cache, quindi chiedeva una pagina che in cache non c'era. *Retry deployment* «funzionava»
+perché fra un tentativo e l'altro capitava un nodo diverso. Nessuno dei due faceva quello che
+sembrava fare — e infatti il problema tornava.
+
+### Escluso tutto il resto, prima di concludere
+
+- l'articolo **non c'è** nel commit di cancellazione né nell'albero del ramo;
+- **non c'è** nella build: né in `dist/blog/`, né nella sitemap, né nell'elenco, né in home;
+- l'alias serve il deployment giusto, e **l'indirizzo specifico di quel deployment risponde 404**
+  su entrambi gli articoli cancellati, mentre il manifesto risponde 200;
+- nessun service worker, nessun `_redirects`, nessuna regola di fallback, nessun router lato
+  client, nessun file residuo in `dist` fra una build e l'altra.
+
+Tutto in ordine, quindi. Il difetto stava fra il sito e chi legge.
+
+### La correzione: `s-maxage=0` sulle pagine
+
+Un file `public/_headers` che dichiara le regole invece di lasciarle al valore predefinito della
+piattaforma. Sulle pagine HTML: `public, max-age=0, must-revalidate, s-maxage=0`. Le cache
+condivise possono tenersi una copia, ma **devono chiedere se è ancora buona prima di servirla**.
+Una pagina cancellata smette di esistere quando viene cancellata, senza che nessuno in redazione
+debba rifare un deployment o svuotare qualcosa a mano.
+
+Gli asset restano cacheabili a lungo: i file con l'impronta nel nome (`/_astro/*`) per un anno,
+perché a parità di nome non cambiano mai; i font un giorno; le immagini un'ora, perché la
+redazione sceglie i nomi e un nome può essere riusato per un'immagine diversa.
+
+**Una trappola trovata scrivendolo.** Le regole che corrispondono allo stesso indirizzo **si
+sommano**, non si sostituiscono. Con `/*` in cima e `/fonts/*` sotto, un font riceveva
+
+```
+Cache-Control: public, max-age=0, must-revalidate, s-maxage=0, public, max-age=86400
+```
+
+cioè due direttive in conflitto nella stessa intestazione, con la cache lunga di fatto annullata.
+Per questo nel file non c'è nessun `/*`: le pagine si indicano per la barra finale, che gli asset
+non hanno. Provato una regola per volta sul runtime vero, non dedotto dalla documentazione.
+
+### Esito, misurato
+
+Sul deployment nuovo, tutte le pagine servono la regola giusta: home, elenco, `/privacy/`,
+articolo, sitemap e robots con `s-maxage=0`; `/_astro/*` con un anno; font e immagini con i loro
+tempi; il 404 con `no-store`.
+
+**Quello che la correzione non fa, e va detto.** Non svuota le copie già conservate. Una voce
+messa in cache prima aveva `s-maxage=604800`: resta valida per il suo nodo fino a sette giorni da
+quando è stata scritta, e il nuovo `s-maxage=0` vale solo per le risposte successive. Misurato,
+dodici richieste per indirizzo:
+
+| Indirizzo | 200 | 404 |
+|---|---|---|
+| `/blog/prova-cms/` | 9 | 3 |
+| `/blog/prova-copertina/` | 1 | 11 |
+
+Le due voci stanno decadendo a ritmi diversi, nodo per nodo. Non c'è modo di forzarle da qui:
+`*.pages.dev` è un dominio di Cloudflare, non una zona dell'account, quindi non esiste un pulsante
+di svuotamento per l'anteprima. Passano da sole.
+
+**Sul dominio pubblico il problema non si presenterà**, perché `_headers` è nella build fin dal
+primo deployment: nessuna pagina verrà mai conservata da una cache condivisa senza rivalidazione.
+Se un giorno servisse comunque svuotare, sul dominio dell'associazione — che sarà una zona
+dell'account — il pulsante esiste.
+
+### Come si controlla, in una riga
+
+```
+curl -sI https://<sito>/blog/<slug>/ | head -1
+```
+
+Va ripetuto qualche volta: la cache è per nodo, e una sola richiesta può capitare su quello
+sbagliato. È il controllo da fare quando si cancella qualcosa, al posto di ricaricare la pagina nel
+browser — che mescola la propria cache a quella del server e non permette di distinguere le due.

@@ -263,9 +263,24 @@ tempo (il collegamento vale dieci minuti). Ricomincia dal pulsante.
 Altrimenti guarda se l'ultima build di Cloudflare è fallita. Non usare *Retry deployment* per forzare
 l'aggiornamento — ricostruisce il commit vecchio e riporta indietro il sito (§6).
 
-**Un articolo cancellato è ricomparso** — è quasi certamente *Retry deployment* premuto su un
-deployment precedente alla cancellazione. Si rimedia lasciando ricostruire il commit più recente,
-o premendo Retry sulla riga giusta: quella del commit `Articolo: rimuove "…"`.
+**Un articolo cancellato è ricomparso** — prima di tutto: **non premere Retry deployment**, e non
+serve svuotare niente a mano. Aspetta un paio di minuti e controlla dal terminale, non dal browser:
+
+```
+curl -sI https://dev.cognitariat.pages.dev/blog/<slug>/ | head -1
+```
+
+Deve dire `404 Not Found`. Ripetilo tre o quattro volte: la cache è distribuita su più nodi e una
+sola richiesta può capitare su quello sbagliato.
+
+Ricaricare la pagina nel browser non dice niente di utile, perché mescola la copia del browser a
+quella del server: se vuoi guardare lì, aggiungi un parametro qualsiasi in fondo
+(`?x=1`) — se con quello la pagina è sparita e senza no, era una copia conservata, non l'articolo.
+
+L'08/09/2026 questo è successo davvero, e non era il browser: era la cache di Cloudflare, che
+teneva la pagina con il permesso di conservarla sette giorni. È stato corretto con `public/_headers`
+(`s-maxage=0` sulle pagine): da allora una pagina cancellata sparisce quando viene cancellata. Il
+dettaglio, con le misure, sta in `docs/registro-fasi.md`.
 
 **La copertina non si vede quando condivido il link** — manca il JPEG accanto al WebP
 (sezione 5).

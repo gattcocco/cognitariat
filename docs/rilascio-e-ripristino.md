@@ -24,24 +24,49 @@ quella di prima.
 Va scritto qui perché cambia la forma del cutover, e la procedura di ieri lo dava per scontato
 nel modo sbagliato.
 
-| Cosa | Valore rilevato |
+Stato rilevato, da riverificare il giorno del cutover perché è l'unica cosa qui che può cambiare
+senza che nessuno ce lo dica:
+
+| Cosa | Valore |
 |---|---|
-| `cognitariatzone.org` → indirizzi IP | `185.199.108.153`, `.109.153`, `.110.153`, `.111.153` — sono di **GitHub Pages** |
+| `cognitariatzone.org` → A | `185.199.108.153`, `.109.153`, `.110.153`, `.111.153` — sono di **GitHub Pages** |
+| `cognitariatzone.org` → AAAA | nessuno |
+| `www.cognitariatzone.org` → CNAME | `gattcocco.github.io` (risponde 301) |
 | Intestazione `Server` della risposta | `GitHub.com` |
 | Nameserver del dominio | `ns23.domaincontrol.com`, `ns24.domaincontrol.com` — **GoDaddy** |
-| File `CNAME` nel repository | `cognitariatzone.org` (è il meccanismo del dominio personalizzato di GitHub Pages) |
+| GitHub Pages del repository | attivo, sorgente **ramo `main`**, cartella `/`, dominio personalizzato `cognitariatzone.org`, HTTPS forzato |
+| Certificato GitHub | copre `cognitariatzone.org` e `www.`, scade il **20/11/2026** |
+| File `CNAME` nel repository | `cognitariatzone.org` — è così che GitHub Pages rivendica il dominio |
 
-Cioè: **Cloudflare oggi non è nel percorso del sito pubblico**, e non gestisce nemmeno il DNS. Il
-sito online è quello vecchio, servito da GitHub Pages.
+Cioè: **Cloudflare oggi non è nel percorso del sito pubblico** e non gestisce il DNS. Il sito
+online è quello vecchio, servito da GitHub Pages dal ramo `main` di questo stesso repository.
 
-Conseguenza per il cutover: oltre ai passaggi del §2 serve **aggiungere il dominio personalizzato
-al progetto Pages e cambiare i record DNS su GoDaddy**. È una modifica al DNS, quindi fuori dal
-perimetro di adesso — ma è un passaggio del rilascio, non un dettaglio, e va deciso e programmato:
-fra il cambio dei record e la propagazione c'è un intervallo in cui i due siti convivono, e chi
-arriva vede l'uno o l'altro a seconda del resolver.
+### Cosa comporta, in concreto
 
-Da decidere insieme al cutover: se il vecchio sito su GitHub Pages resta acceso come rete di
-sicurezza (e per quanto), o se si spegne.
+1. **Il dominio è rivendicato da GitHub Pages**, tramite il file `CNAME` su `main`. Finché resta
+   così, GitHub continua a considerarlo suo. Spostarlo su Cloudflare senza toccare GitHub lascia
+   due sistemi che pensano entrambi di servire lo stesso nome: funziona lo stesso — comanda il DNS
+   — ma è una configurazione che nessuno ricorderà fra sei mesi.
+2. **Serve decidere del vecchio sito.** Resta acceso su `gattcocco.github.io` come rete di
+   sicurezza, e per quanto? Oppure si disattiva GitHub Pages? Sono due scelte diverse: la prima
+   tiene una copia raggiungibile del sito vecchio, la seconda no.
+3. **`www` va gestito insieme all'apice.** Oggi è un CNAME a GitHub che risponde 301. Se si sposta
+   solo l'apice, `www` continua a portare al sito vecchio.
+4. **Il certificato di GitHub scade il 20/11/2026.** Non è una scadenza per il cutover — dopo lo
+   spostamento il certificato lo fa Cloudflare — ma è la data oltre la quale il vecchio sito, se
+   lo si lascia acceso sul dominio, smetterebbe di rinnovarlo.
+
+### La finestra di sovrapposizione
+
+Fra il cambio dei record su GoDaddy e la propagazione c'è un intervallo in cui i due siti
+convivono, e chi arriva vede l'uno o l'altro a seconda del resolver. **Non è un problema da
+evitare: è un problema da restringere.** Abbassare il TTL dei record del dominio (a 300 secondi)
+qualche ora *prima* del cutover riduce quella finestra da ore a minuti, e si può rialzare dopo.
+Va fatto prima, non durante: abbassarlo al momento del cambio non serve, perché i resolver hanno
+già in cache il valore vecchio con il TTL vecchio.
+
+**Tutto questo è fuori dal perimetro di adesso** — è una modifica al DNS. È scritto qui perché è
+un passaggio del rilascio, non un dettaglio, e perché le prime due decisioni non sono tecniche.
 
 ## 1. Prima del cutover — tre minuti
 
@@ -78,9 +103,14 @@ produzione, variabili, record DNS. Senza quelli il ripristino del §4 diventa un
    `https://cognitariatzone.org/api/cms-callback`. GitHub accetta un solo callback per
    applicazione: quella della preview non può servire anche la produzione.
 4. **Nuovo deploy.** Le variabili si leggono al build: cambiarle senza ricostruire non fa niente.
-5. **Dominio personalizzato e DNS** (§0.1): aggiungere `cognitariatzone.org` al progetto Pages e
-   cambiare i record su GoDaddy. È l'ultimo passaggio, non il primo: prima si verifica che la
-   build di produzione sia giusta, poi le si manda il dominio.
+5. **Dominio personalizzato e DNS** (§0.1). È l'ultimo passaggio, non il primo: prima si verifica
+   che la build di produzione sia giusta, poi le si manda il dominio. Nell'ordine:
+   a. abbassare il TTL dei record su GoDaddy, qualche ora prima;
+   b. aggiungere `cognitariatzone.org` (e `www`) come dominio personalizzato del progetto Pages;
+   c. cambiare i record su GoDaddy secondo quello che Cloudflare indica;
+   d. decidere del vecchio sito su GitHub Pages — lasciarlo acceso su `gattcocco.github.io` o
+      disattivarlo — e, se si disattiva, togliere anche il file `CNAME` da `main`;
+   e. rialzare il TTL quando è tutto stabile.
 
 ## 3. Subito dopo — due minuti
 

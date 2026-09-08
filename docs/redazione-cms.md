@@ -110,8 +110,20 @@ nelle variabili del progetto Cloudflare, e le due Function `functions/api/cms-au
    Finché la configurazione manca risponde 503 e ristampa questa lista. Non stampa segreti.
 
 Dopo che risponde a posto, resta un ultimo passaggio a mano che nessuno script può fare: aprire
-`/admin/`, entrare con GitHub, creare una bozza con copertina e testo alternativo, salvarla,
-togliere la spunta «Bozza» e vedere l'articolo comparire nel blog e in home dopo il deploy.
+`/admin/`, entrare con GitHub, creare una bozza, salvarla, togliere la spunta «Bozza» e vedere
+l'articolo comparire nel blog e in home dopo il deploy.
+
+**Fatto sulla preview l'08/09/2026, dalla redazione e non da uno script.** Accesso con GitHub,
+lettura del manifesto esistente, creazione e salvataggio di un articolo di prova, pubblicazione,
+comparsa nel blog e nel richiamo in home, cancellazione dal CMS e sparizione dal sito. L'indirizzo
+dell'articolo cancellato risponde **404** — verificato sull'intestazione HTTP, non a occhio.
+Resta da rifare, identico, sul dominio pubblico dopo il cutover: è un'altra applicazione OAuth e
+un altro ramo (§8).
+
+Una parte non è stata esercitata e va detto: **il caricamento di un'immagine dal CMS**. L'articolo
+di prova non aveva copertina (`cover` vuoto), quindi il percorso «carico un file → finisce in
+`public/images/articoli/` → si vede in pagina» non è ancora stato provato da nessuno. È la cosa da
+fare al primo articolo vero con una foto — vedi §5 e l'avvertenza sul testo alternativo in §6.
 
 Il segreto non va incollato in chat, non va messo in un file del repository e non compare nei
 log: sta solo fra GitHub e le variabili cifrate di Cloudflare. Le due Function lo leggono a
@@ -155,11 +167,54 @@ file di lavoro.
 ## 6. Cosa succede dopo che salvi
 
 1. Il CMS fa un commit su `dev` con un messaggio del tipo `Articolo: aggiorna "…"`.
-2. Cloudflare se ne accorge e ricostruisce la preview: ci vuole un minuto o due.
+2. Cloudflare se ne accorge **da sola** e ricostruisce: ci vuole un minuto o due.
 3. Se il controllo automatico trova un problema — per esempio una copertina senza testo
    alternativo, o un carattere che i nostri font non contengono — **la build fallisce e la
    preview resta com'era**. L'articolo è salvato su Git ma non va online finché il problema non
    è risolto. È voluto: meglio una preview vecchia che una rotta.
+
+**Il punto 2 non richiede niente da parte tua.** Chi scrive articoli non deve entrare in
+Cloudflare, mai: né per pubblicare, né per cancellare. Il commit del CMS fa partire da solo il
+deployment corrispondente.
+
+Verificato l'08/09/2026 sul collaudo reale: quattro commit fatti dal CMS — creazione,
+due modifiche e cancellazione — hanno prodotto **quattro deployment automatici**, uno per commit,
+senza nessun intervento manuale.
+
+### «Retry deployment» non è il modo di pubblicare
+
+Nel pannello di Cloudflare, accanto a ogni deployment, c'è un pulsante **Retry deployment**.
+Serve a **ricostruire il commit di quel deployment**, cioè quello scritto nella sua riga: è
+pensato per quando una build è fallita per una ragione passeggera.
+
+Non porta online l'ultima versione. Se lo si preme su un deployment di ieri, si ricostruisce
+ieri — e un articolo cancellato stamattina **ricompare**, perché nel commit di ieri c'era ancora.
+È successo davvero durante il collaudo, ed è il motivo per cui questa sezione esiste.
+
+Se una modifica del CMS non sembra arrivare online:
+
+1. **aspetta un paio di minuti** — la build ci mette quel tanto;
+2. guarda **l'elenco dei deployment**: in cima deve esserci il commit più recente, quello con il
+   messaggio del tuo salvataggio. Se c'è ed è riuscito, sei a posto: svuota la cache del browser
+   o ricarica con `Ctrl+F5`;
+3. se in cima c'è un commit tuo ma la build è **fallita**, il problema è nel contenuto — quasi
+   sempre una copertina senza testo alternativo (vedi sotto);
+4. se il commit non c'è proprio, allora il CMS non ha salvato: rifai il salvataggio.
+
+**Non premere Retry su un deployment vecchio per «forzare l'aggiornamento».** Fa l'opposto.
+
+### La copertina senza testo alternativo ferma la build
+
+È l'errore più facile da fare e il più scomodo da riconoscere, perché **dal CMS non si vede**: il
+salvataggio riesce, il commit parte, e poi la build fallisce senza dirtelo. In pagina non succede
+niente — l'articolo semplicemente non compare.
+
+Il messaggio, che sta nel registro della build su Cloudflare, è:
+`coverAlt: Se c'e' una copertina serve anche coverAlt: descrivi l'immagine per chi non la vede.`
+
+Si risolve riaprendo l'articolo e compilando il testo alternativo. La regola non si toglie: una
+copertina senza alternativa testuale è un buco per chi non vede l'immagine. Ma vale la pena
+saperlo prima di trovarcisi: **se hai messo una copertina, compila anche l'alt, sempre.**
 
 ---
 
@@ -173,7 +228,13 @@ personale.
 tempo (il collegamento vale dieci minuti). Ricomincia dal pulsante.
 
 **L'articolo non compare sul sito** — quasi sempre è l'interruttore *Bozza* ancora acceso.
-Altrimenti guarda se l'ultima build di Cloudflare è fallita.
+Altrimenti guarda se l'ultima build di Cloudflare è fallita: la causa più frequente è una
+copertina senza testo alternativo (§6). Non usare *Retry deployment* per forzare
+l'aggiornamento — ricostruisce il commit vecchio e riporta indietro il sito (§6).
+
+**Un articolo cancellato è ricomparso** — è quasi certamente *Retry deployment* premuto su un
+deployment precedente alla cancellazione. Si rimedia lasciando ricostruire il commit più recente,
+o premendo Retry sulla riga giusta: quella del commit `Articolo: rimuove "…"`.
 
 **La copertina non si vede quando condivido il link** — manca il JPEG accanto al WebP
 (sezione 5).

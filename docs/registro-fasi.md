@@ -1407,3 +1407,114 @@ dirle prima e non dopo — che nessuna delle opzioni disponibili può garantirle
 sparisca del tutto.
 
 Niente eseguito: nessuna riscrittura, nessun force push, nessuna cancellazione.
+
+---
+
+## Il CMS è collaudato davvero — 08/09/2026
+
+Ramo `dev`. Nessun merge, nessun deploy in produzione, nessuna modifica al DNS.
+
+### Cosa ha fatto la redazione, non uno script
+
+Applicazione OAuth creata, variabili messe nell'ambiente Preview di Cloudflare, e poi il giro
+completo dalla preview: accesso con GitHub, lettura del manifesto già pubblicato, creazione e
+salvataggio di un articolo di prova, pubblicazione, comparsa nel blog e nel richiamo in home,
+cancellazione dal CMS, sparizione dal sito.
+
+Quattro commit, tutti firmati dall'account della redazione:
+
+| Commit | Cosa |
+|---|---|
+| `a3dc925` | aggiunge «prova-cms» |
+| `9b8990a` | aggiorna |
+| `71bdf89` | aggiorna — è qui che `bozza` passa da `true` a `false` |
+| `0d05b58` | rimuove |
+
+**Il collaudo del CMS in anteprima è chiuso.** Quello sul dominio pubblico è un'altra cosa e resta
+da fare: altra applicazione OAuth, altro ramo, altro dominio.
+
+### Le due verifiche chieste, fatte sulle intestazioni HTTP
+
+**404 vero, non una pagina di errore con stato 200.** L'indirizzo dell'articolo cancellato:
+
+```
+GET /blog/prova-cms/   →  HTTP/1.1 404 Not Found   Cache-Control: no-store
+GET /blog/prova-cms    →  HTTP/1.1 404 Not Found   Cache-Control: no-store
+```
+
+Con e senza barra finale. `no-store` sul 404 vuol dire che quella risposta non viene tenuta in
+cache da nessuna parte: non c'è il rischio che l'errore si «incolli» a un indirizzo che un giorno
+tornerà valido. L'elenco del blog risponde `max-age=0, must-revalidate`, cioè si rivalida a ogni
+richiesta: nessun contenuto vecchio servito dalla cache. Quello che si era visto prima era la
+cache del browser, non del server — ed è coerente con il fatto che con il parametro anticache la
+pagina risultava già sparita.
+
+La pagina di errore, verificata anche su un indirizzo inventato: `404` con «Questa pagina non c'è».
+
+**Il deployment parte da solo.** Ognuno dei quattro commit del CMS ha prodotto il proprio
+deployment su Cloudflare, senza che nessuno toccasse il pannello:
+
+| Commit | Deployment automatico |
+|---|---|
+| `a3dc925` | 08:54:37Z ✅ |
+| `9b8990a` | 09:07:56Z ✅ |
+| `71bdf89` | 09:19:04Z ✅ |
+| `0d05b58` | 09:53:37Z ✅ |
+
+Quattro su quattro, cancellazione compresa. **La redazione non deve entrare in Cloudflare per
+pubblicare**, che era il requisito.
+
+### «Retry deployment» ricostruisce il commit selezionato
+
+Durante il collaudo l'articolo cancellato è ricomparso, ed era questo: *Retry deployment* premuto
+su un deployment precedente alla cancellazione. Quel pulsante non porta online l'ultima versione —
+**ricostruisce il commit di quella riga**. Se la riga è di ieri, si ricostruisce ieri, e un
+articolo cancellato oggi torna, perché nel commit di ieri c'era ancora.
+
+Non è un difetto: è a cosa serve quel pulsante, cioè ritentare una build fallita per una ragione
+passeggera. Ma è un modo naturale di ragionare — «non si aggiorna, glielo faccio rifare» — che
+fa esattamente il contrario. Documentato in `docs/redazione-cms.md` §6, insieme a cosa guardare
+davvero quando una modifica non sembra arrivare online.
+
+### Una cosa che il collaudo non ha esercitato, e va detto
+
+**Il caricamento di un'immagine dal CMS.** L'articolo di prova aveva `cover` vuoto: il percorso
+«carico un file → finisce in `public/images/articoli/` → si vede in pagina» non l'ha ancora
+provato nessuno. È la cosa da fare al primo articolo vero con una foto.
+
+E c'è una trappola su quel percorso, che ho verificato apposta: **se si mette una copertina senza
+testo alternativo, la build fallisce** — con un messaggio chiaro, ma che sta nel registro di
+Cloudflare, dove chi scrive articoli non guarda. Dal CMS il salvataggio riesce e sembra tutto a
+posto; poi l'articolo non compare e non si capisce perché.
+
+La regola non si toglie: una copertina senza alternativa testuale è un buco per chi non vede
+l'immagine, ed è il motivo per cui il campo esiste. Ma il modo in cui fallisce è scomodo, ed è una
+decisione da prendere prima del rilascio, non dopo il primo articolo con foto:
+
+- **lasciare così** e affidarsi alla documentazione (`docs/redazione-cms.md` §6 lo dice ora in
+  modo esplicito);
+- oppure **non far fallire la build**: pubblicare l'articolo senza mostrare la copertina, il che
+  però fa sparire in silenzio un'immagine che qualcuno aveva messo — un'altra forma della stessa
+  scomodità.
+
+Non ho cambiato il comportamento: è una scelta editoriale su cosa sia peggio, non un difetto da
+correggere di mia iniziativa.
+
+### Il dominio, guardato meglio in vista del cutover
+
+Oltre a quello che si sapeva ieri — apice sugli IP di GitHub Pages, nameserver GoDaddy — ora c'è
+il quadro completo, in `docs/rilascio-e-ripristino.md` §0.1: nessun record AAAA; `www` è un CNAME
+a `gattcocco.github.io` che risponde 301; GitHub Pages è attivo su questo repository con sorgente
+**ramo `main`**, dominio personalizzato e HTTPS forzato; il certificato di GitHub copre anche
+`www` e scade il **20/11/2026**.
+
+Tre conseguenze che non sono tecniche e vanno decise:
+
+1. il dominio è **rivendicato da GitHub Pages** tramite il file `CNAME` su `main`: spostarlo su
+   Cloudflare senza toccare GitHub lascia due sistemi che pensano entrambi di servirlo;
+2. il vecchio sito **resta acceso** come rete di sicurezza, e per quanto, oppure si disattiva;
+3. `www` va spostato insieme all'apice, altrimenti continua a portare al sito vecchio.
+
+E una che è tecnica: abbassare il TTL dei record **qualche ora prima** del cutover restringe la
+finestra in cui i due siti convivono da ore a minuti. Farlo al momento del cambio non serve — i
+resolver hanno già in cache il valore vecchio con il TTL vecchio.

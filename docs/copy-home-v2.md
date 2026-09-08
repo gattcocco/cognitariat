@@ -269,22 +269,32 @@ qualcosa insieme. `alt=""`.
 
 ## 6. Cosa vogliamo costruire
 
-**Id**: `cosa-costruiamo` · **Stato**: **progetto — non ancora attivo**
+**Id**: `cosa-costruiamo` · **Stato**: **stesura approvata dal committente l'08/09/2026**
 
-**Titolo**: Quello che stiamo costruendo, e che oggi non c'è
+**Titolo**: Quello che stiamo costruendo
 
 **Corpo**
-> Questa parte non è un servizio disponibile. È il programma di lavoro del sindacato, scritto qui
-> perché chi si avvicina sappia cosa sta per nascere e possa contribuire a farlo nascere.
->
-> - Una **libreria di clausole contrattuali** per il lavoro cognitivo: cosa firmi quando firmi.
+> - Una **libreria di clausole contrattuali** per il lavoro cognitivo
 > - Una **rete di avvocatə del lavoro** per le prime vertenze.
 > - Un **archivio di casi anonimizzati**, perché chi arriva dopo non riparta da zero.
 > - Strumenti di **contrattazione collettiva** per figure che oggi contrattano da sole.
 >
-> Lo scriviamo così perché è così. Chi si avvicina adesso entra in un progetto in costruzione, non
-> in un servizio che funziona. Se hai un caso da raccontare o un contratto strano sotto mano,
-> quello ci serve più di qualsiasi altra cosa.
+> Se hai un caso da raccontare o un contratto strano sotto mano, quello ci serve più di qualsiasi
+> altra cosa.
+
+**Cosa è stato tolto l'08/09/2026, su indicazione esplicita**: l'occhiello «In costruzione — non
+ancora disponibile», il paragrafo introduttivo («Questa parte non è un servizio disponibile…»), la
+coda del primo punto («: cosa firmi quando firmi») e le due frasi che aprivano il paragrafo finale
+(«Lo scriviamo così perché è così. Chi si avvicina adesso entra in un progetto in costruzione, non
+in un servizio che funziona.»).
+
+Il testo approvato **non va accompagnato da formule equivalenti**: niente occhielli, niente
+disclaimer, niente «in arrivo». Se un giorno servisse di nuovo dire che questi strumenti non ci
+sono ancora, è una decisione editoriale da prendere, non un automatismo da reintrodurre.
+
+Il grassetto sulle aperture dei punti è quello di prima, sulle stesse identiche parole:
+impaginazione, non testo aggiunto. **Da notare**: il primo punto non ha punto fermo finale, gli
+altri tre sì — è così nel testo approvato ed è stato riprodotto tale e quale, non uniformato.
 
 **CTA unica**: nessuna — l'invito è nella sezione 7, per non chiedere due volte di fila.
 
@@ -304,7 +314,10 @@ qualcosa insieme. `alt=""`.
 **Titolo**: Da dove si comincia
 
 **Corpo**
-> Non chiediamo di iscriversi a niente. Chiediamo tre cose, in ordine di utilità per noi:
+> Chiediamo tre cose, in ordine di utilità per noi:
+
+*(«Non chiediamo di iscriversi a niente.» tolta l'08/09/2026, su indicazione esplicita.)*
+
 >
 > **Raccontaci un caso.** Un contratto con una clausola strana, una mansione che è cambiata senza
 > che cambiasse la paga, un committente che ha iniziato a chiedere il doppio nello stesso tempo.

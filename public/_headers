@@ -1,10 +1,13 @@
-# Regole di cache, dichiarate da noi invece che lasciate al valore predefinito
-# della piattaforma.
+# Regole di cache per gli asset.
 #
-# PERCHE' ESISTE QUESTO FILE
+# Qui NON c'e' nessuna regola per le pagine HTML, ed e' una conclusione, non una
+# dimenticanza. Vale la pena raccontare perche': e' il tipo di cosa che qualcuno
+# riproverebbe fra sei mesi.
+#
+# IL PROBLEMA
 # L'08/09/2026 due articoli cancellati dal CMS continuavano a rispondere sul loro
-# indirizzo, e non era la cache del browser: era la cache di bordo di Cloudflare.
-# Le risposte lo dicevano da sole —
+# indirizzo. Non era la cache del browser: era quella di bordo di Cloudflare, e le
+# risposte lo dicevano da sole —
 #
 #   GET /blog/prova-cms/
 #   HTTP/1.1 200 OK
@@ -12,69 +15,42 @@
 #   Age: 12425
 #   Cache-Control: public, s-maxage=604800
 #
-# — cioe' una copia conservata da tre ore e mezza, con il permesso di restare per
-# sette giorni, servita a chiunque colpisse quel nodo. Un indirizzo mai esistito
-# rispondeva invece 404 con no-store, e un articolo vivo 200 con max-age=0: la
-# differenza non era il contenuto, era che quelle due pagine erano finite in
-# cache mentre esistevano e ci erano rimaste dopo.
+# — con dentro l'articolo cancellato, non la pagina di errore. Un indirizzo mai
+# esistito rispondeva invece 404 a ogni richiesta, senza un solo HIT.
 #
-# PRIMO TENTATIVO, INSUFFICIENTE: `s-maxage=0`. Sembra dire "le cache condivise
-# rivalidino sempre", e invece Cloudflare lo legge come "cacheabile con TTL zero"
-# e ci applica il proprio tempo di bordo. Misurato: pubblicato un articolo di
-# prova, scaldata la cache, cancellato e ridistribuito, rispondeva ancora 200 su
-# 20 richieste su 20, con CF-Cache-Status: HIT e la nostra stessa intestazione
-# s-maxage=0 nella risposta. Un tempo di scadenza non e' un divieto.
+# TRE TENTATIVI DI CORREGGERLO DA QUI, TUTTI FALLITI
+# Ogni volta con la stessa prova: pubblicare un articolo, scaldare la cache,
+# cancellarlo, aspettare il deployment, contare le risposte.
 #
-# SECONDO TENTATIVO, ANCHE QUESTO INSUFFICIENTE: `private, max-age=0,
-# must-revalidate`. Non e' un tempo ma una destinazione — "questa copia e' del
-# browser, le cache condivise non la tengano" — e sarebbe la scelta piu' leggera,
-# perche' lascia al browser il "torna indietro" e le risposte 304. Misurato con
-# lo stesso metodo, su un secondo articolo di prova: cancellato e ridistribuito,
-# rispondeva ancora 200 su 25 richieste su 25, CF-Cache-Status: HIT, Age 93, con
-# `private` scritto nella risposta stessa. Su questo host le direttive
-# dell'origine non governano la cache di bordo.
+#   s-maxage=0                          -> 200 su 20 richieste su 20, HIT
+#   private, max-age=0, must-revalidate -> 200 su 25 su 25, HIT, Age 93
+#   no-store                            -> 200 su 30 su 30, HIT, Age 76
 #
-# CORREZIONE: `no-store`. E' l'unica che questa piattaforma dimostra di
-# rispettare, e la prova e' nel suo stesso comportamento: le risposte 404 escono
-# con `no-store` e non finiscono mai in cache — un indirizzo mai esistito
-# risponde 404 a ogni richiesta, da ogni nodo, senza un solo HIT.
+# Nell'ultima, la risposta portava `Cache-Control: no-store` e insieme
+# `CF-Cache-Status: HIT`: la piattaforma serviva dalla cache una risposta che le
+# diceva di non conservarla. Su `*.pages.dev` le direttive dell'origine non
+# governano la cache di bordo.
 #
-# COSA COSTA, detto chiaramente. `no-store` vieta di conservare la pagina anche
-# al browser: si perdono le risposte 304 e, su Chrome, il ripristino istantaneo
-# col tasto "indietro". Su un sito di poche pagine statiche e' un prezzo piccolo —
-# l'HTML pesa decine di kilobyte e gli asset, che sono il grosso, restano in cache
-# per un anno. In cambio una pagina cancellata sparisce quando viene cancellata,
-# che e' la cosa che deve funzionare senza che nessuno ci pensi.
+# PERCHE' NON RESTA `no-store`
+# Perche' non otteneva niente e costava: vieta di conservare la pagina anche al
+# browser, quindi niente risposte 304 e niente ripristino istantaneo col tasto
+# "indietro". Pagare un prezzo per zero risultato e' peggio che non fare niente.
+# Le pagine tornano al valore predefinito della piattaforma
+# (`max-age=0, must-revalidate`), che per il browser e' la cosa giusta.
 #
-# Se un giorno il sito passasse su una zona dell'account — il dominio pubblico lo
-# sara' — si potra' governare la cache di bordo con una regola di zona e tornare a
-# `private`, che e' piu' efficiente. Su `pages.dev` quella leva non c'e'.
+# DOVE SI CORREGGE DAVVERO
+# Non da qui: serve una regola di cache sulla zona, e `pages.dev` non e' una zona
+# di questo account. Il dominio dell'associazione lo sara': al cutover va
+# impostata li'. Vedi docs/rilascio-e-ripristino.md.
 #
-# ATTENZIONE ALLA FORMA DELLE REGOLE
-# Le regole che corrispondono allo stesso indirizzo **si sommano**, non si
-# sostituiscono: con `/*` in cima e `/fonts/*` sotto, un file di font riceveva
-# la regola delle pagine attaccata alla propria, cioe' due direttive in conflitto
-# nella stessa intestazione e la cache lunga di fatto annullata. Per questo qui non c'e' nessun `/*`: le pagine
-# si indicano per la barra finale, che gli asset non hanno.
-
-# Le pagine HTML: tutti gli indirizzi che finiscono con la barra, cioe' la home,
-# /blog/, /privacy/, ogni articolo. Piu' la pagina di errore, servita quando un
-# indirizzo non c'e' (o non c'e' piu').
-/
-  Cache-Control: no-store
-
-/*/
-  Cache-Control: no-store
-
-/404.html
-  Cache-Control: no-store
-
-# Sitemap e robots cambiano quando cambia il sito: stessa regola.
-/sitemap.xml
-  Cache-Control: no-store
-
-/robots.txt
-  Cache-Control: no-store
+# Quello che resta in questo file riguarda gli asset, dove le direttive vengono
+# rispettate — verificato — e dove c'e' qualcosa da guadagnare.
+#
+# ATTENZIONE ALLA FORMA DELLE REGOLE: quelle che corrispondono allo stesso
+# indirizzo **si sommano** invece di sostituirsi. Con un `/*` in cima, un font
+# riceveva la regola generale attaccata alla propria, cioe' due direttive in
+# conflitto nella stessa intestazione e la cache lunga di fatto annullata. Per
+# questo qui non c'e' nessun `/*`.
 
 # I file con l'impronta nel nome non cambiano mai contenuto a parita' di nome: se
 # cambia il contenuto cambia il nome. Si possono tenere per sempre, ed e' quello

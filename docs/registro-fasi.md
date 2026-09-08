@@ -1718,3 +1718,77 @@ curl -sI https://<sito>/blog/<slug>/ | head -1
 Va ripetuto qualche volta: la cache è per nodo, e una sola richiesta può capitare su quello
 sbagliato. È il controllo da fare quando si cancella qualcosa, al posto di ricaricare la pagina nel
 browser — che mescola la propria cache a quella del server e non permette di distinguere le due.
+
+### Seguito, la stessa sera: la correzione non teneva, e la causa è più a monte
+
+Il blocco qui sopra si chiude dicendo che `s-maxage=0` risolve. **Non risolve.** L'ho scoperto
+provandolo invece di darlo per buono, ed è il motivo per cui questa sezione esiste.
+
+Il metodo, ripetuto tre volte identico: pubblicare un articolo di prova, chiederlo venti-trenta
+volte per farlo entrare in cache, cancellarlo dal repository, aspettare il deployment, contare le
+risposte.
+
+| Intestazione dichiarata | Risultato dopo la cancellazione |
+|---|---|
+| `public, max-age=0, must-revalidate, s-maxage=0` | **200 su 20 richieste su 20**, `HIT` |
+| `private, max-age=0, must-revalidate` | **200 su 25 su 25**, `HIT`, `Age 93` |
+| `no-store` | **200 su 30 su 30**, `HIT`, `Age 76` |
+
+L'ultima riga è quella che chiude la questione:
+
+```
+HTTP/1.1 200 OK
+CF-Cache-Status: HIT
+Age: 76
+Cache-Control: no-store
+```
+
+La piattaforma stava servendo **dalla cache** una risposta che le diceva di non conservarla. Su
+`*.pages.dev` le direttive di cache dell'origine non governano la cache di bordo: né un tempo
+(`s-maxage`), né una destinazione (`private`), né un divieto (`no-store`).
+
+Le tre prove hanno consumato tre articoli di prova, tutti cancellati. Il manifesto non è mai stato
+toccato.
+
+### Cosa ho lasciato, e cosa ho tolto
+
+`public/_headers` resta, ma **solo per gli asset**, dove le direttive vengono rispettate: i file
+con l'impronta nel nome per un anno, i font un giorno, le immagini un'ora. Lì c'è qualcosa da
+guadagnare e funziona.
+
+Le regole sulle pagine le ho **tolte**. `no-store` non otteneva niente e costava: vieta di
+conservare la pagina anche al browser, quindi niente risposte 304 e niente ripristino istantaneo
+col tasto «indietro». Pagare un prezzo per zero risultato è peggio che non fare niente. Le pagine
+tornano al valore predefinito della piattaforma, che per il browser è la cosa giusta.
+
+Sarebbe stato comodo lasciare il file com'era e dire che il problema era stato affrontato. Non è
+stato affrontato: è stato capito, e sta in un posto dove da qui non si arriva.
+
+### Dove si corregge davvero
+
+Serve una regola di cache **sulla zona**, e `pages.dev` non è una zona di questo account: è un
+dominio di Cloudflare. Non c'è nessuna leva — né un file nel repository, né un pulsante di
+svuotamento per l'anteprima.
+
+**Il dominio dell'associazione sarà una zona dell'account**, e lì la leva esiste. Al cutover va
+creata una regola di cache che escluda le pagine HTML dalla cache di bordo, o che le faccia
+rivalidare. È stato aggiunto come passaggio in `docs/rilascio-e-ripristino.md`: **non è
+facoltativo**, perché in produzione questo difetto significa un articolo ritirato che resta
+leggibile per giorni, e lì non è una prova, è un articolo vero.
+
+### Cosa vuol dire per la redazione, adesso
+
+Sull'anteprima, **un articolo cancellato può restare visibile per un po'** su alcuni nodi. Non c'è
+niente da fare e non c'è niente da premere: *Retry deployment* non serve — sembrava servire solo
+perché fra un tentativo e l'altro capitava un nodo diverso.
+
+Il modo affidabile di verificare che una cancellazione è andata a buon fine è **l'indirizzo del
+deployment**, quello con il codice davanti, che si legge nel pannello o nel controllo su GitHub:
+
+```
+https://<codice>.cognitariat.pages.dev/blog/<slug>/
+```
+
+Quello non passa dalla cache condivisa e dice la verità: sui tre articoli di prova ha risposto 404
+ogni volta, mentre l'alias ancora no. È anche il modo di distinguere le due cose, se ricapita:
+l'alias sbaglia, il deployment no.

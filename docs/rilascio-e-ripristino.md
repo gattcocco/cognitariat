@@ -103,7 +103,27 @@ produzione, variabili, record DNS. Senza quelli il ripristino del §4 diventa un
    `https://cognitariatzone.org/api/cms-callback`. GitHub accetta un solo callback per
    applicazione: quella della preview non può servire anche la produzione.
 4. **Nuovo deploy.** Le variabili si leggono al build: cambiarle senza ricostruire non fa niente.
-5. **Dominio personalizzato e DNS** (§0.1). È l'ultimo passaggio, non il primo: prima si verifica
+5. **Regola di cache sulle pagine.** Non e' facoltativa. Sull'anteprima
+   (`dev.cognitariat.pages.dev`) la cache di bordo di Cloudflare ignora le direttive che il sito
+   dichiara: un articolo cancellato resta leggibile per giorni, e non c'e' modo di correggerlo dal
+   repository — provato con `s-maxage=0`, `private` e `no-store`, tutti e tre serviti dalla cache
+   con `CF-Cache-Status: HIT` (vedi `docs/registro-fasi.md` e i commenti in `public/_headers`).
+   `pages.dev` non e' una zona dell'account, quindi lì la leva non c'e'. **Sul dominio
+   dell'associazione sì**: nel pannello di Cloudflare, *Caching → Cache Rules*, una regola che per
+   le richieste di pagine HTML (percorso che finisce con `/` o con `.html`) imposti *Bypass cache*,
+   oppure *Respect origin TTL* con l'intestazione del sito. In produzione questo difetto significa
+   un articolo ritirato che resta online per giorni: lì non e' una prova, e' un articolo vero.
+
+   Da verificare subito dopo, pubblicando e cancellando un articolo di prova:
+
+   ```
+   curl -s -o /dev/null -w "%{http_code}
+" https://cognitariatzone.org/blog/<slug>/
+   ```
+
+   Ripetuto una decina di volte, deve dire sempre `404`.
+
+6. **Dominio personalizzato e DNS** (§0.1). È l'ultimo passaggio, non il primo: prima si verifica
    che la build di produzione sia giusta, poi le si manda il dominio. Nell'ordine:
    a. abbassare il TTL dei record su GoDaddy, qualche ora prima;
    b. aggiungere `cognitariatzone.org` (e `www`) come dominio personalizzato del progetto Pages;

@@ -277,10 +277,21 @@ Ricaricare la pagina nel browser non dice niente di utile, perché mescola la co
 quella del server: se vuoi guardare lì, aggiungi un parametro qualsiasi in fondo
 (`?x=1`) — se con quello la pagina è sparita e senza no, era una copia conservata, non l'articolo.
 
-L'08/09/2026 questo è successo davvero, e non era il browser: era la cache di Cloudflare, che
-teneva la pagina con il permesso di conservarla sette giorni. È stato corretto con `public/_headers`
-(`s-maxage=0` sulle pagine): da allora una pagina cancellata sparisce quando viene cancellata. Il
-dettaglio, con le misure, sta in `docs/registro-fasi.md`.
+**Sull'anteprima può succedere, e non si può correggere.** L'08/09/2026 è stato indagato fino in
+fondo: non è il browser, è la cache di Cloudflare, che su `pages.dev` non rispetta quello che il
+sito le chiede — provato con tre intestazioni diverse, servite tutte e tre dalla cache. Non c'è
+niente da premere e niente da svuotare: passa da sé.
+
+Il modo affidabile di verificare che una cancellazione è andata a buon fine è **l'indirizzo del
+deployment**, quello col codice davanti che trovi nel pannello o nel controllo su GitHub:
+
+```
+https://<codice>.cognitariat.pages.dev/blog/<slug>/
+```
+
+Quello non passa dalla cache condivisa e dice la verità. Sul sito pubblico il problema non ci sarà:
+al cutover viene impostata una regola di cache che sul dominio dell'associazione si può fare e su
+`pages.dev` no. Il dettaglio, con le misure, sta in `docs/registro-fasi.md`.
 
 **La copertina non si vede quando condivido il link** — manca il JPEG accanto al WebP
 (sezione 5).

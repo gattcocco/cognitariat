@@ -1,6 +1,6 @@
 ---
 title: Prova CMS
-bozza: true
+bozza: false
 date: 2026-09-08
 autore: Editoriale
 excerpt: Prova tecnica di pubblicazione

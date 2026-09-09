@@ -47,18 +47,27 @@ const articles = defineCollection({
     excerpt: z.string(),
 
     /**
-     * Copertina: immagine e testo alternativo insieme, o niente.
+     * Copertina: obbligatoria, immagine e testo alternativo insieme.
      *
-     * Stanno in un gruppo e non come due campi affiancati perche' e' l'unico
-     * modo, nella versione di Sveltia che usiamo, di ottenere «obbligatorio solo
-     * se c'e' l'immagine»: il CMS mostra una casella «Aggiungi Copertina», e
-     * finche' non la si spunta i due campi non esistono, quindi non possono
-     * essere obbligatori. Spuntandola compaiono entrambi obbligatori.
-     * Vedi docs/redazione-cms.md §5.
+     * Decisione editoriale del 09/09/2026: ogni articolo ha una copertina. Il
+     * gruppo non e' piu' facoltativo, e i due campi dentro nemmeno — un'immagine
+     * senza descrizione e' invisibile a chi non la vede, e una descrizione senza
+     * immagine non descrive niente. Vanno insieme o non vanno.
      *
-     * Il controllo e' ripetuto qui alla costruzione del sito: il CMS non e'
-     * l'unico modo di scrivere un file, e una regola che vale solo
-     * nell'interfaccia non e' una regola.
+     * Il controllo e' ripetuto qui alla costruzione del sito, oltre che nel CMS:
+     * il CMS non e' l'unico modo di scrivere un file — si puo' sempre
+     * modificarlo a mano su Git — e una regola che vale solo nell'interfaccia
+     * non e' una regola. Vedi docs/redazione-cms.md §5.
+     */
+    /*
+     * Dichiarato facoltativo qui e reso obbligatorio nel controllo piu' sotto, che
+     * non e' un giro inutile: se l'obbligo stesse qui, un articolo senza copertina
+     * fallirebbe con il messaggio di serie «copertina: Required» e il resto dei
+     * controlli non girerebbe nemmeno — compreso quello che spiega come migrare la
+     * forma vecchia. Cioe' chi ha un file scritto col vecchio schema si vedrebbe
+     * dire «Required» su un campo che non ha mai sentito nominare, invece delle
+     * istruzioni. Rimandare l'obbligo di due righe fa uscire il messaggio giusto in
+     * tutti i casi.
      */
     copertina: z
       .object({
@@ -102,18 +111,30 @@ const articles = defineCollection({
             'salvataggio li toglierebbe, facendo sparire la copertina senza dirlo a nessuno.',
         });
       }
-      if (d.copertina && d.copertina.alt.trim().length === 0) {
+      if (!d.copertina) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['copertina'],
+          message:
+            'Ogni articolo deve avere una copertina. Aggiungi al frontmatter:\n' +
+            '  copertina:\n    file: /images/articoli/....webp\n    alt: descrizione dell\'immagine\n' +
+            'Dal CMS il campo e\' obbligatorio e non lascia salvare senza.',
+        });
+        return;
+      }
+      // Uno spazio non e' una descrizione: si confronta il valore ripulito.
+      if (d.copertina.alt.trim().length === 0) {
         ctx.addIssue({
           code: 'custom',
           path: ['copertina', 'alt'],
-          message: 'Descrivi la copertina per chi non puo\' vederla: senza, l\'immagine non si pubblica.',
+          message: 'Descrivi la copertina per chi non puo\' vederla: senza, l\'articolo non si pubblica.',
         });
       }
-      if (d.copertina && d.copertina.file.trim().length === 0) {
+      if (d.copertina.file.trim().length === 0) {
         ctx.addIssue({
           code: 'custom',
           path: ['copertina', 'file'],
-          message: 'C\'e\' il testo alternativo ma non l\'immagine: aggiungi il file, oppure togli il gruppo.',
+          message: 'Manca il file della copertina: ogni articolo deve averne una.',
         });
       }
     })
@@ -124,8 +145,11 @@ const articles = defineCollection({
      */
     .transform((d) => ({
       ...d,
-      cover: d.copertina?.file,
-      coverAlt: d.copertina?.alt,
+      // Il ramo senza copertina non si raggiunge: il controllo qui sopra ha gia'
+      // fermato la costruzione, e zod non esegue la trasformazione se ci sono
+      // errori. I `??` esistono solo per il verificatore di tipi.
+      cover: d.copertina?.file ?? '',
+      coverAlt: d.copertina?.alt ?? '',
     })),
 });
 

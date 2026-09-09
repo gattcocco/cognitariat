@@ -42,6 +42,16 @@ const SOLO_NEL_SITO = new Set(['cover', 'coverAlt']);
  */
 const GRUPPI = { copertina: ['file', 'alt'] };
 
+/**
+ * Gruppi che devono essere **obbligatori** nel CMS, non solo presenti. Per la
+ * copertina e' la decisione editoriale del 09/09/2026: ogni articolo ne ha una.
+ * Se qualcuno rimettesse `required: false`, il CMS tornerebbe a mostrare la
+ * casella «Aggiungi Copertina» e si potrebbe salvare un articolo senza — mentre
+ * la build lo rifiuterebbe. Il salvataggio riuscirebbe e la pubblicazione no:
+ * il modo peggiore di rompersi.
+ */
+const GRUPPI_OBBLIGATORI = ['copertina'];
+
 const problemi = [];
 
 let config;
@@ -80,6 +90,42 @@ for (const c of campiCms) {
     );
   }
 }
+/**
+ * Legge il `required:` dichiarato accanto a un `name:` di primo livello.
+ * A mano e non con un'espressione regolare costruita al volo: la versione con
+ * RegExp e template literal aveva perso i backslash e cercava `s{8}` invece di
+ * spazi, quindi non trovava mai il blocco e dava sempre lo stesso allarme.
+ * Righe indentate di 8 spazi = campo di primo livello; 12 = sottocampo.
+ */
+function requiredDelCampo(yaml, nome) {
+  const righe = yaml.split('\n');
+  const inizio = righe.findIndex((r) => r === `        name: ${nome}`);
+  if (inizio === -1) return { trovato: false };
+  for (let i = inizio + 1; i < righe.length; i += 1) {
+    const r = righe[i];
+    // Fine del blocco: un'altra voce di elenco allo stesso livello.
+    if (/^ {6}- /.test(r)) break;
+    const m = /^ {8}required:\s*(\S+)\s*$/.exec(r);
+    if (m) return { trovato: true, valore: m[1] };
+  }
+  return { trovato: true, valore: undefined };
+}
+
+for (const gruppo of GRUPPI_OBBLIGATORI) {
+  const { trovato, valore } = requiredDelCampo(config, gruppo);
+  if (!trovato) {
+    problemi.push(`Nel CMS non c'e' nessun campo "${gruppo}".`);
+  } else if (valore === undefined) {
+    problemi.push(`Nel CMS il gruppo "${gruppo}" non dichiara "required": deve essere obbligatorio.`);
+  } else if (valore !== 'true') {
+    problemi.push(
+      `Nel CMS il gruppo "${gruppo}" ha required: ${valore}. Deve essere true: ogni articolo deve\n` +
+        `     avere una copertina, e con required: false il CMS lascerebbe salvare senza mentre la\n` +
+        `     build rifiuterebbe di pubblicare — il salvataggio riesce, la pubblicazione no.`
+    );
+  }
+}
+
 for (const [gruppo, attesi] of Object.entries(GRUPPI)) {
   if (!campiCms.has(gruppo)) continue;
   const mancanti = attesi.filter((c) => !sottocampiCms.includes(c));

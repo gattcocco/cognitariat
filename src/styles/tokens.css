@@ -1,0 +1,118 @@
+/* ============================================================================
+   COG U — token di design
+   Unica fonte per colori, tipografia e spaziature. I componenti non devono
+   contenere valori esadecimali: se serve un colore nuovo, si aggiunge qui.
+
+   PALETTE (5 colori, decisi dal committente)
+   I rapporti di contrasto sotto sono calcolati secondo WCAG 2.1 e verificati,
+   non stimati. AA richiede 4,5:1 per il testo normale e 3:1 per il testo grande
+   (>=24px, oppure >=18.66px se grassetto).
+
+     coppia            rapporto   testo normale   testo grande
+     nero/bianco        21,00        si              si
+     nero/giallo        14,47        si              si
+     nero/rosa           5,09        si              si
+     bianco/verde        4,95        si              si
+     verde/nero          4,24        NO              si
+     rosa/bianco         4,13        NO              si
+     verde/giallo        3,41        NO              si
+     rosa/giallo         2,85        NO              NO
+     bianco/giallo       1,45        NO              NO   <- mai testo giallo su bianco
+     rosa/verde          1,20        NO              NO   <- mai accostati
+
+   CONSEGUENZE PRATICHE, da rispettare:
+   - Il pulsante primario e' rosa con testo NERO (5,09), non bianco (4,13 non basta).
+   - Il pulsante secondario e' verde con testo BIANCO (4,95).
+   - Il giallo si usa solo come fondo con testo nero. Mai come colore di testo.
+   - I link nel corpo del testo sono verdi E sottolineati: il verde passa AA (4,95)
+     e la sottolineatura evita di affidare l'informazione al solo colore.
+   - Il rosa su bianco si usa solo per titoli grandi, mai per il corpo del testo.
+   ========================================================================= */
+
+:root {
+  /* --- palette --- */
+  --rosa: #e5376a;
+  --verde: #477c48;
+  --nero: #000000;
+  --bianco: #ffffff;
+  --giallo: #f7d44a;
+
+  /* --- varianti di stato ---
+     Derivate dalla palette per hover e pressed. Non sono colori di marca:
+     non vanno usate per superfici o testo, solo per il feedback di interazione.
+
+     Attenzione al verso: il pulsante rosa ha testo NERO, quindi il suo hover va
+     SCHIARITO — scurendo il rosa ci si avvicina al nero e il contrasto cala
+     sotto la soglia (un rosa scurito a #c22a58 scende a 3,77 e non passa AA).
+     Il verde ha invece testo bianco, quindi il suo hover va scurito. */
+  --rosa-hover: #e84b79;   /* rosa schiarito 10%: con testo nero sale a 5,71:1 */
+  --verde-hover: #365e37;  /* verde scurito: con testo bianco sale a 7,47:1 */
+  --giallo-hover: #e5be2b; /* con testo nero: 11,73:1 */
+
+  /* --- neutri derivati dal nero ---
+     Il grigio del testo secondario e' scelto per restare sopra 4,5:1 su bianco
+     (#4a4a4a ~ 9,0:1). Non usare grigi piu' chiari per il testo. */
+  --nero-secondario: #4a4a4a;
+  --bordo: rgba(0, 0, 0, 0.14);       /* solo decorativo: 1,38:1, non delimita controlli */
+  --bordo-forte: rgba(0, 0, 0, 0.28); /* separatori marcati: 1,99:1 */
+  /* Bordo dei campi di form e dei controlli: WCAG 1.4.11 richiede almeno 3:1
+     rispetto allo sfondo adiacente. rgba(0,0,0,0.45) su bianco da' 3,35:1.
+     Non abbassare questo valore per ragioni estetiche. */
+  --bordo-campo: rgba(0, 0, 0, 0.45);
+  --ombra: rgba(0, 0, 0, 0.10);
+
+  /* fondo tenue per riquadri di errore: rosa molto diluito, testo sempre nero */
+  --rosa-tenue: rgba(229, 55, 106, 0.10);
+  --giallo-tenue: rgba(247, 212, 74, 0.22);
+
+  /* --- superfici --- */
+  --fondo: var(--bianco);
+  --fondo-scuro: var(--nero);
+  --superficie: var(--bianco);
+
+  /* --- tipografia ---
+     Inter per gerarchia, corpo e controlli: nessun cambio.
+     Shantell Sans per le sole annotazioni. E' la prima alternativa a Doodle
+     Lines, che resta fuori dal sito finche' non e' chiarito il trasferimento
+     della licenza Envato: Shantell Sans e' SIL OFL 1.1, quindi ospitabile sul
+     nostro dominio e versionabile con il suo OFL.txt (vedi src/styles/font.css).
+     Confronto e prova della schwa: _local/campionario/confronto-font.html.
+     Il fallback resta un corsivo di sistema, per il caso in cui il file non
+     arrivi: e' un'annotazione, non deve bloccare la lettura. */
+  --font-titoli: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-testo: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-annotazioni: 'Shantell Sans', 'Segoe Script', 'Bradley Hand', cursive;
+  /* Peso medio, come da indicazione: il tratto regge senza diventare chiassoso. */
+  --peso-annotazione: 500;
+
+  --peso-titolo: 800;
+  --peso-forte: 700;
+  --peso-medio: 600;
+  --peso-normale: 400;
+
+  /* --- raggi e spaziature --- */
+  --raggio-s: 12px;
+  --raggio-m: 20px;
+  --raggio-l: 28px;
+  --raggio-pill: 40px;
+
+  /* --- focus ---
+     Nero su fondi chiari (21:1 su bianco, 5,09 su rosa, 14,47 su giallo).
+     Sulle sezioni a fondo nero si passa a giallo tramite .sezione-scura. */
+  --focus: var(--nero);
+  --focus-spessore: 3px;
+  --focus-offset: 2px;
+}
+
+/* Sulle superfici scure il focus nero sparirebbe: si usa il giallo (14,47 su nero).
+   Le sezioni a fondo nero esistenti sono elencate qui, cosi' non serve toccare i
+   componenti; per una sezione scura nuova basta aggiungerle la classe. */
+.sezione-scura,
+.cta-section,
+.imaginarium,
+.cogu-intro-overlay {
+  --focus: var(--giallo);
+}
+/* .ai-warning non e' in elenco di proposito: in Hero ha fondo nero, ma in Merch
+   e' sovrascritta a fondo chiaro. Non contiene elementi attivabili, quindi il
+   token di focus li' non serve, e metterlo darebbe la regola sbagliata su uno dei due. */

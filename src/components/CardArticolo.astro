@@ -1,0 +1,116 @@
+---
+import { dataItaliana, dataIso, type Articolo } from '../lib/articoli';
+
+interface Props {
+  articolo: Articolo;
+  /** Livello dell'intestazione, per non rompere la gerarchia della pagina ospite. */
+  livello?: 2 | 3;
+}
+
+const { articolo, livello = 3 } = Astro.props;
+// coverAlt non si usa qui: nella scheda l'immagine e' decorativa (alt="") perche'
+// il titolo accanto dice gia' di cosa si tratta. Serve invece nella pagina
+// dell'articolo, dove l'immagine e' contenuto.
+const { title, excerpt, cover, autore, date, bozza } = articolo.data;
+const Titolo = `h${livello}` as 'h2' | 'h3';
+---
+<article class="card-articolo">
+  {cover && (
+    <a class="card-articolo-figura" href={`/blog/${articolo.id}/`} tabindex="-1" aria-hidden="true">
+      <img src={cover} alt="" width="1200" height="800" loading="lazy" decoding="async" />
+    </a>
+  )}
+
+  <div class="card-articolo-testo">
+    <p class="card-articolo-meta">
+      <time datetime={dataIso(date)}>{dataItaliana(date)}</time>
+      <span aria-hidden="true"> · </span>
+      <span>{autore}</span>
+      {bozza && <span class="occhiello occhiello--progetto card-articolo-bozza">Bozza</span>}
+    </p>
+
+    <Titolo class="card-articolo-titolo">
+      <a href={`/blog/${articolo.id}/`}>{title}</a>
+    </Titolo>
+
+    <p class="card-articolo-sommario">{excerpt}</p>
+  </div>
+</article>
+
+<style is:global>
+  /* Scheda articolo, usata sia in /blog sia nel richiamo in home.
+     Un solo elemento cliccabile: il titolo. Il riquadro sembra cliccabile perche'
+     il link si estende con uno pseudo-elemento, ma per tastiera e lettori di
+     schermo resta un link solo, con il testo del titolo come nome. L'immagine e'
+     decorativa (alt vuoto, aria-hidden): la descrive gia' il titolo accanto. */
+  .card-articolo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--bianco);
+    border: 1px solid var(--bordo);
+    border-radius: var(--raggio-l);
+    overflow: hidden;
+  }
+  .card-articolo-figura {
+    display: block;
+    aspect-ratio: 3 / 2;
+    /* Con un solo articolo la scheda occupa tutta la riga e la copertina, a
+       proporzione libera, diventerebbe alta mezzo schermo: il tetto la tiene una
+       copertina invece che un manifesto. Con piu' schede in griglia non entra
+       mai in gioco, perche' la larghezza e' gia' minore. */
+    max-height: 340px;
+    background: var(--giallo-tenue);
+  }
+  .card-articolo-figura img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .card-articolo-testo {
+    padding: 22px 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .card-articolo-meta {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--nero-secondario);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-articolo-bozza {
+    margin-left: 4px;
+  }
+  .card-articolo-titolo {
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.25;
+    font-weight: var(--peso-titolo);
+    letter-spacing: -0.01em;
+  }
+  .card-articolo-titolo a {
+    color: var(--nero);
+    text-decoration: none;
+  }
+  /* Estende l'area cliccabile a tutta la scheda senza aggiungere un secondo link. */
+  .card-articolo-titolo a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .card-articolo-titolo a:hover {
+    color: var(--verde-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .card-articolo-sommario {
+    margin: 0;
+    color: var(--nero-secondario);
+    line-height: 1.6;
+  }
+</style>

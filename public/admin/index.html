@@ -3,10 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex" />
+  <meta name="robots" content="noindex, nofollow" />
   <title>COG U · Redazione articoli</title>
+  <!--
+    La configurazione non e' un file fermo in public/: la genera
+    src/pages/admin/config.yml.ts, perche' contiene l'origine del servizio di
+    login, che cambia fra sito, anteprima di ramo e singolo deployment.
+
+    La versione di Sveltia CMS e' fissata. Prima era "@sveltia/cms" senza
+    versione, cioe' l'ultima pubblicata: significa che il codice che gestisce un
+    token GitHub con permessi di scrittura sul repository poteva cambiare da
+    solo, da un giorno all'altro, senza che nessuno lo decidesse. Per aggiornare
+    si cambia il numero qui, di proposito.
+  -->
+  <link href="/admin/config.yml" type="text/yaml" rel="cms-config-url" />
 </head>
 <body>
-  <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js" type="module"></script>
+  <script src="https://unpkg.com/@sveltia/cms@0.206.1/dist/sveltia-cms.js" type="module"></script>
 </body>
 </html>

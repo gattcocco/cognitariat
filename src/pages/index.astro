@@ -3,66 +3,98 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Banners from '../components/Banners.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
+import CosaSucceded from '../components/CosaSucceded.astro';
+import PercheCiPreoccupa from '../components/PercheCiPreoccupa.astro';
+import Lavoro from '../components/Lavoro.astro';
+import Alternative from '../components/Alternative.astro';
 import AssemblyBanner from '../components/AssemblyBanner.astro';
-import ContractSupport from '../components/ContractSupport.astro';
-import Imaginarium from '../components/Imaginarium.astro';
-import Legal from '../components/Legal.astro';
-import Strike from '../components/Strike.astro';
-import Advocacy from '../components/Advocacy.astro';
+import CosaFacciamo from '../components/CosaFacciamo.astro';
+import Articoli from '../components/Articoli.astro';
 import VideoInterviews from '../components/VideoInterviews.astro';
+import CosaCostruiamo from '../components/CosaCostruiamo.astro';
+import Avvicinarsi from '../components/Avvicinarsi.astro';
+import Imaginarium from '../components/Imaginarium.astro';
 import Membership from '../components/Membership.astro';
 import Merch from '../components/Merch.astro';
-import AssembliesNews from '../components/AssembliesNews.astro';
-import OrganizerCta from '../components/OrganizerCta.astro';
 import Footer from '../components/Footer.astro';
 ---
 <BaseLayout>
   <Banners />
   <Header />
-  <main>
+  <main id="contenuto" tabindex="-1">
+    <!--
+      Ordine editoriale di docs/copy-home-v2.md: prima cosa succede, poi perche'
+      ci preoccupa, poi il lavoro, poi le alternative (che occupano almeno tanto
+      spazio quanto le preoccupazioni), poi cosa facciamo davvero, poi cosa e'
+      solo un progetto, infine come avvicinarsi.
+      "Perche' ci preoccupa" e' tornata in Fase 5 riscritta da zero: la versione
+      precedente reggeva sull'acronimo MANGOS, questa su due decisioni gia' prese
+      e un dato gia' misurato. Resta piu' corta delle alternative, di proposito.
+    -->
     <Hero />
+    <CosaSucceded />
+    <PercheCiPreoccupa />
+    <Lavoro />
+    <Alternative />
     <AssemblyBanner />
-    <ContractSupport />
-    <Imaginarium />
-    <Legal />
-    <Strike />
-    <Advocacy />
+    <CosaFacciamo />
+    <Articoli />
     <VideoInterviews />
+    <CosaCostruiamo />
+    <Avvicinarsi />
+    <Imaginarium />
+    <!--
+      Tesseramento e merch restano nella pagina con le strutture intatte, ma con
+      gli acquisti disabilitati: nessun pulsante deve far pensare che si possa
+      gia' pagare. Vedi Fase 5 per il gating lato server.
+    -->
     <Membership />
     <Merch />
-    <AssembliesNews />
-    <OrganizerCta />
     <Footer />
   </main>
 </BaseLayout>
 
-<script is:inline type="module">
-  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!reduce) {
+<script>
+  /**
+   * Intro d'ingresso. Sta in una funzione e non a livello di modulo perche' ha
+   * piu' di un motivo per rinunciare a meta' strada, e "return" a livello di
+   * modulo non e' consentito.
+   */
+  async function avviaIntro() {
     try {
-      const { createTimeline, animate, stagger, utils } =
-        await import('https://cdn.jsdelivr.net/npm/animejs/+esm');
+      // anime.js arriva dal nostro bundle, non da jsdelivr. In Fase 4 la CDN non
+      // rispondeva e l'intro restava a meta': con il pacchetto in locale quel modo
+      // di rompersi sparisce, e resta un import dinamico, cosi' il codice
+      // dell'animazione non pesa sul caricamento iniziale della pagina.
+      const { createTimeline, stagger, utils } = await import('animejs');
 
-      // Sipario
+      // Il modulo puo' arrivare dopo che il failsafe ha gia' scoperto la pagina:
+      // con una rete lenta il testo diventa leggibile a 3 secondi e il chunk
+      // atterra dopo. Ripartire da li' vorrebbe dire coprire di nero una pagina
+      // che la persona sta gia' leggendo. Meglio niente intro.
+      if (window.__coguRivelato) return;
+
       const overlay = document.createElement('div');
       overlay.className = 'cogu-intro-overlay';
       overlay.setAttribute('aria-hidden', 'true');
       overlay.innerHTML =
         '<div class="cogu-intro-mark">' +
         '<span class="cogu-intro-brand">COG U</span>' +
-        '<span class="cogu-intro-tag">Sindacato del Cognitariato</span>' +
+        '<span class="cogu-intro-tag">Sindacato e osservatorio</span>' +
         '<span class="cogu-intro-rule"></span>' +
         '</div>';
       document.body.appendChild(overlay);
 
-      // Titolo: split in parole preservando lo <span> della keyword
       const h1 = document.querySelector('.hero-content h1');
-      const words = [];
+      // Ogni parola del titolo finisce in uno span, per farle entrare in cascata.
+      // La regola CSS della parola chiave usa :not(.cogu-w) proprio per questo:
+      // senza, colorerebbe di rosa l'intero H1.
+      const words: HTMLElement[] = [];
       if (h1) {
         const frag = document.createDocumentFragment();
         Array.from(h1.childNodes).forEach((node) => {
-          if (node.nodeType === 3) {
-            node.textContent.split(/(\s+)/).forEach((tok) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            (node.textContent ?? '').split(/(\s+)/).forEach((tok) => {
               if (tok === '') return;
               if (/^\s+$/.test(tok)) { frag.appendChild(document.createTextNode(tok)); return; }
               const w = document.createElement('span');
@@ -72,7 +104,7 @@ import Footer from '../components/Footer.astro';
               frag.appendChild(w);
               words.push(w);
             });
-          } else if (node.nodeType === 1) {
+          } else if (node instanceof HTMLElement) {
             node.style.display = 'inline-block';
             frag.appendChild(node);
             words.push(node);
@@ -86,27 +118,29 @@ import Footer from '../components/Footer.astro';
         utils.set(words, { opacity: 0 });
       }
 
-      const startFloat = () => {
-        animate('.hero-visual', {
-          translateY: [0, -10],
-          loop: true,
-          alternate: true,
-          duration: 2600,
-          ease: 'inOutSine',
-        });
-      };
-
       const cleanup = () => {
         if (window.__coguFailsafe) clearTimeout(window.__coguFailsafe);
         if (window.__coguReveal) window.__coguReveal();
         overlay.remove();
-        startFloat();
       };
 
       const tl = createTimeline({
         defaults: { ease: 'outExpo', duration: 720 },
         onComplete: cleanup,
       });
+
+      // Il gate CSS html.cogu-intro spegne l'hero, ma le parole del titolo hanno
+      // anche un opacity inline messo qui sopra: se la timeline si blocca (scheda
+      // in background, rAF sospesi, CDN lenta) togliere la classe non basta e il
+      // titolo resta invisibile. Il failsafe in BaseLayout chiama questa funzione.
+      window.__coguHeroReset = () => {
+        try { tl.pause(); } catch (e) {}
+        try {
+          utils.set(words.length ? words : '.hero-content h1', { opacity: 1, translateY: 0 });
+          utils.set('.hero-badge, .hero-lead, .hero-desc, .hero-content > .btn-primary',
+                    { opacity: 1, translateY: 0, scale: 1 });
+        } catch (e) {}
+      };
 
       tl
         .add('.cogu-intro-brand', { opacity: [0, 1], translateY: [30, 0], duration: 780 })
@@ -118,14 +152,29 @@ import Footer from '../components/Footer.astro';
              { opacity: [0, 1], translateY: [32, 0], duration: 760, delay: stagger(42) }, '-=470')
         .add('.hero-lead',  { opacity: [0, 1], translateY: [16, 0] }, '-=520')
         .add('.hero-desc',  { opacity: [0, 1], translateY: [16, 0] }, '-=560')
-        .add('.hero-stats', { opacity: [0, 1], translateY: [16, 0] }, '-=560')
         .add('.hero-content > .btn-primary',
-             { opacity: [0, 1], scale: [0.9, 1], translateY: [10, 0], ease: 'outBack' }, '-=520')
-        .add('.ai-warning', { opacity: [0, 1], translateY: [16, 0] }, '-=560')
-        .add('.hero > .container:last-child > div', { opacity: [0, 1], translateY: [12, 0] }, '-=600')
-        .add('.hero-visual', { opacity: [0, 1], scale: [0.9, 1], translateY: [18, 0], duration: 860, ease: 'outExpo' }, '-=940');
+             { opacity: [0, 1], scale: [0.9, 1], translateY: [10, 0], ease: 'outBack' }, '-=520');
+
+      // Il failsafe di BaseLayout scatta a 3s, ma la timeline completa dura di
+      // piu': se anime.js e' partito davvero lo riprogrammiamo oltre la durata
+      // reale, altrimenti taglierebbe l'ingresso a meta' a ogni caricamento.
+      // Resta comunque una rete per le timeline che si bloccano.
+      if (window.__coguFailsafe) clearTimeout(window.__coguFailsafe);
+      window.__coguFailsafe = setTimeout(
+        () => window.__coguReveal?.(),
+        Math.max(tl.duration || 0, 3700) + 1500
+      );
     } catch (e) {
+      // anime.js non disponibile, o qualcosa e' andato storto nel costruire la
+      // timeline: la pagina deve restare leggibile comunque.
       if (window.__coguReveal) window.__coguReveal();
     }
   }
+
+  // Con "movimento ridotto" attivo non si parte proprio: nessun pannello, nessuna
+  // animazione, l'hero e' visibile fin dal primo istante (lo script inline in
+  // BaseLayout non ha nemmeno applicato il gate CSS).
+  const movimentoRidotto =
+    window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!movimentoRidotto) avviaIntro();
 </script>

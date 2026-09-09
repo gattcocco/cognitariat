@@ -1,0 +1,43 @@
+FONT OSPITATI DA COG U
+======================
+
+I file di questa cartella sono serviti dal dominio del sito, non da una CDN.
+Sono entrambi sotto SIL Open Font License 1.1, che consente esplicitamente di
+ospitarli, includerli in un progetto e ridistribuirli, a due condizioni che qui
+sono rispettate: la licenza viaggia insieme ai file, e i font non vengono
+venduti da soli.
+
+  inter-latin.woff2 / inter-latin-ext-sub.woff2
+    Inter — Copyright 2020 The Inter Project Authors
+    https://github.com/rsms/inter
+    Licenza: Inter-OFL.txt (in questa cartella)
+    Uso: testi, titoli, controlli. Tutto il sito.
+
+  shantell-latin.woff2 / shantell-latin-ext-sub.woff2
+    Shantell Sans — Copyright 2022 The Shantell Sans Project Authors
+    https://github.com/arrowtype/shantell-sans
+    Licenza: ShantellSans-OFL.txt (in questa cartella)
+    Uso: solo annotazioni a margine (.nota-metodo). Peso medio, niente animazioni.
+
+I DUE FILE "-ext-sub"
+---------------------
+Non sono i font completi: sono sottoinsiemi che contengono i segni latini estesi
+che il sito usa davvero, schwa (U+0259) compresa. Per Inter significa 28 KB
+invece di 133. Gli intervalli esatti sono dichiarati negli unicode-range di
+src/styles/font.css, che sono la fonte di verita'.
+
+Se un testo nuovo introduce un carattere fuori da quegli intervalli, il browser
+non segnala niente: prende il font di sistema e quella parola si stacca dal
+resto. Per questo `npm run check:glifi` confronta gli unicode-range dichiarati
+con i caratteri realmente presenti nell'HTML costruito, e fallisce se qualcosa
+non e' coperto. Se serve aggiungere un carattere, si rigenera il sottoinsieme e
+si aggiorna l'unicode-range.
+
+PERCHE' NON DOODLE LINES
+------------------------
+Doodle Lines (Envato Elements) resta fuori dal repository e dal sito: la sua
+licenza e' personale, intestata a una persona fisica, e il punto sul
+trasferimento all'associazione non e' chiarito. I suoi file e il certificato
+stanno in _local/, esclusi da Git e dal deploy. Shantell Sans e' stato scelto
+come alternativa fra tre candidati; il confronto e la prova della schwa sono in
+_local/campionario/confronto-font.html.

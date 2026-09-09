@@ -1,25 +1,95 @@
 ---
+import Icona from './Icona.astro';
+
+/**
+ * Video: link, non incorporamenti.
+ *
+ * Prima qui c'erano tre iframe di youtube-nocookie. Anche in modalità nocookie e
+ * con loading="lazy", arrivare in fondo alla pagina bastava a far partire una
+ * richiesta verso Google con l'indirizzo IP di chi legge — senza che l'avesse
+ * chiesto. Ora la richiesta parte solo se si clicca, cioè quando la persona ha
+ * deciso di andare su YouTube.
+ *
+ * Conseguenze volute:
+ *  - il sito pubblico non contatta più nessuna terza parte, per nessun motivo;
+ *  - niente anteprime prese da i.ytimg.com: sarebbe la stessa richiesta a Google,
+ *    solo travestita da immagine. La copertina è disegnata qui, in CSS;
+ *  - rel="noreferrer" oltre a noopener: senza, YouTube riceverebbe comunque da
+ *    quale pagina si arriva.
+ *
+ * Se un giorno ci saranno fotogrammi esportati dai video e messi in
+ * `public/images/video/`, basta valorizzare `copertina` e `copertinaAlt` qui
+ * sotto: la scheda usa l'immagine al posto della copertina disegnata. Devono
+ * essere file nostri, serviti dal nostro dominio — non URL di terze parti.
+ *
+ * I titoli sono quelli dei video sul canale COG U. Due, sul canale, hanno un
+ * refuso («Assembla»): qui è scritto giusto, ma il refuso resta da correggere
+ * là — vedi docs/registro-fasi.md.
+ */
+type Video = {
+  id: string;
+  titolo: string;
+  copertina?: string;
+  copertinaAlt?: string;
+};
+
+const canale = 'https://www.youtube.com/@Cognitariaz';
+
+const video: Video[] = [
+  { id: 'xphrQ11NviI', titolo: 'Assemblea cittadina sui data center — La Fornace, Rho (Milano)' },
+  { id: 'IGKsa9LyRfs', titolo: 'Assemblea cittadina sui data center — La Fornace, Rho (Milano)' },
+  { id: 'oT-w31xlPs4', titolo: 'Assemblea cittadina sui data center — La Fornace, Rho (Milano)' },
+];
 ---
 <section id="video">
   <div class="container">
-    <h2 class="section-title">Video &amp; Interviste <i class="fas fa-video" aria-hidden="true"></i></h2>
+    <h2 class="section-title">Video &amp; Interviste <Icona nome="video" /></h2>
     <p class="section-sub">Voci dal cognitariato: interviste, testimonianze e contenuti brevi sulla lotta contro lo sfruttamento algoritmico.</p>
-    <div class="video-grid">
-      <div class="video-card">
-        <div class="video-embed">
-          <iframe src="https://www.youtube-nocookie.com/embed/xphrQ11NviI" title="COG U — Video 1" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </div>
-      </div>
-      <div class="video-card">
-        <div class="video-embed">
-          <iframe src="https://www.youtube-nocookie.com/embed/IGKsa9LyRfs" title="COG U — Video 2" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </div>
-      </div>
-      <div class="video-card">
-        <div class="video-embed">
-          <iframe src="https://www.youtube-nocookie.com/embed/oT-w31xlPs4" title="COG U — Video 3" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </div>
-      </div>
-    </div>
+    <p class="video-nota">
+      I video stanno sul canale YouTube di COG U e si aprono lì: da questa pagina non parte
+      nessuna richiesta verso Google finché non clicchi.
+    </p>
+    <ul class="video-grid">
+      {video.map((v, i) => (
+        <li>
+          <a
+            class="video-card"
+            href={`https://www.youtube.com/watch?v=${v.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="video-copertina">
+              {v.copertina ? (
+                <img src={v.copertina} alt={v.copertinaAlt ?? ''} loading="lazy" width="480" height="270" />
+              ) : (
+                <span class="video-copertina-disegnata" aria-hidden="true">
+                  <Icona nome="video" dimensione={2.4} />
+                </span>
+              )}
+              <span class="video-play" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+                  <path d="M9 6.5v11l9-5.5z" fill="currentColor" />
+                </svg>
+              </span>
+            </span>
+            <span class="video-testo">
+              <span class="video-titolo">{v.titolo}</span>
+              <span class="video-meta">
+                Guarda su YouTube <Icona nome="link-esterno" dimensione={0.85} />
+                <span class="sr-only">
+                  {' '}— video {i + 1} di {video.length}, si apre in una nuova scheda su youtube.com
+                </span>
+              </span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="video-canale">
+      Tutti i video sono sul{' '}
+      <a class="link" href={canale} target="_blank" rel="noopener noreferrer">
+        canale YouTube di COG U <Icona nome="link-esterno" dimensione={0.85} />
+      </a>.
+    </p>
   </div>
 </section>

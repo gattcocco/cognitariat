@@ -6,6 +6,15 @@
 # La secret key di Turnstile NON è tra queste: si configura in Supabase Auth (dashboard),
 # non nel nostro runtime — vedi piano §2.
 
+# INTERRUTTORE DEI PAGAMENTI (Fase 5).
+# Solo la stringa esatta "true" apre i tre checkout (quota, sostenitore, merch).
+# Assente, vuota, "false", "1", "si": i pagamenti restano chiusi e gli endpoint
+# rispondono 503 con un errore in JSON, senza costruire il client Stripe e senza
+# scrivere niente sul database. Oggi va lasciata fuori o a "false".
+# Il webhook Stripe NON passa da qui: continua a funzionare, per riconciliare
+# eventuali pagamenti gia' avviati. Vedi src/lib/pagamenti.ts.
+PAGAMENTI_ATTIVI=false
+
 PUBLIC_SUPABASE_URL=https://xxxxxxxx.supabase.co
 PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...

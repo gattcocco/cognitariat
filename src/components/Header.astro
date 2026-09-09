@@ -1,20 +1,29 @@
 ---
+// Navigazione riordinata secondo docs/copy-home-v2.md: le voci seguono l'ordine
+// editoriale e mettono per prime le cose che esistono.
+// Membership e Merch escono dal menu principale perche' non sono operativi
+// (le sezioni restano nella pagina, con acquisti disabilitati).
+//
+// Le ancore sono assolute ("/#lavoro", non "#lavoro"): l'intestazione compare
+// anche su /blog, /privacy e /account, dove un'ancora relativa non porta da
+// nessuna parte perche' quella sezione in pagina non c'e'. Prima da quelle
+// pagine meta' del menu non faceva niente.
 ---
 <header class="site-header">
   <div class="container header-flex">
-    <div class="logo">
-      <p class="brand">COG U</p>
-      <span>Sindacato del Cognitariato</span>
-    </div>
+    <a class="logo" href="/">
+      <span class="brand">COG U</span>
+      <span>Sindacato e osservatorio</span>
+    </a>
     <nav class="main-nav" aria-label="Navigazione principale">
       <ul>
-        <li><a href="#contract-support">Contratti</a></li>
-        <li><a href="#legal">Assistenza Legale</a></li>
-        <li><a href="#strike">Sciopero &amp; Picchetto</a></li>
-        <li><a href="#advocacy">Advocacy</a></li>
-        <li><a href="#video">Video &amp; Interviste</a></li>
-        <li><a href="#membership">Membership</a></li>
-        <li><a href="#merch">T‑Shirts &amp; Merch</a></li>
+        <li><a href="/#cosa-succede">Cosa succede</a></li>
+        <li><a href="/#lavoro">Il lavoro</a></li>
+        <li><a href="/#alternative">Alternative</a></li>
+        <li><a href="/#cosa-facciamo">Cosa facciamo</a></li>
+        <li><a href="/blog/">Blog</a></li>
+        <li><a href="https://gattcocco.github.io/mappa-e-contenuti/" target="_blank" rel="noopener">Osservatorio</a></li>
+        <li><a href="/#avvicinarsi">Scrivici</a></li>
       </ul>
     </nav>
   </div>

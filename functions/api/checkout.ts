@@ -1,6 +1,7 @@
 import type Stripe from 'stripe';
 import { requireUser, getSupabaseAdmin, type RuntimeEnv } from '../../src/lib/supabase-server';
 import { getStripe, priceIdForTier, isMembershipTier } from '../../src/lib/stripe';
+import { cancelloPagamenti, CHIAVI_QUOTA } from '../../src/lib/pagamenti';
 
 // Quota associativa 2026 (Build 1.0): pagamento ONE-OFF, nessun rinnovo automatico,
 // valida fino al 31/12/2026 — non un abbonamento. Vedi piano v3.
@@ -42,6 +43,13 @@ const RETRY_MESSAGE = 'Stiamo già preparando il tuo pagamento. Attendi qualche 
 
 export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
   const { request, env } = context;
+
+  // PRIMA di tutto il resto: prima di leggere il corpo, prima di validare il
+  // token (che e' gia' una chiamata verso Supabase), prima di costruire il
+  // client Stripe, prima di qualunque scrittura. Se i pagamenti sono fermi,
+  // questa richiesta non deve lasciare traccia da nessuna parte.
+  const cancello = cancelloPagamenti(env, CHIAVI_QUOTA);
+  if (cancello.bloccato) return cancello.risposta;
 
   const user = await requireUser(env, request);
   if (!user || !user.email) {

@@ -6,8 +6,16 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["@cloudflare/workers-types"]
+    "types": [
+      "@cloudflare/workers-types"
+    ]
   },
-  "include": ["**/*.ts", "../src/lib/**/*.ts"],
-  "exclude": ["../src/lib/supabase-browser.ts"]
+  "include": [
+    "**/*.ts",
+    "../src/lib/**/*.ts"
+  ],
+  "exclude": [
+    "../src/lib/supabase-browser.ts",
+    "../src/lib/articoli.ts"
+  ]
 }

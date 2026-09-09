@@ -1,21 +1,35 @@
 ---
+import { associazione } from '../lib/associazione';
+// Fase 4: il footer diceva due cose non vere. «Sindacato del Cognitariato» da
+// solo nascondeva meta' dell'identita' (l'osservatorio e' l'attivita' che esiste
+// gia'), e «GDPR compliant · crittografia end-to-end» era una promessa tecnica
+// che il sito non puo' mantenere ne' dimostrare: al suo posto un link semplice
+// all'informativa. Rimosso anche il blocco centrale che stampava due virgolette.
+import Icona from './Icona.astro';
 ---
 <footer class="footer">
   <div class="container">
-    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px;">
+    <div class="footer-cols">
       <div>
-        <h3 style="font-weight: 700;">COG U — Sindacato del Cognitariato</h3>
-        <p><strong>Agisci sull'AI</strong></p>
-        <p>© 2026 Cognitive Workers Union · PRD v1.0 · In attesa di lancio ufficiale</p>
+        <p class="footer-firma">COG U — Sindacato e osservatorio sul lavoro cognitivo</p>
+        <p>Documentiamo cosa succede al lavoro cognitivo e alle infrastrutture che lo reggono.</p>
+        <p>
+          © 2026 {associazione.denominazione}, {associazione.formaGiuridica}, costituita il{' '}
+          {associazione.costituitaIlTesto} · C.F. {associazione.codiceFiscale}.
+          Tesseramento e servizi online in preparazione.
+        </p>
       </div>
       <div>
-        <p><i class="fas fa-envelope" aria-hidden="true"></i> <a href="mailto:cognitariatz@proton.me">cognitariatz@proton.me</a> (scrivici per info e collaborazioni)</p>
-        <p><a href="/privacy">GDPR compliant · dati residenti UE · crittografia end‑to‑end</a></p>
+        <p>
+          <Icona nome="busta" />
+          <a href="mailto:cognitariatz@proton.me">cognitariatz@proton.me</a>{' '}
+          — scrivici per info, casi e collaborazioni
+        </p>
+        <p><a href="/privacy">Privacy e trattamento dei dati</a></p>
+        <p>
+          <a href="https://gattcocco.github.io/mappa-e-contenuti/" rel="noopener">Resistenze AI — mappa e contenuti</a>
+        </p>
       </div>
-    </div>
-    <hr style="margin: 24px 0; border-color: #cfc8bc;">
-    <div style="text-align: center; font-size: 0.8rem;">
-      ""
     </div>
   </div>
 </footer>

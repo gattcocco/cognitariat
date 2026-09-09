@@ -48,6 +48,27 @@ landing.md
 riassunto.md
 
 # materiale operativo locale: screenshot di pannelli di controllo, stati DNS
-# pre-cutover, appunti. Può contenere dettagli di configurazione dell'infrastruttura
-# che non vanno in un repo pubblico.
+# pre-cutover, appunti, archivio licenze e originali. Può contenere dettagli di
+# configurazione dell'infrastruttura e dati del licenziatario: non vanno in un repo
+# pubblico. L'archivio in _local/licenze-e-originali/ è la copia di riferimento da
+# esibire se venisse richiesta prova dell'autorizzazione all'uso degli asset.
 _local/
+
+# Asset acquistati e materiale licenziato: file originali (.ai/.eps), pacchetti completi
+# e certificati di licenza restano fuori dal repository pubblico. I certificati Envato
+# riportano il nome del licenziatario. Nel sito va solo il ritaglio effettivamente usato,
+# esportato in web (svg/png) sotto public/.
+font/
+**/license_certificate_*.pdf
+_local/licenze-e-originali/
+
+# Documenti di lavoro sul copy: restano sul disco, fuori dal repository.
+# Non sono materiale del sito e non servono a chi legge il codice. Il copy
+# definitivo (docs/copy-home-v2.md), il manuale di brand e i registri delle
+# verifiche restano invece versionati.
+/testi-sito.md
+/info regole nuovi testi/
+
+# Configurazione locale dello strumento di lavoro (avvio dell'anteprima e simili).
+# Non fa parte del sito e cambia da macchina a macchina.
+.claude/

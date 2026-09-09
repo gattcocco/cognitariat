@@ -1,6 +1,18 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-export interface RuntimeEnv {
+/**
+ * Alias di tipo e non interfaccia, di proposito: TypeScript concede una index
+ * signature implicita solo agli alias, e senza quella questo oggetto non
+ * verrebbe accettato da cancelloPagamenti(), che legge le variabili per nome.
+ */
+export type RuntimeEnv = {
+  /**
+   * Interruttore dei pagamenti (Fase 5). Solo la stringa esatta "true" li apre:
+   * assente, vuota o qualsiasi altro valore li tiene chiusi. Opzionale di
+   * proposito — un ambiente che non la definisce e' un ambiente con i pagamenti
+   * fermi, che e' lo stato corretto oggi. Vedi src/lib/pagamenti.ts.
+   */
+  PAGAMENTI_ATTIVI?: string;
   PUBLIC_SUPABASE_URL: string;
   PUBLIC_SUPABASE_ANON_KEY: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
@@ -13,7 +25,7 @@ export interface RuntimeEnv {
   STRIPE_PRICE_MERCH_PIN: string;
   STRIPE_PRICE_MERCH_POSTER: string;
   SITE_URL: string;
-}
+};
 
 /** Client con la sola anon key: usato per validare il JWT di un utente lato server. Non bypassa mai RLS. */
 export function getSupabaseAnon(env: RuntimeEnv): SupabaseClient {

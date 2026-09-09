@@ -12,7 +12,8 @@
   },
   "include": [
     "**/*.ts",
-    "../src/lib/**/*.ts"
+    "../src/lib/**/*.ts",
+    "../generato/**/*.ts"
   ],
   "exclude": [
     "../src/lib/supabase-browser.ts",

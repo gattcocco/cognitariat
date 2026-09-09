@@ -38,10 +38,18 @@
 # Le pagine tornano al valore predefinito della piattaforma
 # (`max-age=0, must-revalidate`), che per il browser e' la cosa giusta.
 #
-# DOVE SI CORREGGE DAVVERO
-# Non da qui: serve una regola di cache sulla zona, e `pages.dev` non e' una zona
-# di questo account. Il dominio dell'associazione lo sara': al cutover va
-# impostata li'. Vedi docs/rilascio-e-ripristino.md.
+# DOVE SI CORREGGE DAVVERO — aggiornato il 09/09/2026
+# Non da qui, e nemmeno da una regola di cache sulla zona: sul dominio pubblico
+# la regola di bypass viene applicata (lo conferma Cloudflare Trace) e l'origine
+# risponde 404, ma la pagina vecchia continuava a uscire, e *Purge Everything*
+# non l'ha rimossa. Cioe' non e' la cache della zona: e' uno strato statico di
+# Pages, davanti al quale nessuna intestazione e nessuna regola arriva.
+#
+# La correzione e' non arrivarci: functions/blog/_middleware.ts gira **prima**
+# che la richiesta possa essere soddisfatta da un asset e risponde 404 se lo slug
+# non e' fra le pagine costruite in questo deployment. L'elenco lo scrive la build
+# leggendo dist/blog/ (scripts/genera-slug-articoli.mjs). Vedi quel file per il
+# resto del ragionamento.
 #
 # Quello che resta in questo file riguarda gli asset, dove le direttive vengono
 # rispettate — verificato — e dove c'e' qualcosa da guadagnare.

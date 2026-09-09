@@ -72,3 +72,10 @@ _local/licenze-e-originali/
 # Configurazione locale dello strumento di lavoro (avvio dell'anteprima e simili).
 # Non fa parte del sito e cambia da macchina a macchina.
 .claude/
+
+# Elenco degli slug degli articoli, riscritto a ogni build da
+# scripts/genera-slug-articoli.mjs leggendo dist/blog/. Fuori da Git di
+# proposito: un elenco versionato si sfaserebbe dal contenuto al primo articolo
+# pubblicato dal CMS, e il middleware di /blog/ risponderebbe 404 su un articolo
+# appena uscito.
+/generato/

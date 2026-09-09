@@ -131,13 +131,12 @@ collections:
       - label: Copertina
         name: copertina
         widget: object
-        required: false
+        required: true
         collapsed: false
         hint: >-
-          Facoltativa. Se la aggiungi servono tutte e due le cose, l'immagine e
-          la descrizione: e' il modo per non pubblicare una figura che una parte
-          delle persone non puo' vedere. Per toglierla, togli la spunta qui
-          sopra.
+          Ogni articolo ha una copertina. Servono tutte e due le cose, l'immagine
+          e la descrizione: e' il modo per non pubblicare una figura che una
+          parte delle persone non puo' vedere.
         fields:
           - label: Immagine
             name: file

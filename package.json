@@ -8,20 +8,21 @@
   "scripts": {
     "dev": "wrangler pages dev -- npm run dev:astro",
     "dev:astro": "astro dev",
-    "build": "astro build",
+    "build": "astro build && npm run genera:slug",
     "preview": "wrangler pages dev ./dist",
     "astro": "astro",
     "check": "astro check",
     "check:functions": "tsc --noEmit -p functions/tsconfig.json",
     "check:all": "npm run check && npm run check:functions",
     "check:glifi": "node scripts/verifica-glifi.mjs",
-    "test:functions": "node --test --import ./test/registra-hook.mjs test/pagamenti.test.ts",
-    "verify": "npm run check:all && npm run build && npm run check:glifi && npm run check:testi && npm run check:cms && npm run test:functions",
+    "test:functions": "node --test --import ./test/registra-hook.mjs test/pagamenti.test.ts test/blog-slug.test.ts",
+    "verify": "npm run build && npm run check:all && npm run check:glifi && npm run check:testi && npm run check:cms && npm run test:functions",
     "check:testi": "node scripts/verifica-testi.mjs",
     "check:supabase": "node scripts/verifica-supabase.mjs",
     "check:cms": "node scripts/verifica-cms.mjs",
     "check:cms-oauth": "node scripts/verifica-cms-oauth.mjs",
-    "check:produzione": "node scripts/verifica-produzione.mjs"
+    "check:produzione": "node scripts/verifica-produzione.mjs",
+    "genera:slug": "node scripts/genera-slug-articoli.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

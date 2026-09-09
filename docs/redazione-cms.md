@@ -47,8 +47,8 @@ destra.
 | **Data di pubblicazione** | Solo il giorno. Niente orario: con l'ora la data rischia di comparire spostata di un giorno. |
 | **Firma** | Una persona, oppure `Editoriale` per un testo della redazione. |
 | **Sommario** | Due o tre righe. Si legge nell'elenco, nel richiamo in home e nell'anteprima social. Non è l'inizio dell'articolo: è il motivo per aprirlo. |
-| **Immagine di copertina** | Facoltativa. Vedi sezione 5 per le dimensioni. |
-| **Testo alternativo della copertina** | **Obbligatorio se c'è la copertina.** Descrivi l'immagine per chi non la vede. Senza, il sito si rifiuta di costruire l'articolo — non è un capriccio del programma, è l'unico modo perché quel campo non venga dimenticato. |
+| **Copertina — Immagine** | **Obbligatoria.** Ogni articolo ha una copertina. Vedi sezione 5 per le dimensioni. |
+| **Copertina — Testo alternativo** | **Obbligatorio.** Descrivi la copertina per chi non può vederla. Senza, il CMS non ti lascia salvare — non è un capriccio del programma, è l'unico modo perché quel campo non venga dimenticato. |
 | **Corpo** | Il testo. Si scrive in Markdown, ma l'editor ha i pulsanti per grassetto, corsivo, titoli, elenchi e link. |
 
 Nel corpo si usano i **titoli di secondo livello** (`##`) per le sezioni: il primo livello è già
@@ -147,25 +147,20 @@ i casi fuori standard. In produzione servirà una seconda applicazione OAuth, co
 
 ## 5. La copertina
 
-Nel modulo la copertina è **un blocco solo**, con una casella «Aggiungi Copertina». Finché non la
-spunti non esiste: l'articolo si salva senza, e non ti viene chiesto niente. Se la spunti compaiono
-due campi, **tutti e due obbligatori**: l'immagine e la sua descrizione. Per toglierla si toglie
-la spunta, e spariscono insieme.
+**Ogni articolo ha una copertina.** È una decisione editoriale, presa il 09/09/2026, e nel modulo
+si vede così: la copertina è un blocco sempre aperto con due campi, **entrambi obbligatori** —
+l'immagine e la sua descrizione. Senza uno dei due il salvataggio non passa, e l'errore compare
+accanto al campo mentre stai scrivendo.
 
-**Perché insieme e non due campi affiancati.** Un'immagine senza descrizione è invisibile a chi
-usa un lettore di schermo, e prima era possibile metterne una e dimenticare l'altra: il salvataggio
-riusciva, poi la costruzione del sito falliva con un messaggio che nessuno in redazione va a
-leggere, e l'articolo semplicemente non compariva. Ora il CMS non ti lascia salvare, e te lo dice
-mentre stai scrivendo — non mezz'ora dopo.
+Uno spazio non conta come descrizione: il campo viene ripulito prima di essere controllato, quindi
+` ` vale come vuoto.
 
-Uno spazio non conta come descrizione: il campo viene ripulito prima di essere controllato.
+**Perché la descrizione non è un campo che si può saltare.** Un'immagine senza descrizione è
+invisibile a chi usa un lettore di schermo. Prima era possibile metterne una e dimenticare
+l'altra: il salvataggio riusciva, poi la costruzione del sito falliva con un messaggio che nessuno
+in redazione va a leggere, e l'articolo semplicemente non compariva. Ora te lo dice il CMS, subito.
 
-**Il limite tecnico, per chi si chiedesse perché è fatto così.** Nella versione di Sveltia che
-usiamo (0.206.1) non esiste un modo di dire «obbligatorio *solo se* un altro campo è pieno»: non
-ci sono condizioni fra campi. Quello che c'è è il gruppo facoltativo, e funziona per la ragione
-giusta — finché la casella non è spuntata i due campi **non esistono**, quindi non possono essere
-obbligatori; quando è spuntata esistono entrambi e lo sono. Verificato sul programma vero, non
-dedotto dalla documentazione.
+Sotto il campo resta l'aiuto: *«Descrivi la copertina per chi non può vederla.»*
 
 ### Come si scrive nel file
 
@@ -277,21 +272,21 @@ Ricaricare la pagina nel browser non dice niente di utile, perché mescola la co
 quella del server: se vuoi guardare lì, aggiungi un parametro qualsiasi in fondo
 (`?x=1`) — se con quello la pagina è sparita e senza no, era una copia conservata, non l'articolo.
 
-**Sull'anteprima può succedere, e non si può correggere.** L'08/09/2026 è stato indagato fino in
-fondo: non è il browser, è la cache di Cloudflare, che su `pages.dev` non rispetta quello che il
-sito le chiede — provato con tre intestazioni diverse, servite tutte e tre dalla cache. Non c'è
-niente da premere e niente da svuotare: passa da sé.
+**Dal 09/09/2026 questo non dovrebbe più capitare.** Il difetto era reale e stava nella
+piattaforma: uno strato statico di Pages continuava a servire la pagina vecchia nonostante il
+deployment corretto, e non lo raggiungeva né un'intestazione del sito né una regola di cache né
+*Purge Everything*. Ora davanti a `/blog/` c'è un controllo che risponde 404 quando lo slug non è
+fra gli articoli di questo deployment, e l'elenco lo scrive la build da sé. **Cancellare basta.**
 
-Il modo affidabile di verificare che una cancellazione è andata a buon fine è **l'indirizzo del
-deployment**, quello col codice davanti che trovi nel pannello o nel controllo su GitHub:
+Se dovesse ricapitare, il modo affidabile di verificarlo è **l'indirizzo del deployment**, quello
+col codice davanti che trovi nel pannello o nel controllo su GitHub:
 
 ```
 https://<codice>.cognitariat.pages.dev/blog/<slug>/
 ```
 
-Quello non passa dalla cache condivisa e dice la verità. Sul sito pubblico il problema non ci sarà:
-al cutover viene impostata una regola di cache che sul dominio dell'associazione si può fare e su
-`pages.dev` no. Il dettaglio, con le misure, sta in `docs/registro-fasi.md`.
+Quello non passa da nessuna cache condivisa e dice la verità. Il dettaglio, con le misure, sta in
+`docs/registro-fasi.md`.
 
 **La copertina non si vede quando condivido il link** — manca il JPEG accanto al WebP
 (sezione 5).

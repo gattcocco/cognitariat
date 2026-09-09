@@ -1792,3 +1792,102 @@ https://<codice>.cognitariat.pages.dev/blog/<slug>/
 Quello non passa dalla cache condivisa e dice la verità: sui tre articoli di prova ha risposto 404
 ogni volta, mentre l'alias ancora no. È anche il modo di distinguere le due cose, se ricapita:
 l'alias sbaglia, il deployment no.
+
+---
+
+## Copertina obbligatoria, e un articolo cancellato smette di esistere — 09/09/2026
+
+Ramo `dev`, poi in produzione. Nessuna modifica a DNS, dominio, OAuth, regole di cache, regola di
+reindirizzamento, pagamenti o registrazioni.
+
+### 1. Ogni articolo ha una copertina
+
+Decisione editoriale. Il gruppo `copertina` passa da facoltativo a obbligatorio, con i due campi
+dentro obbligatori a loro volta.
+
+Prima di toccare niente, il controllo che andava fatto per primo: **l'unico articolo reale** —
+il manifesto — ha già copertina e testo alternativo validi. Nessun contenuto è stato modificato.
+
+Nel CMS il blocco è sempre aperto, senza più la casella «Aggiungi Copertina»; sotto il testo
+alternativo resta l'aiuto «Descrivi la copertina per chi non può vederla.». Tolti i testi che la
+presentavano come facoltativa, in `docs/redazione-cms.md` e negli aiuti del modulo.
+
+Alla costruzione del sito il controllo è ripetuto, e questa volta con un'attenzione in più. Rendere
+`copertina` obbligatoria **nello schema** sembrava la cosa ovvia, ma produceva il messaggio di
+serie «copertina: Required» e fermava tutti gli altri controlli — compreso quello che spiega come
+migrare la forma vecchia `cover`/`coverAlt`. Cioè chi avesse un file scritto col vecchio schema si
+sarebbe visto dire «Required» su un campo mai sentito nominare. L'obbligo sta quindi due righe più
+in basso, nel controllo scritto a mano:
+
+| Caso | Messaggio |
+|---|---|
+| Manca la copertina | «Ogni articolo deve avere una copertina», con il frammento da incollare |
+| `alt` vuoto o di soli spazi | «Descrivi la copertina per chi non può vederla: senza, l'articolo non si pubblica.» |
+| `file` vuoto | «Manca il file della copertina: ogni articolo deve averne una.» |
+| Forma vecchia | le istruzioni per migrare, **più** l'obbligo — entrambi, nell'ordine utile |
+
+`check:cms` ora verifica anche che il gruppo sia dichiarato `required: true` nel CMS. Serve perché
+il modo peggiore di rompersi sarebbe questo: `required: false` nel CMS e obbligo nella build —
+il salvataggio riesce, la pubblicazione no. Provato al contrario: rimettendo `false`, il controllo
+fallisce con il messaggio giusto.
+
+Una nota su come è stato scritto quel controllo, perché è un errore che rifarei. La prima versione
+costruiva l'espressione regolare con un template literal: `` `^\s{8}name:...` ``. In JavaScript
+`\s` dentro un template literal **non è** la classe dei caratteri di spazio — è la lettera `s`,
+perché il backslash viene scartato. La regola cercava quindi `s{8}` e non trovava mai niente,
+dando sempre lo stesso allarme. Riscritta leggendo le righe a mano: più lunga, e non ha un modo
+silenzioso di sbagliare.
+
+### 2. L'articolo cancellato che restava online
+
+**Il caso, sul dominio pubblico.** Articolo rimosso dal CMS; commit di cancellazione e deployment
+Production verdi; articolo fuori dal blog roll e fuori dal CMS; indirizzo specifico del deployment
+404; `cognitariat.pages.dev` 404; **lo stesso indirizzo sul dominio pubblico con una query nuova**
+404. Solo l'indirizzo originale, senza query, continuava a servire la pagina vecchia.
+
+Quindi non il browser, e **non la cache della zona**: *Purge Everything* non l'ha rimossa, e
+Cloudflare Trace mostrava la regola di bypass applicata e l'origine a 404. Restava una sola
+spiegazione: uno strato statico di Pages, davanti al quale non arriva né un'intestazione del sito
+né una regola della zona. È lo stesso strato che in anteprima aveva ignorato `s-maxage=0`,
+`private` e `no-store` — quest'ultimo servito con `CF-Cache-Status: HIT`, cioè una risposta
+conservata dalla cache che le diceva di non conservarla.
+
+**La correzione non è svuotare: è non arrivarci.** `functions/blog/_middleware.ts` gira prima che
+la richiesta possa essere soddisfatta da un asset. Se lo slug non è fra le pagine costruite in
+questo deployment, risponde **404** con `Cache-Control: no-store` e `x-robots-tag: noindex`, e la
+pagina di errore del sito nel corpo. Quello che c'è dietro non viene nemmeno interrogato.
+
+**Da dove viene l'elenco degli slug.** Non dai file markdown: sarebbe una seconda implementazione
+della regola sulle bozze che sta in `src/lib/articoli.ts`, e due implementazioni della stessa
+regola divergono. Viene da **`dist/blog/`**, cioè dalle pagine che la build ha davvero prodotto —
+non una copia della regola, il suo risultato. Se un articolo è una bozza la sua cartella non
+esiste e lo slug non c'è, perché la pagina non c'è, non perché un `if` l'ha escluso; in una build
+autorizzata a mostrare le bozze le cartelle ci sono e l'elenco le contiene. Si adegua da sé.
+
+Lo scrive `scripts/genera-slug-articoli.mjs`, dentro `npm run build`, subito dopo `astro build` —
+quindi anche nella build di Cloudflare, che raccoglie `functions/` dopo il comando di build. Il
+file prodotto è fuori da Git: un elenco versionato si sfaserebbe dal contenuto al primo articolo
+pubblicato dal CMS, e il middleware risponderebbe 404 su un articolo appena uscito. Per lo stesso
+motivo `verify` esegue ora `build` **prima** del controllo dei tipi: il middleware importa un
+modulo che la build genera.
+
+**Cosa non tocca**, verificato uno per uno nel runtime vero: `/blog/`, gli articoli veri, le
+bozze quando la build le include, le copertine sotto `/images/articoli/`, sitemap, canonical e
+metadati, `/admin/` e le due rotte OAuth, i percorsi più profondi e i file dentro `/blog/`.
+
+**Nove prove** in `test/blog-slug.test.ts`, sulle tre situazioni chieste e su quello che non deve
+essere intercettato. Il codice della decisione è ripetuto nel test invece di importare il
+middleware: importarlo tirerebbe dentro l'elenco reale, e la prova dipenderebbe da quanti articoli
+ci sono oggi.
+
+E la prova che conta, nel runtime di Pages in locale:
+
+| Indirizzo | Risposta |
+|---|---|
+| `/blog/manifesto-cognitario-contro-oligarchia-ai/` | 200, l'articolo |
+| `/blog/non-esiste/` | 404, `no-store`, `noindex`, pagina di errore del sito |
+| `/blog/prova-cache-produzione-da-eliminare/` | **404** — è lo slug che sul dominio restava online |
+| `/blog/` · `/privacy/` · `/sitemap.xml` · `/admin/config.yml` · copertina `.webp` | intatti |
+
+La regola di reindirizzamento temporanea sul vecchio slug **non è stata toccata**: va rimossa a
+mano dopo che questa soluzione è verificata sul dominio, altrimenti non si vedrebbe la differenza.

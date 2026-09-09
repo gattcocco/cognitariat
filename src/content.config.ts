@@ -153,4 +153,180 @@ const articles = defineCollection({
     })),
 });
 
-export const collections = { articles };
+/**
+ * Agenda: appuntamenti dell'associazione, gestiti dalla redazione come gli
+ * articoli. Una collection separata e non un campo degli articoli, perche' un
+ * evento ha domande diverse — quando, dove, si ripete? — e perche' un articolo
+ * invecchia mentre un appuntamento **scade**.
+ *
+ * DUE FORME DI APPUNTAMENTO, e la seconda e' il motivo per cui `inizio` e'
+ * facoltativo:
+ *  - datato: ha `inizio` (e magari `fine`). Finisce in ordine cronologico e a
+ *    un certo punto passa;
+ *  - ricorrente: non ha una data ma un'etichetta scritta a mano, del tipo
+ *    «Ogni mercoledi' · dalle 19». Non scade e non si mette in fila con gli
+ *    altri, perche' non ha un istante a cui appartenere.
+ *
+ * Uno dei due deve esserci: un evento senza data e senza ricorrenza non dice
+ * quando succede, ed e' il controllo piu' sotto a impedirlo.
+ *
+ * PERCHE' NON CALCOLIAMO LA PROSSIMA OCCORRENZA di un ricorrente. Si potrebbe:
+ * «ogni mercoledi'» e' una regola, e la prossima data si ricava. Ma questo sito
+ * e' costruito una volta e poi sta fermo finche' qualcuno non pubblica: la
+ * "prossima data" scritta nell'HTML resterebbe quella del giorno della build, e
+ * mercoledi' prossimo sarebbe sbagliata senza che nessuno se ne accorga. Meglio
+ * l'etichetta, che e' vera sempre.
+ */
+/**
+ * Un momento scritto dalla redazione, che resta una stringa.
+ *
+ * Accetta la stringa 'AAAA-MM-GG' o 'AAAA-MM-GGTHH:mm', e anche una Date —
+ * perche' YAML converte da se' una data non virgolettata, e non si puo'
+ * pretendere che nessuno se ne dimentichi mai. La Date viene riletta in UTC,
+ * lo stesso fuso con cui il parser l'ha costruita non trovandone uno indicato:
+ * cosi' si torna esattamente alla stringa che era nel file, senza che il fuso
+ * della macchina entri nel risultato.
+ */
+function momentoScritto() {
+  const p = (n: number, l = 2) => String(n).padStart(l, '0');
+  return z
+    .union([z.string(), z.date()])
+    .transform((v, ctx) => {
+      if (v instanceof Date) {
+        const data = `${p(v.getUTCFullYear(), 4)}-${p(v.getUTCMonth() + 1)}-${p(v.getUTCDate())}`;
+        if (v.getUTCHours() === 0 && v.getUTCMinutes() === 0) return data;
+        return `${data}T${p(v.getUTCHours())}:${p(v.getUTCMinutes())}`;
+      }
+      const s = v.trim();
+      if (!/^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2})?$/.test(s)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Data non valida: "${v}". Attesa AAAA-MM-GG oppure AAAA-MM-GGTHH:mm.`,
+        });
+        return s;
+      }
+      return s.replace(' ', 'T');
+    })
+    .optional();
+}
+
+const eventi = defineCollection({
+  loader: glob({ base: './src/content/eventi', pattern: '**/*.md' }),
+  schema: z.object({
+    title: z.string(),
+
+    /** Sommario: nell'elenco, in home e nei metadati social. */
+    excerpt: z.string(),
+
+    /**
+     * Inizio, come 'AAAA-MM-GGTHH:mm' oppure 'AAAA-MM-GG'. Dopo questo campo e'
+     * sempre una stringa, mai una Date: la lettura la fa src/lib/eventi.ts, che
+     * sa tenere insieme il fuso Europe/Rome e l'ora scritta dalla redazione.
+     * Lasciarla diventare una Date vorrebbe dire interpretarla nel fuso di chi
+     * costruisce — che su Cloudflare e' UTC — e le 19:00 di Milano
+     * diventerebbero le 21:00 o le 17:00 a seconda del mese.
+     *
+     * Perche' accetta anche una Date: il frontmatter e' YAML, e YAML converte da
+     * se' `2026-10-03` in una data se non e' fra virgolette. Non possiamo
+     * pretendere che chi scrive — o il CMS, che serializza da solo — ricordi
+     * sempre di virgolettarla. Quando arriva una Date la si rilegge **in UTC**,
+     * che e' esattamente il fuso con cui il parser YAML l'ha costruita non
+     * trovandone uno: andata e ritorno senza perdere niente, e si torna alla
+     * stringa che era scritta nel file.
+     */
+    inizio: momentoScritto(),
+
+    /** Fine, stessa forma. Facoltativa: molti appuntamenti non hanno un'ora di chiusura. */
+    fine: momentoScritto(),
+
+    /**
+     * Etichetta della ricorrenza, scritta dalla redazione: «Ogni mercoledi' ·
+     * dalle 19». E' testo, non una regola da interpretare — vedi sopra.
+     */
+    ricorrenza: z.string().optional(),
+
+    /** Nome del posto, se c'e'. */
+    luogo: z.string().optional(),
+
+    /** Indirizzo, se c'e'. Separato dal luogo perche' spesso si sa uno e non l'altro. */
+    indirizzo: z.string().optional(),
+
+    /** Come per gli articoli: obbligatoria, immagine e descrizione insieme. */
+    copertina: z
+      .object({
+        file: z.string(),
+        alt: z.string(),
+      })
+      .optional(),
+
+    /**
+     * Link esterno con la sua etichetta, entrambi o nessuno dei due: un
+     * indirizzo senza etichetta diventa un «clicca qui», e un'etichetta senza
+     * indirizzo non porta da nessuna parte.
+     */
+    linkEsterno: z
+      .object({
+        url: z.url('Indirizzo non valido: serve un URL completo, con https://'),
+        etichetta: z.string(),
+      })
+      .optional(),
+
+    /** Fuori da home, agenda pubblica, pagine generate e sitemap finche' e' true. */
+    bozza: z.boolean().default(false),
+  })
+    .superRefine((d, ctx) => {
+      if (!d.copertina) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['copertina'],
+          message:
+            'Ogni evento deve avere una copertina. Aggiungi al frontmatter:\n' +
+            '  copertina:\n    file: /images/agenda/....webp\n    alt: descrizione dell\'immagine',
+        });
+      } else {
+        // Uno spazio non e' una descrizione: si confronta il valore ripulito.
+        if (d.copertina.alt.trim().length === 0) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['copertina', 'alt'],
+            message: 'Descrivi la copertina per chi non puo\' vederla: senza, l\'evento non si pubblica.',
+          });
+        }
+        if (d.copertina.file.trim().length === 0) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['copertina', 'file'],
+            message: 'Manca il file della copertina: ogni evento deve averne una.',
+          });
+        }
+      }
+
+      const haInizio = typeof d.inizio === 'string' && d.inizio.trim().length > 0;
+      const haRicorrenza = typeof d.ricorrenza === 'string' && d.ricorrenza.trim().length > 0;
+      if (!haInizio && !haRicorrenza) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['inizio'],
+          message:
+            'Un evento deve dire quando succede: compila «Inizio» per un appuntamento datato, ' +
+            'oppure «Si ripete» per uno che torna ogni settimana.',
+        });
+      }
+      if (d.fine && !haInizio) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['fine'],
+          message: 'C\'e\' una fine ma non un inizio: aggiungi «Inizio», oppure togli «Fine».',
+        });
+      }
+      if (d.fine && haInizio && d.fine.replace(' ', 'T') < (d.inizio as string).replace(' ', 'T')) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['fine'],
+          message: 'La fine viene prima dell\'inizio.',
+        });
+      }
+    }),
+});
+
+export const collections = { articles, eventi };

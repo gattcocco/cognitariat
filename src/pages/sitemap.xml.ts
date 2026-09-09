@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { articoliPubblicati, dataIso } from '../lib/articoli';
+import { eventiPubblicati, datetimeIso } from '../lib/eventi';
 
 /**
  * Sitemap scritta a mano invece che con @astrojs/sitemap.
@@ -20,10 +21,12 @@ export const GET: APIRoute = async ({ site }) => {
   const statiche: Array<{ percorso: string; priorita: string; frequenza: string }> = [
     { percorso: '/', priorita: '1.0', frequenza: 'weekly' },
     { percorso: '/blog/', priorita: '0.8', frequenza: 'weekly' },
+    { percorso: '/agenda/', priorita: '0.8', frequenza: 'weekly' },
     { percorso: '/privacy/', priorita: '0.3', frequenza: 'yearly' },
   ];
 
   const articoli = await articoliPubblicati();
+  const eventi = await eventiPubblicati();
 
   const voci = [
     ...statiche.map((s) => ({
@@ -36,6 +39,14 @@ export const GET: APIRoute = async ({ site }) => {
       url: new URL(`/blog/${a.id}/`, base).href,
       lastmod: dataIso(a.data.date),
       changefreq: 'yearly',
+      priority: '0.7',
+    })),
+    // Gli eventi: `lastmod` e' la data dell'appuntamento quando c'e', altrimenti
+    // quella della build — un ricorrente non ha una data propria.
+    ...eventi.map((e) => ({
+      url: new URL(`/agenda/${e.evento.id}/`, base).href,
+      lastmod: e.inizio ? datetimeIso(e.inizio).slice(0, 10) : oggi,
+      changefreq: 'monthly',
       priority: '0.7',
     })),
   ];

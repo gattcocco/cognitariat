@@ -41,7 +41,7 @@ const immagineSocial = cover?.replace(/\.webp$/i, '.jpg') ?? undefined;
   noindex={bozza}
 >
   <Header />
-  <main id="contenuto" tabindex="-1" class="container" style="padding: 48px 0 90px;">
+  <main id="contenuto" tabindex="-1" class="container pagina-testo" style="padding-block: 48px 90px;">
     <article class="articolo">
       <p class="articolo-torna">
         <a class="link" href="/blog/"><Icona nome="chevron-sinistra" /> Tutti gli articoli</a>
@@ -86,6 +86,10 @@ const immagineSocial = cover?.replace(/\.webp$/i, '.jpg') ?? undefined;
   .articolo {
     max-width: 72ch;
     margin: 0 auto;
+    /* Un indirizzo web o una parola lunghissima non devono sfondare il
+       contenitore: a 320px basta un link non spezzabile per far comparire la
+       barra orizzontale su tutta la pagina. */
+    overflow-wrap: break-word;
   }
   .articolo-torna {
     margin: 0 0 28px;

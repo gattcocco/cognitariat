@@ -4,13 +4,18 @@
  *
  * Se qualcuno aggiunge un campo allo schema e si dimentica del CMS, la redazione
  * non ha modo di compilarlo. Se lo aggiunge al CMS e si dimentica dello schema,
- * la build fallisce dopo che l'articolo e' gia' stato salvato: l'errore compare
+ * la build fallisce dopo che il contenuto e' gia' stato salvato: l'errore compare
  * a chi non l'ha causato, mezz'ora dopo, e sembra che il sito sia rotto.
  *
- * Si controlla anche la data. Il widget deve restare su 'YYYY-MM-DD' con
- * picker_utc false: con l'orario e il fuso, una data scritta il 6 settembre puo'
- * comparire sul sito come 5 settembre, ed e' un errore che nessuno collega alla
- * configurazione del CMS.
+ * Dal 09/09/2026 le collection sono due, articoli e agenda, e il controllo gira
+ * su entrambe: era il momento in cui un difetto poteva nascondersi nella seconda
+ * mentre la prima restava a posto.
+ *
+ * Si controllano anche i campi data. Devono restare senza fuso (`picker_utc:
+ * false`) e con un formato dichiarato: con l'orario in UTC, una data scritta il 6
+ * settembre puo' comparire sul sito come 5 settembre, e le 19:00 di Milano
+ * diventano le 21:00. E' un errore che nessuno collega alla configurazione del
+ * CMS.
  *
  * Uso: node scripts/verifica-cms.mjs   (dopo `npm run build`)
  */
@@ -19,40 +24,52 @@ import { readFile } from 'node:fs/promises';
 const CONFIG = 'dist/admin/config.yml';
 const SCHEMA = 'src/content.config.ts';
 
-/** Il corpo Markdown non e' un campo del frontmatter: sta nel file, non sopra. */
-const SOLO_NEL_CMS = new Set(['body']);
-
-/**
- * Campi che lo schema dichiara di proposito senza un corrispettivo nel CMS.
- * `cover` e `coverAlt` sono la forma vecchia della copertina: restano nello
- * schema solo per far fallire la build se un file e' rimasto indietro, non per
- * essere compilati. Nel CMS non devono esserci — se ci tornassero, i due modi
- * di scrivere la copertina convivrebbero e nessuno saprebbe quale vince.
- */
-const SOLO_NEL_SITO = new Set(['cover', 'coverAlt']);
-
-/**
- * Gruppi del CMS e i sottocampi che devono contenere. La copertina e' un gruppo
- * e non due campi affiancati perche' e' l'unico modo, in questa versione di
- * Sveltia, di rendere il testo alternativo obbligatorio *solo* quando c'e'
- * l'immagine: finche' la casella «Aggiungi Copertina» non e' spuntata i due
- * campi non esistono. Se qualcuno li riappiattisse, la descrizione tornerebbe
- * facoltativa senza che nessuno se ne accorga: e' quello che questo controllo
- * impedisce.
- */
-const GRUPPI = { copertina: ['file', 'alt'] };
-
-/**
- * Gruppi che devono essere **obbligatori** nel CMS, non solo presenti. Per la
- * copertina e' la decisione editoriale del 09/09/2026: ogni articolo ne ha una.
- * Se qualcuno rimettesse `required: false`, il CMS tornerebbe a mostrare la
- * casella «Aggiungi Copertina» e si potrebbe salvare un articolo senza — mentre
- * la build lo rifiuterebbe. Il salvataggio riuscirebbe e la pubblicazione no:
- * il modo peggiore di rompersi.
- */
-const GRUPPI_OBBLIGATORI = ['copertina'];
-
 const problemi = [];
+
+/**
+ * Le collection, con quello che ci si aspetta da ciascuna.
+ *
+ * - `variabile`: come si chiama nello schema Astro (`const articles = …`);
+ * - `soloNelCms`: campi che esistono solo nel modulo (il corpo Markdown sta nel
+ *   file, non nel frontmatter);
+ * - `soloNelSito`: campi che lo schema dichiara di proposito senza corrispettivo
+ *   nel CMS. `cover` e `coverAlt` sono la forma vecchia della copertina: restano
+ *   solo per far fallire la build se un file e' rimasto indietro. Se tornassero
+ *   nel CMS, i due modi di scrivere la copertina convivrebbero e nessuno saprebbe
+ *   quale vince;
+ * - `gruppi`: i sottocampi attesi dentro un campo `object`;
+ * - `gruppiObbligatori`: i gruppi che devono avere `required: true`. Per la
+ *   copertina e' la decisione editoriale del 09/09/2026: ogni contenuto ne ha
+ *   una. Con `required: false` il CMS lascerebbe salvare senza, mentre la build
+ *   rifiuterebbe di pubblicare — il salvataggio riesce e la pubblicazione no, il
+ *   modo peggiore di rompersi;
+ * - `date`: campi data e cosa devono dichiarare.
+ */
+const COLLECTION = {
+  articles: {
+    variabile: 'articles',
+    soloNelCms: ['body'],
+    soloNelSito: ['cover', 'coverAlt'],
+    gruppi: { copertina: ['file', 'alt'] },
+    gruppiObbligatori: ['copertina'],
+    date: {
+      date: { date_format: "'YYYY-MM-DD'", time_format: 'false', picker_utc: 'false' },
+    },
+  },
+  eventi: {
+    variabile: 'eventi',
+    soloNelCms: ['body'],
+    soloNelSito: [],
+    gruppi: { copertina: ['file', 'alt'], linkEsterno: ['url', 'etichetta'] },
+    gruppiObbligatori: ['copertina'],
+    date: {
+      // Qui l'ora serve — un appuntamento ha un orario — ma il fuso no: la
+      // stringa resta 'AAAA-MM-GGTHH:mm' e la interpreta src/lib/eventi.ts.
+      inizio: { date_format: "'YYYY-MM-DD'", time_format: "'HH:mm'", picker_utc: 'false' },
+      fine: { date_format: "'YYYY-MM-DD'", time_format: "'HH:mm'", picker_utc: 'false' },
+    },
+  },
+};
 
 let config;
 try {
@@ -63,33 +80,23 @@ try {
 }
 const schema = await readFile(SCHEMA, 'utf8');
 
-// --- Campi dichiarati nel CMS ------------------------------------------------
-const campiCms = new Set(
-  [...config.matchAll(/^\s{8}name:\s*([A-Za-z][A-Za-z0-9_]*)\s*$/gm)].map((m) => m[1])
-);
-
-// Sottocampi: piu' indentati, cioe' dentro un gruppo.
-const sottocampiCms = [...config.matchAll(/^\s{12,}name:\s*([A-Za-z][A-Za-z0-9_]*)\s*$/gm)].map(
-  (m) => m[1]
-);
-
-// --- Campi dichiarati nello schema del sito ---------------------------------
-const corpoSchema = schema.slice(schema.indexOf('z.object({'));
-const campiSchema = new Set(
-  [...corpoSchema.matchAll(/^\s{4}([A-Za-z][A-Za-z0-9_]*):\s*z\b/gm)].map((m) => m[1])
-);
-
-if (campiCms.size === 0) problemi.push(`Nessun campo trovato in ${CONFIG}: il formato e' cambiato?`);
-if (campiSchema.size === 0) problemi.push(`Nessun campo trovato in ${SCHEMA}: il formato e' cambiato?`);
-
-for (const c of campiCms) {
-  if (!campiSchema.has(c) && !SOLO_NEL_CMS.has(c)) {
-    problemi.push(
-      `Il CMS fa compilare "${c}", ma lo schema del sito non lo conosce: quello che scrive la\n` +
-        `     redazione verrebbe ignorato, o farebbe fallire la build.`
-    );
-  }
+/** Il blocco YAML di una collection: da `- name: x` fino alla successiva allo stesso livello. */
+function bloccoCms(nome) {
+  const righe = config.split('\n');
+  const inizio = righe.findIndex((r) => r === `  - name: ${nome}`);
+  if (inizio === -1) return undefined;
+  const fine = righe.findIndex((r, i) => i > inizio && /^ {2}- name: /.test(r));
+  return righe.slice(inizio, fine === -1 ? righe.length : fine).join('\n');
 }
+
+/** Il blocco TypeScript di una collection: da `const x = defineCollection({` a `});`. */
+function bloccoSchema(variabile) {
+  const i = schema.indexOf(`const ${variabile} = defineCollection({`);
+  if (i === -1) return undefined;
+  const j = schema.indexOf('\n});', i);
+  return schema.slice(i, j === -1 ? schema.length : j);
+}
+
 /**
  * Legge il `required:` dichiarato accanto a un `name:` di primo livello.
  * A mano e non con un'espressione regolare costruita al volo: la versione con
@@ -102,82 +109,159 @@ function requiredDelCampo(yaml, nome) {
   const inizio = righe.findIndex((r) => r === `        name: ${nome}`);
   if (inizio === -1) return { trovato: false };
   for (let i = inizio + 1; i < righe.length; i += 1) {
-    const r = righe[i];
-    // Fine del blocco: un'altra voce di elenco allo stesso livello.
-    if (/^ {6}- /.test(r)) break;
-    const m = /^ {8}required:\s*(\S+)\s*$/.exec(r);
+    if (/^ {6}- /.test(righe[i])) break;
+    const m = /^ {8}required:\s*(\S+)\s*$/.exec(righe[i]);
     if (m) return { trovato: true, valore: m[1] };
   }
   return { trovato: true, valore: undefined };
 }
 
-for (const gruppo of GRUPPI_OBBLIGATORI) {
-  const { trovato, valore } = requiredDelCampo(config, gruppo);
-  if (!trovato) {
-    problemi.push(`Nel CMS non c'e' nessun campo "${gruppo}".`);
-  } else if (valore === undefined) {
-    problemi.push(`Nel CMS il gruppo "${gruppo}" non dichiara "required": deve essere obbligatorio.`);
-  } else if (valore !== 'true') {
-    problemi.push(
-      `Nel CMS il gruppo "${gruppo}" ha required: ${valore}. Deve essere true: ogni articolo deve\n` +
-        `     avere una copertina, e con required: false il CMS lascerebbe salvare senza mentre la\n` +
-        `     build rifiuterebbe di pubblicare — il salvataggio riesce, la pubblicazione no.`
-    );
+/** Le chiavi dichiarate accanto a un `name:` di sottocampo (12 spazi). */
+function chiaviSottocampo(yaml, nome) {
+  const righe = yaml.split('\n');
+  const inizio = righe.findIndex((r) => r === `            name: ${nome}`);
+  if (inizio === -1) return undefined;
+  const fuori = {};
+  for (let i = inizio + 1; i < righe.length; i += 1) {
+    if (/^ {10}- /.test(righe[i]) || /^ {6}- /.test(righe[i])) break;
+    const m = /^ {12}([a-z_]+):\s*(\S.*?)\s*$/.exec(righe[i]);
+    if (m) fuori[m[1]] = m[2];
   }
+  return fuori;
 }
 
-for (const [gruppo, attesi] of Object.entries(GRUPPI)) {
-  if (!campiCms.has(gruppo)) continue;
-  const mancanti = attesi.filter((c) => !sottocampiCms.includes(c));
-  if (mancanti.length) {
-    problemi.push(
-      `Il gruppo "${gruppo}" del CMS non contiene ${mancanti.map((c) => `"${c}"`).join(' e ')}: ` +
-        `lo schema del sito se li aspetta dentro quel gruppo.`
-    );
+/** Le chiavi dichiarate accanto a un `name:` di primo livello (8 spazi). */
+function chiaviCampo(yaml, nome) {
+  const righe = yaml.split('\n');
+  const inizio = righe.findIndex((r) => r === `        name: ${nome}`);
+  if (inizio === -1) return undefined;
+  const fuori = {};
+  for (let i = inizio + 1; i < righe.length; i += 1) {
+    if (/^ {6}- /.test(righe[i])) break;
+    const m = /^ {8}([a-z_]+):\s*(\S.*?)\s*$/.exec(righe[i]);
+    if (m) fuori[m[1]] = m[2];
   }
-  const richiesti = [...config.matchAll(/^\s{12}name:\s*([A-Za-z][A-Za-z0-9_]*)[\s\S]{0,200}?^\s{12}required:\s*(\S+)/gm)];
-  for (const c of attesi) {
-    const riga = richiesti.find((m) => m[1] === c);
-    if (!riga || riga[2] !== 'true') {
-      problemi.push(
-        `Nel gruppo "${gruppo}" il campo "${c}" non e' obbligatorio. E' proprio il punto del ` +
-          `gruppo: quando la copertina c'e', servono tutte e due le parti.`
-      );
-    }
-  }
+  return fuori;
 }
 
-for (const c of campiSchema) {
-  if (SOLO_NEL_SITO.has(c)) {
-    if (campiCms.has(c)) {
-      problemi.push(
-        `"${c}" e' la forma vecchia della copertina ed e' tornato nel CMS: i due modi di ` +
-          `scriverla convivrebbero e nessuno saprebbe quale vince.`
-      );
-    }
+const riepilogo = {};
+
+for (const [nome, atteso] of Object.entries(COLLECTION)) {
+  const yaml = bloccoCms(nome);
+  const ts = bloccoSchema(atteso.variabile);
+
+  if (!yaml) {
+    problemi.push(`Nel CMS non c'e' la collection "${nome}".`);
     continue;
   }
-  if (!campiCms.has(c)) {
-    problemi.push(
-      `Lo schema prevede "${c}", ma nel CMS non c'e' nessun campo per compilarlo: la redazione\n` +
-        `     non ha modo di valorizzarlo.`
-    );
+  if (!ts) {
+    problemi.push(`Nello schema del sito non c'e' la collection "${atteso.variabile}".`);
+    continue;
   }
-}
 
-// --- Il campo data non deve reintrodurre il problema del fuso orario --------
-const bloccoData = config.match(/name:\s*date[\s\S]{0,400}/);
-if (!bloccoData) {
-  problemi.push('Nel CMS non c\'e\' il campo "date".');
-} else {
-  if (!/date_format:\s*'YYYY-MM-DD'/.test(bloccoData[0])) {
-    problemi.push("Il campo data del CMS non e' su date_format: 'YYYY-MM-DD'.");
+  const campiCms = new Set(
+    [...yaml.matchAll(/^\s{8}name:\s*([A-Za-z][A-Za-z0-9_]*)\s*$/gm)].map((m) => m[1])
+  );
+  const sottocampiCms = [...yaml.matchAll(/^\s{12}name:\s*([A-Za-z][A-Za-z0-9_]*)\s*$/gm)].map(
+    (m) => m[1]
+  );
+  // Un campo dello schema e' una riga indentata di 4 spazi che assegna o `z.…`
+  // o una chiamata di funzione: `inizio: momentoScritto()` e' un campo quanto
+  // `title: z.string()`, e cercare solo `z` lo faceva sparire dall'elenco —
+  // con il risultato che il controllo accusava il CMS di avere un campo in piu'.
+  const campiSchema = new Set(
+    [...ts.matchAll(/^\s{4}([A-Za-z][A-Za-z0-9_]*):\s*(?:z\b|[A-Za-z_$][\w$]*\()/gm)].map((m) => m[1])
+  );
+
+  riepilogo[nome] = campiSchema;
+
+  if (campiCms.size === 0) problemi.push(`Nessun campo trovato per "${nome}" in ${CONFIG}.`);
+  if (campiSchema.size === 0) problemi.push(`Nessun campo trovato per "${nome}" in ${SCHEMA}.`);
+
+  const soloNelCms = new Set(atteso.soloNelCms);
+  const soloNelSito = new Set(atteso.soloNelSito);
+
+  for (const c of campiCms) {
+    if (!campiSchema.has(c) && !soloNelCms.has(c)) {
+      problemi.push(
+        `[${nome}] Il CMS fa compilare "${c}", ma lo schema del sito non lo conosce: quello che\n` +
+          `     scrive la redazione verrebbe ignorato, o farebbe fallire la build.`
+      );
+    }
   }
-  if (!/time_format:\s*false/.test(bloccoData[0])) {
-    problemi.push('Il campo data del CMS non ha time_format: false: con l\'orario la data puo\' slittare di un giorno.');
+
+  for (const c of campiSchema) {
+    if (soloNelSito.has(c)) {
+      if (campiCms.has(c)) {
+        problemi.push(
+          `[${nome}] "${c}" e' la forma vecchia della copertina ed e' tornato nel CMS: i due modi\n` +
+            `     di scriverla convivrebbero e nessuno saprebbe quale vince.`
+        );
+      }
+      continue;
+    }
+    if (!campiCms.has(c)) {
+      problemi.push(
+        `[${nome}] Lo schema prevede "${c}", ma nel CMS non c'e' nessun campo per compilarlo: la\n` +
+          `     redazione non ha modo di valorizzarlo.`
+      );
+    }
   }
-  if (!/picker_utc:\s*false/.test(bloccoData[0])) {
-    problemi.push('Il campo data del CMS non ha picker_utc: false: la data verrebbe scritta in UTC.');
+
+  // --- Gruppi: sottocampi presenti e obbligatori ------------------------------
+  for (const [gruppo, sottocampi] of Object.entries(atteso.gruppi)) {
+    if (!campiCms.has(gruppo)) continue;
+    const mancanti = sottocampi.filter((c) => !sottocampiCms.includes(c));
+    if (mancanti.length) {
+      problemi.push(
+        `[${nome}] Il gruppo "${gruppo}" non contiene ${mancanti.map((c) => `"${c}"`).join(' e ')}: ` +
+          `lo schema del sito se li aspetta dentro quel gruppo.`
+      );
+    }
+    for (const c of sottocampi) {
+      const chiavi = chiaviSottocampo(yaml, c);
+      if (!chiavi) continue;
+      if (chiavi.required !== 'true') {
+        problemi.push(
+          `[${nome}] Nel gruppo "${gruppo}" il campo "${c}" non e' obbligatorio (required: ` +
+            `${chiavi.required ?? 'assente'}). E' il punto del gruppo: se c'e', servono tutte le parti.`
+        );
+      }
+    }
+  }
+
+  for (const gruppo of atteso.gruppiObbligatori) {
+    const { trovato, valore } = requiredDelCampo(yaml, gruppo);
+    if (!trovato) {
+      problemi.push(`[${nome}] Nel CMS non c'e' nessun campo "${gruppo}".`);
+    } else if (valore === undefined) {
+      problemi.push(
+        `[${nome}] Il gruppo "${gruppo}" non dichiara "required": deve essere obbligatorio.`
+      );
+    } else if (valore !== 'true') {
+      problemi.push(
+        `[${nome}] Il gruppo "${gruppo}" ha required: ${valore}. Deve essere true: ogni contenuto\n` +
+          `     deve avere una copertina, e con required: false il CMS lascerebbe salvare senza\n` +
+          `     mentre la build rifiuterebbe di pubblicare.`
+      );
+    }
+  }
+
+  // --- Campi data: niente fusi, niente slittamenti ----------------------------
+  for (const [campo, atteseChiavi] of Object.entries(atteso.date)) {
+    const chiavi = chiaviCampo(yaml, campo);
+    if (!chiavi) {
+      problemi.push(`[${nome}] Nel CMS non c'e' il campo "${campo}".`);
+      continue;
+    }
+    for (const [chiave, valore] of Object.entries(atteseChiavi)) {
+      if (chiavi[chiave] !== valore) {
+        problemi.push(
+          `[${nome}] Il campo "${campo}" ha ${chiave}: ${chiavi[chiave] ?? 'assente'}, atteso ` +
+            `${valore}. Senza, la data puo' slittare di un giorno e l'ora di un'ora o due.`
+        );
+      }
+    }
   }
 }
 
@@ -192,16 +276,17 @@ if (!baseUrl || !/^https?:\/\//.test(baseUrl)) {
 // --- Esito -------------------------------------------------------------------
 const elenco = (s) => [...s].sort().join(', ');
 if (problemi.length === 0) {
+  const righe = Object.entries(riepilogo)
+    .map(([nome, campi]) => `  ${nome}: ${elenco(campi)}`)
+    .join('\n');
   console.log(
-    `verifica CMS: campi allineati (${elenco(campiSchema)}), data senza fuso, ` +
-      `ramo "${ramo}", login su ${baseUrl}.`
+    `verifica CMS: campi allineati su ${Object.keys(riepilogo).length} collection,\n${righe}\n` +
+      `  date senza fuso, ramo "${ramo}", login su ${baseUrl}.`
   );
   process.exit(0);
 }
 
 console.error(`verifica CMS: ${problemi.length} problema/i.`);
-console.error(`  campi nel CMS:    ${elenco(campiCms)}`);
-console.error(`  campi nel sito:   ${elenco(campiSchema)}`);
 for (const p of problemi) console.error(`  - ${p}`);
 console.error(
   '\nLe due liste stanno in src/content.config.ts e src/pages/admin/config.yml.ts:\n' +

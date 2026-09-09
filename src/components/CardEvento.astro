@@ -1,0 +1,73 @@
+---
+import { dataLunga, dataBreve, ora, meseAbbr, datetimeIso, type EventoLetto } from '../lib/eventi';
+
+interface Props {
+  voce: EventoLetto;
+  /** In home le schede sono più compatte e senza sommario. */
+  compatta?: boolean;
+}
+
+const { voce, compatta = false } = Astro.props;
+const { evento, inizio, fine, ricorrente, scadeIl } = voce;
+const d = evento.data;
+
+const oraInizio = inizio ? ora(inizio) : undefined;
+const oraFine = fine ? ora(fine) : undefined;
+const stessoGiorno =
+  inizio && fine && inizio.anno === fine.anno && inizio.mese === fine.mese && inizio.giorno === fine.giorno;
+---
+{/*
+  La data è trattata come un oggetto grafico e non come una riga di testo: il
+  numero grande, il mese sotto, il giorno della settimana sopra. È il segno che
+  distingue un appuntamento da un articolo a colpo d'occhio, e costa una sola
+  forma — un rettangolo nero — che non entra in competizione con le locandine,
+  che sono già molto cariche.
+
+  Gli appuntamenti che si ripetono non hanno un numero da mettere lì, e al suo
+  posto c'è l'etichetta scritta dalla redazione su fondo giallo: il giallo è
+  usato solo qui, come evidenza, e su fondo giallo il testo è nero (14,47:1).
+*/}
+<article class="evento" data-scade-il={scadeIl}>
+  <a class="evento-figura" href={`/agenda/${evento.id}/`} tabindex="-1" aria-hidden="true">
+    {/* Niente width/height dichiarati: le locandine hanno proporzioni diverse
+        fra loro, e un valore fisso qui riserverebbe lo spazio sbagliato. */}
+    <img src={d.copertina!.file} alt="" loading="lazy" decoding="async" />
+  </a>
+
+  <div class="evento-testo">
+    {ricorrente ? (
+      <p class="evento-ricorrenza">{d.ricorrenza}</p>
+    ) : (
+      <p class="evento-quando">
+        <time class="evento-data" datetime={datetimeIso(inizio!)}>
+          <span class="evento-giorno-settimana">{dataLunga(inizio!).split(' ')[0]}</span>
+          <span class="evento-numero">{inizio!.giorno}</span>
+          <span class="evento-mese">{meseAbbr(inizio!)}</span>
+        </time>
+        {oraInizio && (
+          <span class="evento-ora">
+            ore {oraInizio}
+            {oraFine && stessoGiorno && <> – {oraFine}</>}
+          </span>
+        )}
+      </p>
+    )}
+
+    <h3 class="evento-titolo">
+      <a href={`/agenda/${evento.id}/`}>{evento.data.title}</a>
+    </h3>
+
+    {/* Luogo e indirizzo su una riga, uniti da un punto mediano che è **testo**
+        e non un elemento: dentro uno <span> la resa sarebbe identica, ma
+        check:testi vedrebbe un tag in linea appiccicato alle parole e
+        segnalerebbe uno spazio mangiato che non c'è. Un controllo che dà falsi
+        allarmi viene disattivato dopo la seconda volta. */}
+    {(d.luogo || d.indirizzo) && (
+      <p class="evento-luogo">{[d.luogo, d.indirizzo].filter(Boolean).join(' · ')}</p>
+    )}
+
+    {!compatta && <p class="evento-sommario">{evento.data.excerpt}</p>}
+
+    {d.bozza && <p class="occhiello occhiello--progetto">Bozza — non pubblicata</p>}
+  </div>
+</article>

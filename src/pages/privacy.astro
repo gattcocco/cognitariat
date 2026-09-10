@@ -65,7 +65,7 @@ const versione = PRIVACY_POLICY_VERSION;
       <p>
         Per qualunque cosa riguardi i tuoi dati — chiedere, correggere, cancellare, opporti — il
         riferimento è{' '}
-        <a class="link" href={`mailto:${associazione.email}`}>{associazione.email}</a>{haPec ? ',' : '.'}
+        {associazione.email}{haPec ? ',' : '.'}
         {haPec && <> oppure la PEC {associazione.pec}.</>}
       </p>
       <p>
@@ -152,7 +152,7 @@ const versione = PRIVACY_POLICY_VERSION;
       <h2>4. Se ci scrivi</h2>
       <p>
         Scrivere a{' '}
-        <a class="link" href={`mailto:${associazione.email}`}>{associazione.email}</a> è, oggi,
+        {associazione.email} è, oggi,
         l'unico modo per farci arrivare dei dati. La casella è ospitata da <strong>Proton</strong>
         {' '}(Proton AG, Svizzera): i messaggi stanno sui suoi server, come per qualunque posta
         elettronica.
@@ -260,7 +260,7 @@ const versione = PRIVACY_POLICY_VERSION;
         riguardano, e opporti al trattamento fondato sul legittimo interesse. Dove abbiamo chiesto
         il tuo consenso puoi ritirarlo quando vuoi, senza che questo tocchi quello che è stato
         fatto prima. Si scrive a{' '}
-        <a class="link" href={`mailto:${associazione.email}`}>{associazione.email}</a>.
+        {associazione.email}.
       </p>
       <p>
         Se pensi che qualcosa non vada puoi rivolgerti al Garante per la protezione dei dati

@@ -10,6 +10,7 @@ import Alternative from '../components/Alternative.astro';
 import AssemblyBanner from '../components/AssemblyBanner.astro';
 import CosaFacciamo from '../components/CosaFacciamo.astro';
 import Agenda from '../components/Agenda.astro';
+import Manifesto from '../components/Manifesto.astro';
 import Articoli from '../components/Articoli.astro';
 import VideoInterviews from '../components/VideoInterviews.astro';
 import CosaCostruiamo from '../components/CosaCostruiamo.astro';
@@ -33,6 +34,14 @@ import Footer from '../components/Footer.astro';
       e un dato gia' misurato. Resta piu' corta delle alternative, di proposito.
     -->
     <Hero />
+    <!--
+      L'agenda sta subito sotto la prima schermata, e non piu' a meta' pagina.
+      Un appuntamento ha una scadenza: se di questa home si legge solo la prima
+      schermata, quello che deve restare e' dove ci si puo' incontrare, non un
+      testo che spiega. La sezione sparisce da sola quando non c'e' niente in
+      calendario, quindi qui in alto non lascia un buco.
+    -->
+    <Agenda />
     <CosaSucceded />
     <PercheCiPreoccupa />
     <Lavoro />
@@ -40,11 +49,11 @@ import Footer from '../components/Footer.astro';
     <AssemblyBanner />
     <CosaFacciamo />
     <!--
-      L'agenda sta prima degli articoli: un appuntamento ha una scadenza, un
-      articolo no. Se una sola delle due cose viene letta, meglio che sia quella
-      a cui si puo' ancora partecipare.
+      La locandina sta a meta' strada: dopo le sezioni che spiegano, prima di
+      quelle che invitano a leggere altro. E' una pausa, e il punto in cui la
+      pagina smette per un attimo di argomentare.
     -->
-    <Agenda />
+    <Manifesto />
     <Articoli />
     <VideoInterviews />
     <CosaCostruiamo />

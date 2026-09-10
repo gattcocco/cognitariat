@@ -1393,3 +1393,42 @@ main[tabindex='-1']:focus-visible {
 .scrivici-banner .indirizzo {
   background-image: none;
 }
+
+/* ============================================================================
+   MANIFESTO — la locandina affissa a metà pagina
+
+   Fondo nero per un motivo preciso: la locandina è stampata su bianco e la home
+   è bianca. Su fondo chiaro i suoi bordi sparirebbero e il foglio sembrerebbe
+   una parte della pagina. Il nero lo stacca senza cornici né ombre finte.
+
+   Nessun raggio sugli angoli: un foglio stampato ha gli angoli vivi.
+   ========================================================================= */
+.manifesto {
+  background: var(--nero);
+  color: var(--bianco);
+  border-bottom: none;
+  text-align: center;
+}
+/* Etichetta, non titolo di sezione: piccola, gialla su nero (14,47:1), serve a
+   dire di che manifesto si tratta — lo stesso numero stampato sulla locandina.
+   Niente maiuscolo forzato: la regola redazionale vale anche per le etichette. */
+.manifesto-etichetta {
+  font-size: 0.82rem;
+  font-weight: var(--peso-forte);
+  letter-spacing: 0.14em;
+  color: var(--giallo);
+  margin-bottom: 28px;
+}
+.manifesto-figura {
+  margin: 0;
+}
+/* La locandina è verticale (991x1400): a piena larghezza su desktop sarebbe
+   alta due schermate. 460px la tengono leggibile senza costringere a scorrere
+   per vederla tutta; sotto quella soglia prende la larghezza disponibile. */
+.manifesto-figura img {
+  display: block;
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  margin-inline: auto;
+}

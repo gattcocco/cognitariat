@@ -41,6 +41,17 @@
     </div>
 
     <figure class="figura">
+      {/*
+        Il file SVG porta width e height sulla propria radice, non solo il
+        viewBox. Senza, l'illustrazione non ha una dimensione propria: il
+        browser le assegna il riquadro predefinito di un elemento sostituito
+        (300x150, qui 104x150 una volta applicate le proporzioni del viewBox),
+        e i motori che pretendono una dimensione intrinseca per disegnare
+        un'immagine vettoriale si comportano ognuno a modo suo — c'e' chi la
+        scala lo stesso e chi non disegna niente. Gli attributi qui sotto
+        riservano lo spazio nella pagina; quelli nel file rendono l'immagine
+        una dimensione, non un'ipotesi.
+      */}
       <img
         src="/images/illustrazioni/figura-domanda-lavoro.svg"
         alt=""

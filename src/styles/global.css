@@ -1300,11 +1300,28 @@ main[tabindex='-1']:focus-visible {
   gap: 16px 24px;
   margin-bottom: 20px;
 }
+/* I dati pratici dell'appuntamento: quando, dove, indirizzo.
+
+   Fondo NERO con etichette gialle, non il giallo diluito che usava prima. Due
+   motivi, e nessuno dei due e' estetico:
+
+   1. quel giallo al 22% su bianco diventa un sabbia (#FDF6D7) che nella palette
+      non c'e'. La palette e' cinque colori — bianco, nero, rosa, verde, giallo —
+      e il giallo il manuale lo vuole "solo come fondo con testo nero", pieno,
+      non annacquato;
+   2. il nero con il giorno in giallo e' gia' il linguaggio del blocco-data nelle
+      schede dell'agenda. Ritrovarlo qui lega l'elenco alla pagina invece di
+      introdurre una terza superficie.
+
+   Contrasti: bianco su nero 21:1, giallo su nero 14,47:1.
+   La classe `sezione-scura` nell'HTML porta il token del focus a giallo — sul
+   nero un contorno nero sparirebbe. */
 .evento-dati {
   list-style: none;
-  padding: 16px 20px;
+  padding: 20px 22px;
   margin: 0 0 28px;
-  background: var(--giallo-tenue);
+  background: var(--nero);
+  color: var(--bianco);
   border-radius: var(--raggio-m);
   display: grid;
   gap: 8px;
@@ -1315,13 +1332,23 @@ main[tabindex='-1']:focus-visible {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--nero-secondario);
+  color: var(--giallo);
 }
 .evento-dati dd {
-  margin: 0 0 6px;
+  margin: 0 0 10px;
   overflow-wrap: break-word;
 }
 .evento-dati dd:last-child { margin-bottom: 0; }
+/* Il primo dato — quando — e' quello che si cerca per primo: pesa di piu'. */
+.evento-dati dd:first-of-type {
+  font-size: 1.12rem;
+  font-weight: var(--peso-medio);
+}
+.evento-dati a {
+  color: var(--giallo);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 .evento-link-esterno {
   margin-top: 28px;

@@ -1,7 +1,7 @@
 ---
 title: "Serata benefit con Kenobit"
 excerpt: "Autofinanziamento del sindacato COG U al Circolo Anarchico Ponte della Ghisolfa: laboratorio Mastodon, inaugurazione degli account di Ponte e COG U, dj set chiptune di Kenobit e cocktail bar."
-inizio: 2026-10-04T19:00
+inizio: "2026-10-14T19:00"
 luogo: Circolo Anarchico Ponte della Ghisolfa
 indirizzo: Viale Monza 255, Milano
 copertina:

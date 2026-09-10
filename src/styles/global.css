@@ -1365,3 +1365,31 @@ main[tabindex='-1']:focus-visible {
 .evento-copertina {
   max-width: 480px;
 }
+
+/* L'indirizzo di posta: in risalto, ma non cliccabile.
+
+   Sul sito non c'e' piu' nessun `mailto:` — niente deve aprire il programma di
+   posta — quindi l'indirizzo e' testo. Testo che pero' va trovato subito, perche'
+   oggi e' l'unico modo per farsi sentire.
+
+   L'evidenziatore giallo dietro le parole e' il linguaggio che il sito usa gia'
+   per dare peso a una parola (la parola chiave dell'hero ha lo stesso giallo
+   sotto). I link nel corpo sono invece verdi e sottolineati sottili: due segni
+   diversi per due cose diverse, cosi' nessuno prova a cliccare qualcosa che non
+   si clicca.
+
+   Il testo resta nero: su giallo pieno da' 14,47:1. */
+.indirizzo {
+  font-weight: var(--peso-forte);
+  background-image: linear-gradient(transparent 62%, var(--giallo) 62%);
+  /* Un indirizzo e' una parola sola e lunga: a 320px deve poter andare a capo
+     invece di sfondare la colonna. */
+  overflow-wrap: anywhere;
+}
+
+/* Nel banner rosa l'evidenziatore giallo si vedrebbe appena (giallo su rosa e'
+   2,85) e sarebbe comunque di troppo: quel fondo e' gia' un'evidenza. Resta il
+   peso. */
+.scrivici-banner .indirizzo {
+  background-image: none;
+}

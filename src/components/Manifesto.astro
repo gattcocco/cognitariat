@@ -1,0 +1,41 @@
+---
+/**
+ * Manifesto 01 — la locandina, in mezzo alla pagina.
+ *
+ * Sta fra «Cosa facciamo» e gli articoli, cioè al centro della home: è il punto
+ * in cui il discorso ha già detto chi siamo e sta per passare ai testi lunghi.
+ * Una locandina lì dentro è una pausa, non un'altra cosa da leggere.
+ *
+ * Perché il fondo è nero. La locandina è stampata su bianco, e la home è
+ * bianca: senza una banda scura dietro, i suoi bordi sparirebbero e il foglio
+ * sembrerebbe una parte della pagina invece che un oggetto affisso. Il nero fa
+ * quel lavoro senza aggiungere cornici o ombre finte.
+ *
+ * L'immagine è una locandina, non una decorazione: il testo alternativo dice
+ * cosa c'è scritto sopra, perché è l'unico modo per chi non la vede di sapere
+ * che manifesto è.
+ *
+ * L'originale ad alta risoluzione resta fuori dal repository, in
+ * `media/COG-U-manifesto-01-non-farti-sostituire-da-un-ai.png`: qui c'è solo la
+ * versione web. Il personaggio viene dal set illustrato in licenza — la licenza
+ * e i file originali del set restano anch'essi in locale.
+ */
+const FILE = '/images/manifesti/manifesto-01-non-farti-sostituire-da-un-ai.webp';
+---
+<section id="manifesto-01" class="manifesto" aria-labelledby="manifesto-01-etichetta">
+  <div class="container">
+    <h2 class="manifesto-etichetta" id="manifesto-01-etichetta">Manifesto 01</h2>
+    <figure class="manifesto-figura">
+      {/* Dimensioni dichiarate: si conoscono, e riservano lo spazio prima che
+          l'immagine arrivi, così la pagina non salta durante il caricamento. */}
+      <img
+        src={FILE}
+        width="991"
+        height="1400"
+        loading="lazy"
+        decoding="async"
+        alt="Locandina di COG U. In alto, a caratteri grandi: «Non farti sostituire da un'AI». In basso a sinistra: «Il lavoro ha una voce. La nostra.» Al centro il disegno di una persona con i capelli rossi e la camicia verde, che guarda in avanti accigliata."
+      />
+    </figure>
+  </div>
+</section>

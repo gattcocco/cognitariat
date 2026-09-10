@@ -25,11 +25,11 @@ brief che non ho potuto verificare, o che i dati smentiscono, sono fuori dal cop
 
 **Occhiello**: Sindacato e osservatorio sul lavoro cognitivo
 
-**Titolo**
-> Stiamo cercando di capirci qualcosa nella corsa all'intelligenza artificiale.
+**Titolo** — aggiornato il 10/09/2026, dal manifesto 01
+> Non farti sostituire da un'AI.
 
 **Corpo**
-> Chi la sta costruendo, con quali soldi, a spese di cosa. E chi la sta costruendo in un altro modo.
+> Il lavoro ha una voce. La nostra. La tua.
 >
 > Siamo un sindacato in costruzione e un osservatorio già attivo. Documentiamo cosa succede al
 > lavoro cognitivo e alle infrastrutture che lo reggono — data center, energia, contratti — e
@@ -38,6 +38,12 @@ brief che non ho potuto verificare, o che i dati smentiscono, sono fuori dal cop
 **CTA unica**: «Cosa facciamo oggi» → ancora `#cosa-facciamo`
 
 **Illustrazione**: nessuna. La prima schermata resta tipografica.
+
+> **Aggiornamento 10/09/2026**: titolo e prima riga di corpo sostituiti su richiesta del
+> committente con il testo del manifesto 01. Il titolo precedente («Stiamo cercando di capirci
+> qualcosa nella corsa all'intelligenza artificiale») e la riga che lo seguiva («Chi la sta
+> costruendo, con quali soldi, a spese di cosa…») sono stati tolti, non riscritti: descrivevano
+> un metodo di lavoro, non una posizione. Il paragrafo che dichiara identità e attività resta.
 
 > **Nota di integrazione**: l'attuale hero contiene tre statistiche
 > («+10.000 iscritti previsti Lombardia», «Fondo legale di solidarietà», «Sciopero 4.0») e un

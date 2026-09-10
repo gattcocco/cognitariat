@@ -1,0 +1,203 @@
+/* ============================================================================
+   CORPO EDITORIALE — articoli e pagine evento
+   ============================================================================
+
+   PERCHE' QUESTO FILE ESISTE, ed e' una correzione non una riorganizzazione.
+
+   Queste regole stavano in un <style is:global> dentro src/pages/blog/[slug].astro.
+   Astro include un foglio dichiarato in una pagina **solo nel bundle di quella
+   pagina**: le pagine /agenda/<slug>/ riusavano le stesse classi — .articolo,
+   .articolo-copertina, .articolo-corpo — senza ricevere una riga di questo CSS.
+
+   Il risultato, misurato sulla preview il 09/09/2026 a 320, 360 e 390px: la
+   locandina dell'evento restava alla sua dimensione intrinseca. Su
+   /agenda/serata-benefit-kenobit/ a 360px l'immagine era larga 945px con
+   `max-width: none`, il documento aveva scrollWidth 965 su clientWidth 360 —
+   605px di eccedenza — e l'unico elemento sporgente era proprio quell'IMG.
+
+   Non era ne' un attributo width/height fisso, ne' un grid senza min-width, ne'
+   il Markdown: era CSS che non arrivava alla pagina. Stando qui, arriva a
+   entrambe, e la classe di difetti «riuso le classi ma non lo stile» non si
+   ripresenta.
+
+   Le copertine delle schede in /agenda/ NON dipendono da questo file: hanno le
+   loro regole in global.css (.evento-figura) e non sono state toccate.
+   ========================================================================= */
+
+.articolo {
+    max-width: 72ch;
+    margin: 0 auto;
+    /* Un indirizzo web o una parola lunghissima non devono sfondare il
+       contenitore: a 320px basta un link non spezzabile per far comparire la
+       barra orizzontale su tutta la pagina. */
+    overflow-wrap: break-word;
+  }
+  .articolo-torna {
+    margin: 0 0 28px;
+    font-size: 0.9rem;
+  }
+  .articolo-titolo {
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
+    font-weight: var(--peso-titolo);
+    letter-spacing: -0.02em;
+    margin: 12px 0 16px;
+  }
+  .articolo-meta {
+    margin: 0 0 20px;
+    color: var(--nero-secondario);
+    font-size: 0.95rem;
+  }
+  .articolo-sommario {
+    margin: 0 0 32px;
+    font-size: 1.2rem;
+    line-height: 1.55;
+    font-weight: var(--peso-medio);
+  }
+  .articolo-copertina {
+    margin: 0 0 40px;
+  }
+  .articolo-copertina img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--raggio-l);
+  }
+  /* Il corpo arriva da Markdown, quindi non ha classi: si stilano gli elementi. */
+  .articolo-corpo > p {
+    margin: 0 0 20px;
+    font-size: 1.08rem;
+    line-height: 1.7;
+  }
+  .articolo-corpo h2 {
+    font-size: 1.6rem;
+    font-weight: var(--peso-titolo);
+    line-height: 1.2;
+    margin: 44px 0 14px;
+  }
+  .articolo-corpo h3 {
+    font-size: 1.25rem;
+    font-weight: var(--peso-forte);
+    margin: 34px 0 10px;
+  }
+  .articolo-corpo ul,
+  .articolo-corpo ol {
+    margin: 0 0 22px 22px;
+    line-height: 1.7;
+  }
+  .articolo-corpo li {
+    margin-bottom: 8px;
+  }
+  .articolo-corpo blockquote {
+    margin: 26px 0;
+    padding: 4px 0 4px 18px;
+    border-left: 4px solid var(--verde);
+    color: var(--nero-secondario);
+  }
+  .articolo-corpo a {
+    color: var(--verde);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .articolo-corpo a:hover {
+    color: var(--verde-hover);
+  }
+  .articolo-corpo hr {
+    border: none;
+    border-top: 2px solid var(--bordo);
+    margin: 40px 0;
+  }
+  .articolo-corpo img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--raggio-m);
+  }
+
+  /* Nota della redazione: deve leggersi come una voce diversa da quella
+     dell'articolo, altrimenti sembra che il testo sia stato riscritto.
+     Fondo giallo diluito e testo nero: 21:1, e il giallo non porta testo. */
+  .articolo-nota {
+    margin: 40px 0 0;
+    padding: 20px 24px;
+    background: var(--giallo-tenue);
+    border-left: 4px solid var(--rosa);
+    border-radius: 0 var(--raggio-s) var(--raggio-s) 0;
+  }
+  .articolo-nota p { margin: 0; }
+  .articolo-nota-etichetta {
+    font-size: 0.8rem;
+    font-weight: var(--peso-forte);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px !important;
+  }
+
+/* ---------------------------------------------------------------------------
+   Media dentro il corpo editoriale.
+
+   La regola sulle immagini c'era gia'; qui si estende a quello che il corpo
+   puo' contenere davvero. Il Markdown degli articoli e degli eventi passa da
+   Astro senza plugin che aggiungano media, ma l'HTML e' permesso in Markdown:
+   una figure, un picture, un iframe di una mappa o un video incorporato si
+   possono scrivere a mano e finirebbero in pagina senza nessuna regola.
+
+   Non c'e' `overflow-x: hidden` da nessuna parte, ne' qui ne' sul contenitore:
+   nasconderebbe il difetto invece di correggerlo, e taglierebbe contorni di
+   focus e ombre.
+   --------------------------------------------------------------------------- */
+
+/* Nessun media supera la colonna del testo, e nessuno viene deformato: la
+   larghezza si limita, l'altezza segue le proporzioni. `width: auto` insieme a
+   `max-width: 100%` lascia le immagini piccole alla loro dimensione — una
+   miniatura da 200px non va stirata a tutta colonna. */
+.articolo-corpo img,
+.articolo-corpo picture,
+.articolo-corpo svg,
+.articolo-corpo video,
+.articolo-corpo canvas {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+}
+
+/* picture e' un contenitore: e' l'img dentro che va limitata. */
+.articolo-corpo picture img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Una figure con margini propri di Markdown sporgerebbe: azzerati, e la
+   didascalia resta larga come l'immagine perche' sta nello stesso blocco. */
+.articolo-corpo figure {
+  margin: 26px 0;
+  max-width: 100%;
+}
+.articolo-corpo figcaption {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--nero-secondario);
+  max-width: 100%;
+}
+
+/* iframe e embed non hanno proporzioni proprie da conservare: si limita la
+   larghezza e si lascia l'altezza a chi li ha scritti. Oggi nel corpo non ce
+   ne sono — i video del sito sono link, non incorporamenti — ma se qualcuno ne
+   scrivesse uno a mano non deve poter sfondare la pagina. */
+.articolo-corpo iframe,
+.articolo-corpo embed,
+.articolo-corpo object {
+  max-width: 100%;
+}
+
+/* Una tabella o un blocco di codice larghi scorrono **dentro il proprio
+   riquadro**, non trascinando la pagina: e' la differenza fra un contenuto che
+   si consulta e una pagina che si sposta di lato. */
+.articolo-corpo table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.articolo-corpo pre {
+  max-width: 100%;
+  overflow-x: auto;
+}

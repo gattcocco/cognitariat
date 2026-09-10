@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # Tipi: pagine e componenti Astro, piu' le Pages Functions.
+      - run: npm run check:all
+
+      - run: npm run build
+
+      # I font sono ospitati da noi e in sottoinsiemi ridotti: se un testo nuovo
+      # introduce un carattere fuori dagli unicode-range dichiarati, il browser
+      # tornerebbe in silenzio al font di sistema. Qui l'errore e' rumoroso.
+      - run: npm run check:glifi
+
+      # Nessuna pagina pubblica deve mostrare segnaposto di bozza, e nessun testo
+      # deve restare attaccato al link che segue (Astro toglie lo spazio prima di
+      # un a capo: e' successo sette volte, ora lo prende il controllo).
+      - run: npm run check:testi
+
+      # I tre checkout devono restare bloccati lato server finche' i pagamenti
+      # sono in pausa, senza nemmeno una chiamata di rete.
+      - run: npm run test:functions

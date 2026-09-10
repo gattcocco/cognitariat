@@ -1,0 +1,41 @@
+---
+// Fase 4: struttura conservata, acquisti DISABILITATI.
+// Le quote 2026 e la logica Stripe restano intatte nel codice (functions/,
+// migrazioni, componenti) per poter essere riattivate senza ricostruire il
+// flusso, ma qui nessun pulsante deve suggerire che si possa gia' pagare:
+// l'etichetta dice cosa e' vero adesso, non cosa sara'.
+const tiers = [
+  { id: 'studente', title: 'Studentə / disoccupatə', desc: 'Accesso completo a tutte le funzioni sindacali.', price: 10 },
+  { id: 'cognitario', title: 'Cognitariə', desc: 'La quota associativa standard per chi lavora nel cognitariato.', price: 20 },
+];
+---
+<section id="membership">
+  <div class="container">
+    <p class="occhiello occhiello--progetto">Non ancora aperto</p>
+    <h2 class="section-title">Tesseramento</h2>
+    <p class="section-sub">
+      Le quote sono definite, ma il tesseramento non è ancora aperto: non stiamo raccogliendo
+      iscrizioni né pagamenti. Quando apriremo lo scriveremo qui e nell'osservatorio.
+    </p>
+
+    <div class="cards-grid">
+      {tiers.map((t) => (
+        <div class="card">
+          <h3>{t.title}</h3>
+          <p>{t.desc}</p>
+          <p class="price-tier"><span class="price">€{t.price} <small>una tantum, quota 2026</small></span></p>
+        </div>
+      ))}
+      <div class="card">
+        <h3>Contributo sostenitore</h3>
+        <p>Un contributo libero per chi vuole sostenere COG U senza prendere la tessera.</p>
+        <p class="price-tier"><span class="price">€50+ <small>a tua scelta</small></span></p>
+      </div>
+    </div>
+
+    <p class="nota-metodo" style="margin-top: 28px;">
+      Nel frattempo la cosa più utile che puoi fare non è pagare: è{' '}
+      <a class="link" href="#avvicinarsi">raccontarci un caso o segnalarci un progetto</a>.
+    </p>
+  </div>
+</section>

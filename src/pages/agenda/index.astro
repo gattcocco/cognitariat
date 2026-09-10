@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import CardEvento from '../../components/CardEvento.astro';
+import { eventiDaCostruire, raggruppa } from '../../lib/eventi';
+
+/**
+ * Agenda completa: prossimi appuntamenti, quelli che si ripetono, e l'archivio.
+ *
+ * `eventiDaCostruire` e non `getCollection` diretto: è il punto in cui una bozza
+ * smette di esistere in una build pubblica.
+ */
+const tutti = await eventiDaCostruire();
+const { prossimi, ricorrenti, passati } = raggruppa(tutti);
+---
+<BaseLayout
+  title="Agenda — COG U"
+  description="Assemblee, manifestazioni, workshop e serate di COG U: i prossimi appuntamenti e l'archivio di quelli passati."
+>
+  <Header />
+  <main id="contenuto" tabindex="-1" class="container pagina-testo">
+    <h1 class="section-title">Agenda</h1>
+    <p class="section-sub">
+      Dove ci si incontra: assemblee, manifestazioni, workshop, serate. Quello che è già passato
+      resta più in basso, perché serve a capire cosa facciamo.
+    </p>
+
+    <section class="agenda-gruppo" aria-labelledby="prossimi">
+      <h2 class="agenda-gruppo-titolo" id="prossimi">Prossimi appuntamenti</h2>
+      {/*
+        L'elenco e il messaggio «nessun appuntamento» ci sono sempre entrambi, e
+        uno dei due è nascosto: così lo script in coda può scambiarli quando un
+        appuntamento scade, senza doverne costruire uno al volo. Un solo id per
+        elemento — due elementi con lo stesso id sarebbero un difetto anche per
+        chi usa un lettore di schermo.
+      */}
+      <ul class="agenda-elenco" id="elenco-prossimi" hidden={prossimi.length === 0}>
+        {prossimi.map((voce) => (
+          <li><CardEvento voce={voce} /></li>
+        ))}
+      </ul>
+      <p class="agenda-vuoto" id="prossimi-vuoto" hidden={prossimi.length > 0}>
+        Nessun appuntamento in calendario in questo momento. Quelli che si ripetono sono qui sotto.
+      </p>
+    </section>
+
+    {ricorrenti.length > 0 && (
+      <section class="agenda-gruppo" aria-labelledby="ricorrenti">
+        <h2 class="agenda-gruppo-titolo" id="ricorrenti">Ogni settimana</h2>
+        <ul class="agenda-elenco">
+          {ricorrenti.map((voce) => (
+            <li><CardEvento voce={voce} /></li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="agenda-gruppo" aria-labelledby="archivio">
+      <h2 class="agenda-gruppo-titolo" id="archivio">Già passati</h2>
+      <ul class="agenda-elenco" id="elenco-passati">
+        {passati.map((voce) => (
+          <li><CardEvento voce={voce} /></li>
+        ))}
+      </ul>
+      <p class="agenda-vuoto" id="passati-vuoto" hidden={passati.length > 0}>
+        L'archivio è ancora vuoto.
+      </p>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  /**
+   * Sposta nell'archivio gli appuntamenti finiti.
+   *
+   * Perché serve: la divisione fra «prossimi» e «passati» viene calcolata quando
+   * il sito si costruisce, e un sito statico si costruisce solo quando qualcuno
+   * pubblica. Senza questo, un appuntamento concluso resterebbe fra i prossimi
+   * fino al deployment successivo — che potrebbe essere fra tre settimane.
+   *
+   * Cosa non fa: non calcola la «prossima data» degli appuntamenti che si
+   * ripetono. Quelli non hanno una data, hanno un'etichetta scritta dalla
+   * redazione, e restano dove sono.
+   *
+   * Senza JavaScript la pagina resta corretta e completa: mostra la divisione
+   * fatta alla build. È un aggiustamento, non un requisito.
+   */
+  const adesso = Date.now();
+  const prossimi = document.getElementById('elenco-prossimi');
+  const passati = document.getElementById('elenco-passati');
+  const vuotoProssimi = document.getElementById('prossimi-vuoto');
+  const vuotoPassati = document.getElementById('passati-vuoto');
+
+  if (prossimi && passati) {
+    for (const li of Array.from(prossimi.children)) {
+      const scade = li.querySelector('[data-scade-il]')?.getAttribute('data-scade-il');
+      if (!scade) continue;
+      const t = Date.parse(scade);
+      if (Number.isNaN(t) || t >= adesso) continue;
+      // In cima all'archivio: l'ordine là è dal più recente al più vecchio.
+      passati.prepend(li);
+    }
+    prossimi.hidden = prossimi.children.length === 0;
+    if (vuotoProssimi) vuotoProssimi.hidden = prossimi.children.length > 0;
+    if (vuotoPassati) vuotoPassati.hidden = passati.children.length > 0;
+  }
+</script>

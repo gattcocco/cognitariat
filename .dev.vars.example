@@ -1,0 +1,39 @@
+# Variabili SOLO server, lette a runtime dalle Cloudflare Pages Functions in /functions
+# (context.env). Copia in .dev.vars per `wrangler pages dev` in locale.
+# In produzione vanno impostate nelle Environment Variables del progetto Cloudflare Pages,
+# MAI committate qui.
+#
+# La secret key di Turnstile NON è tra queste: si configura in Supabase Auth (dashboard),
+# non nel nostro runtime — vedi piano §2.
+
+# INTERRUTTORE DEI PAGAMENTI (Fase 5).
+# Solo la stringa esatta "true" apre i tre checkout (quota, sostenitore, merch).
+# Assente, vuota, "false", "1", "si": i pagamenti restano chiusi e gli endpoint
+# rispondono 503 con un errore in JSON, senza costruire il client Stripe e senza
+# scrivere niente sul database. Oggi va lasciata fuori o a "false".
+# Il webhook Stripe NON passa da qui: continua a funzionare, per riconciliare
+# eventuali pagamenti gia' avviati. Vedi src/lib/pagamenti.ts.
+PAGAMENTI_ATTIVI=false
+
+PUBLIC_SUPABASE_URL=https://xxxxxxxx.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Price ID delle 2 fasce quota 2026, pagamento one-off (Build 1.0 — vedi piano v3)
+STRIPE_PRICE_STUDENTE=price_...
+STRIPE_PRICE_COGNITARIO=price_...
+
+# Price ID del contributo sostenitore: Price con custom_unit_amount abilitato e minimo
+# 5000 centesimi (€50), creata su Stripe Dashboard. Nessun account/riga DB coinvolti.
+STRIPE_PRICE_SOSTENITORE=price_...
+
+# Price ID merch (fase 2)
+STRIPE_PRICE_MERCH_TSHIRT=price_...
+STRIPE_PRICE_MERCH_PIN=price_...
+STRIPE_PRICE_MERCH_POSTER=price_...
+
+# Origine pubblica del sito, usata per costruire i redirect di Stripe Checkout
+SITE_URL=http://localhost:4321

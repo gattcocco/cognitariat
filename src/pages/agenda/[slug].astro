@@ -1,0 +1,116 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Icona from '../../components/Icona.astro';
+import {
+  eventiDaCostruire,
+  dataLunga,
+  ora,
+  datetimeIso,
+  type EventoLetto,
+} from '../../lib/eventi';
+import '../../styles/articolo.css';
+
+/**
+ * Pagina del singolo appuntamento.
+ *
+ * `eventiDaCostruire` e non `getCollection`: in una build pubblica la pagina di
+ * una bozza non viene generata, quindi l'indirizzo risponde 404. Non basta
+ * toglierla dagli elenchi — un indirizzo indovinato o condiviso resterebbe
+ * raggiungibile.
+ */
+export async function getStaticPaths() {
+  const eventi = await eventiDaCostruire();
+  return eventi.map((voce) => ({
+    params: { slug: voce.evento.id },
+    props: { voce },
+  }));
+}
+
+const { voce } = Astro.props as { voce: EventoLetto };
+const { evento, inizio, fine, ricorrente } = voce;
+const d = evento.data;
+const { Content } = await render(evento);
+
+// og:image: si preferisce il JPEG allo stesso nome, se c'e'. Alcuni servizi
+// social non gestiscono ancora bene il WebP, e una copertina che non compare
+// vanifica il senso di averla.
+const immagineSocial = d.copertina!.file.replace(/\.webp$/i, '.jpg');
+
+const oraInizio = inizio ? ora(inizio) : undefined;
+const oraFine = fine ? ora(fine) : undefined;
+const stessoGiorno =
+  inizio && fine && inizio.anno === fine.anno && inizio.mese === fine.mese && inizio.giorno === fine.giorno;
+---
+<BaseLayout
+  title={`${d.title} — Agenda COG U`}
+  description={d.excerpt}
+  immagine={immagineSocial}
+  tipo="article"
+  pubblicatoIl={inizio ? datetimeIso(inizio).slice(0, 10) : undefined}
+  noindex={d.bozza}
+>
+  <Header />
+  <main id="contenuto" tabindex="-1" class="container pagina-testo" style="padding-block: 48px 90px;">
+    <article class="articolo">
+      <p class="articolo-torna">
+        <a class="link" href="/agenda/"><Icona nome="chevron-sinistra" /> Tutta l'agenda</a>
+      </p>
+
+      {d.bozza && <p class="occhiello occhiello--progetto">Bozza — non pubblicata</p>}
+
+      <h1 class="articolo-titolo">{d.title}</h1>
+
+      {/*
+        I dati pratici stanno prima del racconto: chi apre la pagina di un
+        appuntamento vuole sapere quando e dove, e vuole saperlo subito.
+        `<time datetime>` porta la data in forma leggibile da una macchina, con
+        l'offset di Roma calcolato per quel giorno — vedi src/lib/eventi.ts.
+      */}
+      <dl class="evento-dati sezione-scura">
+        <dt>Quando</dt>
+        {ricorrente ? (
+          <dd>{d.ricorrenza}</dd>
+        ) : (
+          <dd>
+            <time datetime={datetimeIso(inizio!)}>{dataLunga(inizio!)}</time>
+            {oraInizio && <>, ore {oraInizio}</>}
+            {oraFine && stessoGiorno && <> – {oraFine}</>}
+            {fine && !stessoGiorno && (
+              <> — fino a <time datetime={datetimeIso(fine)}>{dataLunga(fine)}</time>
+                {oraFine && <>, ore {oraFine}</>}
+              </>
+            )}
+          </dd>
+        )}
+
+        {d.luogo && (<><dt>Dove</dt><dd>{d.luogo}</dd></>)}
+        {d.indirizzo && (<><dt>Indirizzo</dt><dd>{d.indirizzo}</dd></>)}
+        {!ricorrente && d.ricorrenza && (<><dt>Si ripete</dt><dd>{d.ricorrenza}</dd></>)}
+      </dl>
+
+      <p class="articolo-sommario">{d.excerpt}</p>
+
+      {/* La locandina intera, senza ritagli e senza dimensioni dichiarate: hanno
+          proporzioni diverse fra loro. Vedi src/components/CardEvento.astro. */}
+      <figure class="articolo-copertina evento-copertina">
+        <img src={d.copertina!.file} alt={d.copertina!.alt} decoding="async" />
+      </figure>
+
+      <div class="articolo-corpo prosa">
+        <Content />
+      </div>
+
+      {d.linkEsterno && (
+        <p class="evento-link-esterno">
+          <a class="btn-primary" href={d.linkEsterno.url} target="_blank" rel="noopener noreferrer">
+            {d.linkEsterno.etichetta} <Icona nome="link-esterno" dimensione={0.9} />
+          </a>
+        </p>
+      )}
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>

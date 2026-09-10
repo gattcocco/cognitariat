@@ -1,0 +1,1434 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--fondo);
+  color: var(--nero);
+  line-height: 1.4;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* container */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Pagine di testo: articolo, elenco del blog, informativa, pagina di errore.
+   Mettono il proprio respiro sopra e sotto **senza toccare il gutter laterale**
+   della .container, e qui sta il motivo per cui questa classe esiste.
+
+   IL DIFETTO CHE HA CORRETTO, misurato il 09/09/2026 sul dominio pubblico a
+   360px: titolo, data, autore, sommario, corpo e navigazione dell'articolo
+   avevano `left: 0` e larghezza uguale al viewport, cioe' erano attaccati al
+   bordo. La causa non era una regola mancante: era
+   `<main class="container" style="padding: 48px 0 90px">`. Uno stile inline
+   batte qualunque regola di classe, e quella scorciatoia dichiara anche
+   `padding-left: 0` e `padding-right: 0` — quindi azzerava il gutter che
+   .container forniva. Su desktop non si vedeva perche' `.articolo` ha
+   `max-width: 72ch` e centra; a 360px 72ch e' piu' larga dello schermo, e il
+   testo arrivava al bordo.
+
+   Regola pratica: sulle pagine si usa questa classe, o al massimo
+   `padding-block` inline. Mai la scorciatoia `padding`, che porta con se' i due
+   lati. */
+.pagina-testo {
+  padding-block: 60px 90px;
+}
+@media (max-width: 800px) {
+  .pagina-testo {
+    padding-block: 32px 64px;
+  }
+}
+
+/* header sticky */
+.site-header {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.96);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--bordo);
+  z-index: 100;
+  padding: 16px 0;
+}
+
+.header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Colore pieno, non piu' un gradiente su testo: e' testo grande (1,8rem, 800)
+   quindi il rosa su bianco (4,13) rientra nella soglia AA per il testo grande. */
+.logo .brand {
+  font-size: 1.8rem;
+  font-weight: var(--peso-titolo);
+  letter-spacing: -0.02em;
+  color: var(--rosa);
+}
+.logo span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--nero-secondario);
+  display: block;
+}
+
+.main-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  list-style: none;
+}
+.main-nav a {
+  text-decoration: none;
+  font-weight: var(--peso-medio);
+  font-size: 0.9rem;
+  color: var(--nero);
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+/* Hover verde e non rosa: a 0,9rem il rosa su bianco (4,13) non raggiunge AA.
+   La sottolineatura evita inoltre di affidare lo stato al solo colore. */
+.main-nav a:hover,
+.main-nav a:focus-visible {
+  color: var(--verde);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* buttons
+   Il testo del pulsante rosa e' NERO, non bianco: rosa/bianco da' 4,13 e non
+   raggiunge il 4,5 richiesto per il testo normale, mentre rosa/nero da' 5,09.
+   L'hover schiarisce il rosa (scurirlo abbasserebbe il contrasto col nero). */
+.btn-primary {
+  background: var(--rosa);
+  color: var(--nero);
+  border: none;
+  padding: 12px 28px;
+  font-weight: var(--peso-forte);
+  font-size: 1rem;
+  border-radius: var(--raggio-pill);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 8px var(--ombra);
+  font-family: inherit;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  background: var(--rosa-hover);
+  transform: scale(0.98);
+  box-shadow: 0 2px 6px var(--ombra);
+}
+.btn-primary:disabled,
+.btn-primary[aria-disabled='true'] {
+  background: var(--bianco);
+  color: var(--nero-secondario);
+  border: 2px solid var(--bordo-forte);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Il pulsante secondario ha bordo rosa ma testo nero, per lo stesso motivo. */
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--rosa);
+  color: var(--nero);
+  padding: 10px 24px;
+  font-weight: var(--peso-forte);
+  border-radius: var(--raggio-pill);
+  transition: 0.2s;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-outline:hover {
+  background: var(--rosa);
+  color: var(--nero);
+}
+.btn-outline:disabled,
+.btn-outline[aria-disabled='true'] {
+  border-color: var(--bordo-forte);
+  color: var(--nero-secondario);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+/* Focus unico per tutti gli elementi interattivi: e' il token --focus, che
+   diventa giallo dentro .sezione-scura. Mai rimuovere l'outline senza
+   sostituirlo con qualcosa di altrettanto visibile. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: var(--focus-spessore) solid var(--focus);
+  outline-offset: var(--focus-offset);
+  /* Niente border-radius qui: cambiava la forma dell'elemento nel momento in cui
+     riceve il focus (i pulsanti pillola diventavano squadrati). L'outline segue
+     gia' da solo il raggio dell'elemento. */
+}
+
+/* hero */
+.hero {
+  padding: 60px 0 50px;
+  background: var(--fondo);
+}
+.hero-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40px;
+}
+.hero-content {
+  flex: 1.2;
+  min-width: 280px;
+}
+.hero-badge {
+  background: var(--nero);
+  color: var(--giallo);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 24px;
+}
+.hero-content h1 {
+  font-size: 3.4rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+/* Solo la parola chiave e' rosa, non tutto il titolo. L'animazione d'ingresso
+   avvolge ogni parola in uno <span class="cogu-w"> per animarle in cascata:
+   senza :not() quella regola colorerebbe di rosa l'intero H1. */
+.hero-content h1 span:not(.cogu-w) {
+  color: var(--rosa);
+  border-bottom: 4px solid var(--giallo);
+}
+.hero-lead {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--nero-secondario);
+  margin-bottom: 16px;
+}
+.hero-desc {
+  font-size: 1rem;
+  color: var(--nero-secondario);
+  margin-bottom: 32px;
+  max-width: 90%;
+}
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 28px;
+  margin: 28px 0;
+  font-size: 0.85rem;
+  background: var(--giallo-tenue);
+  padding: 12px 20px;
+  border-radius: 28px;
+  width: fit-content;
+  max-width: 100%;
+}
+.hero-stats i {
+  color: var(--rosa);
+  margin-right: 8px;
+}
+.hero-visual {
+  flex: 0.8;
+  min-width: 240px;
+  background: var(--giallo-tenue);
+  border-radius: 32px;
+  padding: 30px 20px;
+  text-align: center;
+  box-shadow: 0 12px 20px rgba(0,0,0,0.05);
+}
+.hero-visual i {
+  font-size: 6rem;
+  color: var(--rosa);
+  opacity: 0.8;
+}
+.ai-warning {
+  background: var(--nero);
+  color: var(--bianco);
+  border-radius: 24px;
+  padding: 14px 20px;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* banner foto assemblea */
+.assembly-banner {
+  height: 420px;
+  background-image: url('/images/assemblea-rhofornace.jpeg');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+.assembly-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Il contrasto del testo sopra una foto non e' calcolabile in automatico:
+     dipende dal pixel sotto. La sfumatura arriva quindi ad almeno 0,75 di nero
+     su tutta la fascia dove sta la didascalia, cosi' il bianco resta sopra 10:1
+     anche se sotto ci fosse la parte piu' chiara dell'immagine. */
+  background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.78) 24%, rgba(0,0,0,0.15) 62%, rgba(0,0,0,0) 100%);
+}
+.assembly-banner-caption {
+  position: relative;
+  z-index: 1;
+  color: var(--fondo);
+  padding: 24px 0 28px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.assembly-banner-caption strong {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+/* sections generali */
+section {
+  padding: 70px 0;
+  border-bottom: 1px solid var(--bordo);
+}
+.section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+.section-sub {
+  color: var(--nero-secondario);
+  margin-bottom: 48px;
+  max-width: 700px;
+  font-size: 1.1rem;
+}
+/* min(310px, 100%) e non 310px secco: sotto i 350px di finestra — cioe' a 320px,
+   la larghezza minima su cui WCAG 1.4.10 chiede che il contenuto scorra solo in
+   verticale — una colonna rigida da 310px sporgeva dal contenitore e faceva
+   comparire la barra orizzontale su tutta la pagina. Verificato a 320x800:
+   scrollWidth 330 su clientWidth 320, prima; uguali, dopo. */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(310px, 100%), 1fr));
+  gap: 32px;
+}
+.card {
+  background: var(--bianco);
+  border-radius: 28px;
+  padding: 28px 24px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+  border: 1px solid var(--bordo);
+  transition: all 0.2s;
+}
+.card:hover {
+  border-color: var(--rosa);
+  box-shadow: 0 16px 28px rgba(0,0,0,0.05);
+}
+.card-icon {
+  font-size: 2.2rem;
+  color: var(--rosa);
+  margin-bottom: 20px;
+}
+.card h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.price-tier {
+  background: var(--giallo-tenue);
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+}
+.price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--rosa);
+}
+/* Il <small> ereditava il rosa da .price: a 14px sul fondo giallino scendeva a
+   3,79, sotto la soglia del testo normale. La cifra grande resta rosa (testo
+   grande), la postilla passa al nero. */
+.price small {
+  font-size: 0.9rem;
+  font-weight: var(--peso-medio);
+  color: var(--nero);
+}
+
+.member-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+  list-style: none;
+}
+.member-list li {
+  background: var(--giallo-tenue);
+  border-radius: 40px;
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.cta-section {
+  background: var(--nero);
+  color: var(--bianco);
+  text-align: center;
+  border-bottom: none;
+  padding: 60px 0;
+}
+.cta-section .btn-primary {
+  background: var(--giallo);
+  color: var(--nero);
+  margin-top: 20px;
+}
+.cta-section .btn-primary:hover {
+  background: var(--giallo-hover);
+}
+.footer {
+  background: var(--bianco);
+  border-top: 2px solid var(--bordo);
+  padding: 48px 0 32px;
+  font-size: 0.85rem;
+  color: var(--nero-secondario);
+}
+/* I link sono verdi E sottolineati: il verde su bianco passa AA (4,95) e la
+   sottolineatura non affida il significato al solo colore. */
+.footer a,
+.link {
+  color: var(--verde);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footer a:hover,
+.link:hover {
+  color: var(--verde-hover);
+}
+/* Due colonne che collassano da sole sotto i 640px: prima erano stili inline
+   nel componente, qui restano governabili dai token come il resto. */
+.footer-cols {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px 40px;
+}
+.footer-cols > div { min-width: min(100%, 280px); }
+/* La firma del footer non e' un'intestazione di sezione: ha l'aria di un
+   titolo ma nella struttura del documento sarebbe finita allo stesso livello
+   delle schede del merch, facendo leggere il footer come un quarto articolo. */
+.footer-cols .footer-firma {
+  font-size: 1rem;
+  font-weight: var(--peso-forte);
+  margin-bottom: 8px;
+  color: var(--nero);
+}
+.footer-cols p { margin: 0 0 6px; }
+
+/* tablet */
+@media (max-width: 1024px) {
+  .hero-content h1 { font-size: 2.8rem; }
+  .hero { padding: 50px 0 40px; }
+}
+
+/* mobile */
+@media (max-width: 800px) {
+  .hero-content h1 { font-size: 2.2rem; }
+  .hero-lead { font-size: 1.1rem; }
+  .main-nav ul { gap: 0.8rem; }
+  .main-nav a { font-size: 0.78rem; }
+  .container { padding: 0 20px; }
+  section { padding: 50px 0; }
+  .section-title { font-size: 1.6rem; }
+  .cta-section { padding: 50px 0; }
+  .grid-2col { grid-template-columns: 1fr !important; }
+  .assembly-banner { height: 280px; background-position: center bottom; }
+}
+
+/* Video & Interviste — schede-link, non incorporamenti.
+   Gli iframe di YouTube sono stati tolti: anche in modalita' nocookie bastava
+   scorrere fino a qui per far partire una richiesta a Google. Adesso la scheda
+   e' un link, e la copertina e' disegnata in casa — nessuna anteprima presa da
+   i.ytimg.com, che sarebbe la stessa richiesta travestita da immagine.
+   Vedi src/components/VideoInterviews.astro. */
+.video-nota {
+  color: var(--nero-secondario);
+  font-size: 0.92rem;
+  margin: -8px 0 24px;
+  max-width: 62ch;
+}
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: 32px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.video-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bianco);
+  border-radius: 28px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+  border: 1px solid var(--bordo);
+  color: inherit;
+  text-decoration: none;
+  height: 100%;
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+.video-card:hover {
+  box-shadow: 0 14px 30px var(--ombra);
+  transform: translateY(-2px);
+}
+.video-copertina {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--nero);
+}
+.video-copertina img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Copertina disegnata: si vede solo quando non c'e' un'immagine locale.
+   Giallo su nero e' 14,47:1 — decorativa, ma non deve comunque sparire. */
+.video-copertina-disegnata {
+  display: grid;
+  place-items: center;
+  color: var(--giallo);
+  opacity: 0.9;
+}
+.video-play {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--rosa);
+  color: var(--nero);
+}
+.video-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 16px 4px 4px;
+}
+.video-titolo {
+  font-size: 1.05rem;
+  font-weight: var(--peso-forte);
+  line-height: 1.35;
+}
+.video-meta {
+  font-size: 0.85rem;
+  font-weight: var(--peso-medio);
+  color: var(--verde);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.video-card:hover .video-meta,
+.video-card:focus-visible .video-meta {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.video-canale {
+  margin-top: 28px;
+  font-size: 0.95rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .video-card { transition: none; }
+  .video-card:hover { transform: none; }
+}
+
+/* visually-hidden helper for a11y */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
+/* Banner verso il dossier Resistenze AI */
+.resistenze-banner {
+  background: var(--nero);
+  color: var(--bianco);
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.resistenze-banner a {
+  color: var(--giallo);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.resistenze-banner a:hover { color: var(--bianco); }
+
+/* Banner Scrivici — fondo rosa, testo NERO.
+   Il bianco su rosa da' 4,13 e questo e' testo a 0,9rem, cioe' testo normale:
+   servono 4,5. Il nero su rosa da' 5,09. Per lo stesso motivo il link non puo'
+   essere giallo (giallo su rosa: 2,85): resta nero e si distingue per peso e
+   sottolineatura, non per colore. */
+.scrivici-banner {
+  background: var(--rosa);
+  color: var(--nero);
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: var(--peso-medio);
+}
+.scrivici-banner a {
+  color: var(--nero);
+  font-weight: var(--peso-forte);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.scrivici-banner a:hover {
+  text-decoration-thickness: 3px;
+}
+
+/* Slideshow immaginario collettivo */
+.imaginarium {
+  background: var(--nero);
+  padding: 60px 0;
+}
+.imaginarium .section-title,
+.imaginarium .section-sub {
+  color: var(--bianco);
+}
+/* Su fondo nero il grigio del testo secondario sparirebbe: qui il sottotitolo
+   resta bianco pieno (21:1). Il grigio --nero-secondario vale solo su bianco. */
+.imaginarium .section-sub { color: var(--bianco); }
+.slideshow {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  background: var(--nero);
+}
+.slideshow-track {
+  display: flex;
+  transition: transform 0.4s ease;
+}
+.slide {
+  flex: 0 0 100%;
+  position: relative;
+}
+.slide img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+.slide-caption {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+  color: var(--bianco);
+  padding: 24px 28px 18px;
+  font-size: 0.95rem;
+}
+.slide-caption strong { color: var(--giallo); }
+.slideshow-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: var(--bianco);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.slideshow-nav:hover { background: var(--rosa); }
+.slideshow-nav.prev { left: 16px; }
+.slideshow-nav.next { right: 16px; }
+.slideshow-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+/* I pallini stanno su fondo nero: il grigio scuro non raggiungerebbe il 3:1
+   richiesto per gli elementi non testuali. Bianco semitrasparente per gli
+   inattivi, giallo pieno per l'attivo — e la differenza non e' solo di colore
+   ma anche di dimensione, per non affidarla alla sola tinta. */
+.slideshow-dots button {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  padding: 0;
+}
+.slideshow-dots button.active {
+  background: var(--giallo);
+  width: 14px; height: 14px;
+}
+
+/* ===== Intro WOW — entrata estetica della home (JS-gated) ===== */
+.cogu-intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--nero);
+  display: grid;
+  place-items: center;
+  will-change: transform;
+}
+.cogu-intro-mark { text-align: center; padding: 0 24px; }
+/* Colore pieno al posto del gradiente su testo: il gradiente rosa->rosa non
+   aggiungeva nulla e background-clip:text non e' supportato ovunque, lasciando
+   il testo trasparente quando fallisce. Rosa su nero: 5,09. */
+.cogu-intro-brand {
+  display: block;
+  font-size: clamp(3rem, 13vw, 7.5rem);
+  font-weight: var(--peso-titolo);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--rosa);
+}
+/* Su fondo nero serve il bianco: il grigio secondario e' pensato per il bianco. */
+.cogu-intro-tag {
+  display: block;
+  margin-top: 16px;
+  color: var(--bianco);
+  font-weight: var(--peso-medio);
+  font-size: clamp(0.78rem, 2.4vw, 1.05rem);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+}
+.cogu-intro-rule {
+  display: block;
+  height: 3px;
+  width: min(280px, 62vw);
+  margin: 24px auto 0;
+  background: var(--giallo);
+  border-radius: 3px;
+  transform: scaleX(0);
+  transform-origin: center;
+}
+/* Stati iniziali dell'hero: applicati SOLO durante l'intro (classe aggiunta
+   da JS solo se non c'è reduced-motion). Senza JS l'hero resta visibile. */
+/* Elenco allineato agli elementi che l'hero contiene davvero dopo la
+   riscrittura dei testi: statistiche, riquadro "Cognitariato vs AI" e fascia
+   citazione non esistono piu'. Se si aggiunge un elemento all'hero e lo si
+   anima, va aggiunto anche qui, altrimenti compare prima della cascata. */
+html.cogu-intro .hero-badge,
+html.cogu-intro .hero-content h1,
+html.cogu-intro .hero-lead,
+html.cogu-intro .hero-desc,
+html.cogu-intro .hero-content > .btn-primary {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cogu-intro-overlay { display: none !important; }
+}
+
+/* ===== Membership / account (nuovo) ===== */
+.tier-card-cta {
+  margin-top: 16px;
+}
+.member-form {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bianco);
+  border-radius: 28px;
+  padding: 32px;
+  border: 1px solid var(--bordo);
+}
+.member-form label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 16px 0 6px;
+}
+/* Bordo a 3,35:1 come richiede WCAG 1.4.11 per i confini dei controlli:
+   un bordo appena accennato e' esteticamente piacevole ma rende il campo
+   invisibile a chi ha vista ridotta. */
+.member-form input[type="text"],
+.member-form input[type="email"] {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--raggio-s);
+  border: 1px solid var(--bordo-campo);
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--nero);
+  background: var(--bianco);
+}
+.member-form input[aria-invalid='true'] {
+  border-color: var(--rosa);
+  border-width: 2px;
+}
+.member-form .consent-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 16px 0;
+  font-size: 0.85rem;
+}
+.member-form .consent-row input { margin-top: 4px; }
+.member-form .btn-primary { margin-top: 20px; width: 100%; justify-content: center; }
+.form-note {
+  font-size: 0.8rem;
+  color: var(--nero-secondario);
+  margin-top: 12px;
+}
+/* Errore: testo NERO su fondo rosa diluito, non testo rosa (che su fondo quasi
+   bianco non arriva a 4,5). Il bordo laterale e il simbolo prima del testo
+   fanno si' che l'errore non sia comunicato dal solo colore (WCAG 1.4.1). */
+.form-error {
+  background: var(--rosa-tenue);
+  color: var(--nero);
+  border-left: 4px solid var(--rosa);
+  border-radius: var(--raggio-s);
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin-top: 12px;
+}
+.form-error::before {
+  content: '⚠ ';
+  font-weight: var(--peso-forte);
+}
+/* Tessera: testo NERO su rosa (5,09). Il bianco su rosa da' 4,13 e la tessera
+   contiene un elenco a 0,9rem, cioe' testo normale: non basterebbe. */
+.member-card {
+  max-width: 420px;
+  margin: 0 auto;
+  background: var(--rosa);
+  color: var(--nero);
+  border-radius: var(--raggio-l);
+  padding: 32px;
+  box-shadow: 0 16px 32px var(--ombra);
+}
+.member-card .member-card-tier {
+  font-size: 1.6rem;
+  font-weight: var(--peso-titolo);
+}
+.member-card .member-card-status {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 14px;
+  border-radius: var(--raggio-pill);
+  font-size: 0.8rem;
+  font-weight: var(--peso-forte);
+  background: var(--bianco);
+  color: var(--nero);
+}
+.member-card dl {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  font-size: 0.9rem;
+}
+/* Niente opacity sul testo: abbasserebbe il contrasto sotto la soglia.
+   La distinzione fra etichetta e valore la fa il peso, non la trasparenza. */
+.member-card dt { font-weight: var(--peso-medio); }
+.account-actions {
+  max-width: 420px;
+  margin: 20px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ============================================================================
+   Blocchi editoriali — Fase 4
+   Il sito passa da una griglia di card a testo lungo leggibile. Le card
+   restano dove hanno senso (video, tesseramento, merch), non per il discorso.
+   ========================================================================= */
+
+/* Misura di lettura: circa 70 caratteri, il limite oltre il quale l'occhio
+   fatica a ritrovare l'inizio della riga successiva. */
+.prosa {
+  max-width: 68ch;
+}
+.prosa > p {
+  margin-bottom: 18px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+.prosa > p:last-child {
+  margin-bottom: 0;
+}
+
+/* Occhiello: dice se la sezione descrive attivita' reali o progetti. */
+.occhiello {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: var(--peso-forte);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--giallo);
+  color: var(--nero);
+  padding: 5px 14px;
+  border-radius: var(--raggio-pill);
+  margin-bottom: 14px;
+}
+/* Per i progetti non ancora attivi: bordo invece di fondo pieno, cosi' si
+   distingue dall'occhiello delle attivita' reali anche senza percepire il
+   colore (WCAG 1.4.1: non affidarsi al solo colore). */
+.occhiello--progetto {
+  background: transparent;
+  border: 2px dashed var(--nero);
+  padding: 3px 12px;
+}
+
+/* Nota di metodo: quello che non sappiamo, i limiti di un dato. Marcata con
+   un bordo laterale perche' e' un cambio di voce, non un'enfasi. */
+/* L'annotazione a margine e' l'unico posto in cui entra Shantell Sans: e' un
+   commento a mano sul testo, non una parte del testo. Paragrafi, titoli,
+   etichette e pulsanti restano Inter. Nessun effetto di movimento.
+   Leggermente piu' grande di Inter a parita' di corpo, perche' l'occhio medio
+   di Shantell e' piu' piccolo e a 1rem risulterebbe minuto. */
+.nota-metodo {
+  border-left: 4px solid var(--verde);
+  padding: 4px 0 4px 16px;
+  margin: 22px 0;
+  color: var(--nero);
+  font-family: var(--font-annotazioni);
+  font-weight: var(--peso-annotazione);
+  font-size: 1.12rem;
+  line-height: 1.5;
+}
+
+.fonte {
+  font-size: 0.85rem;
+  color: var(--nero-secondario);
+  margin-top: 24px;
+}
+
+/* Elenco titolo + spiegazione, al posto delle card per il testo discorsivo. */
+.elenco-definizioni {
+  margin: 24px 0;
+}
+.elenco-definizioni dt {
+  font-weight: var(--peso-forte);
+  font-size: 1.1rem;
+  margin-top: 20px;
+}
+.elenco-definizioni dd {
+  margin: 6px 0 0;
+  line-height: 1.65;
+}
+
+.elenco-progetto {
+  margin: 20px 0 20px 20px;
+  line-height: 1.7;
+}
+.elenco-progetto li {
+  margin-bottom: 10px;
+}
+
+.sezione-progetto {
+  background: var(--giallo-tenue);
+}
+
+.riquadro-domande {
+  border: 2px solid var(--nero);
+  border-radius: var(--raggio-m);
+  padding: 24px;
+  margin: 32px 0;
+}
+.riquadro-domande h3 {
+  font-size: 1.25rem;
+  margin-bottom: 10px;
+}
+.riquadro-domande ol {
+  margin: 16px 0 16px 20px;
+  line-height: 1.7;
+}
+.riquadro-domande li {
+  margin-bottom: 10px;
+}
+
+/* Ancore storiche: i vecchi id restano raggiungibili dai link esterni gia' in
+   giro, senza occupare spazio. scroll-margin-top evita che l'header sticky
+   copra il titolo quando si arriva da un'ancora. */
+.ancora-storica {
+  display: block;
+  height: 0;
+  scroll-margin-top: 90px;
+}
+section[id] {
+  scroll-margin-top: 90px;
+}
+
+/* Blocco con illustrazione: testo e figura affiancati, figura che si sposta
+   sotto quando non c'e' spazio. */
+.blocco-illustrato {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 40px;
+  align-items: start;
+}
+.blocco-illustrato .figura {
+  margin: 0;
+  color: var(--nero);
+}
+/* height:auto con aspect-ratio preserva le proporzioni originali della figura
+   e, insieme a width/height dichiarati nell'HTML, evita lo spostamento del
+   layout mentre l'immagine carica. */
+.blocco-illustrato .figura img {
+  width: 100%;
+  height: auto;
+  max-height: 340px;
+  object-fit: contain;
+  display: block;
+}
+@media (max-width: 800px) {
+  .blocco-illustrato {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  /* Su una colonna sola, width:100% porterebbe la figura a ~483px di altezza:
+     il max-height la riporterebbe a 220 e object-fit lascerebbe due bande vuote
+     ai lati. Il vuoto sarebbe del contenitore, non dell'asset. Qui e' il
+     contenitore ad adattarsi alla figura: larghezza derivata dall'altezza. */
+  .blocco-illustrato .figura img {
+    width: auto;
+    max-width: 100%;
+    max-height: 260px;
+    margin-inline: auto;
+  }
+}
+
+/* Hero senza colonna visiva: il testo puo' usare piu' larghezza. */
+.hero-content--largo {
+  max-width: 44rem;
+}
+
+/* Il logo e' diventato un link alla home: non deve sembrare un link di testo. */
+.logo {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.logo:hover .brand {
+  color: var(--rosa-hover);
+}
+
+/* Etichetta per funzioni presenti ma non ancora attive (tesseramento, merch). */
+.non-attivo {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: var(--peso-forte);
+  border: 2px solid var(--nero);
+  border-radius: var(--raggio-pill);
+  padding: 3px 12px;
+  margin-bottom: 12px;
+}
+
+/* Salto al contenuto: senza, con la tastiera si attraversano ogni volta i due
+   banner e le sette voci di menu prima di arrivare al testo (WCAG 2.4.1).
+   Nascosto finche' non riceve il focus; il focus qui e' giallo perche' il
+   fondo e' nero e il nero del token sparirebbe. */
+.salta-al-contenuto {
+  --focus: var(--giallo);
+  position: absolute;
+  left: 8px;
+  top: -80px;
+  z-index: 10000;
+  background: var(--nero);
+  color: var(--bianco);
+  padding: 10px 18px;
+  border-radius: var(--raggio-s);
+  font-weight: var(--peso-forte);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.salta-al-contenuto:focus {
+  top: 8px;
+}
+
+/* main riceve il focus in modo programmatico dopo «Salta al contenuto»: serve a
+   spostare davvero la tastiera, ma un contorno attorno all'intera pagina non
+   comunicherebbe niente di utile. L'indicatore resta su tutti i controlli veri. */
+main[tabindex='-1']:focus,
+main[tabindex='-1']:focus-visible {
+  outline: none;
+}
+
+/* Dentro il riquadro d'errore il fondo e' rosato: il verde dei link ci scende a
+   4,31 e non passa AA. Il testo del blocco e' gia' nero; i link restano neri e
+   si distinguono per la sottolineatura, non per il colore (WCAG 1.4.1). */
+.form-error a,
+.form-error a.link {
+  color: var(--nero);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.form-error a:hover,
+.form-error a.link:hover {
+  color: var(--nero);
+  text-decoration-thickness: 2px;
+}
+
+/* ============================================================================
+   AGENDA
+   Le locandine degli eventi sono immagini molto cariche: qui intorno serve
+   silenzio, non altre decorazioni. Il solo segno grafico e' la data, trattata
+   come un blocco tipografico — numero grande, mese sotto, giorno della
+   settimana sopra — perche' e' quello che distingue un appuntamento da un
+   articolo prima di aver letto una parola.
+   Il giallo compare in un posto solo, sull'etichetta degli appuntamenti che si
+   ripetono, e sempre con testo nero (14,47:1).
+   ========================================================================= */
+
+.agenda-elenco {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 28px;
+}
+
+/* Scheda: locandina e testo affiancati, con un rapporto volutamente disuguale —
+   l'immagine non deve prendersi meta' della riga. Sotto gli 800px si impila. */
+.evento {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--bordo);
+}
+.agenda-elenco > li:last-child .evento {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+@media (max-width: 800px) {
+  .evento {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* La locandina si vede INTERA, non ritagliata in un quadrato.
+   Le copertine degli eventi sono manifesti: il titolo, l'ora, l'indirizzo e
+   spesso il senso stesso stanno nella composizione, e un ritaglio quadrato con
+   object-fit: cover ne butterebbe via meta'. Niente aspect-ratio imposto,
+   quindi: l'immagine tiene la sua forma e la scheda si adatta. */
+.evento-figura {
+  display: block;
+  border-radius: var(--raggio-m);
+  overflow: hidden;
+  background: var(--nero);
+  width: 100%;
+}
+.evento-figura img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+@media (max-width: 800px) {
+  /* Impilata, una locandina verticale a piena larghezza occuperebbe uno
+     schermo intero: si limita, restando centrata. */
+  .evento-figura {
+    max-width: 320px;
+  }
+}
+
+.evento-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* La data e l'ora stanno sulla stessa riga, allineate in basso: il numero e'
+   grande e l'ora gli sta accanto come una didascalia. */
+.evento-quando {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.evento-data {
+  display: grid;
+  grid-template-columns: auto;
+  justify-items: start;
+  background: var(--nero);
+  color: var(--bianco);
+  border-radius: var(--raggio-s);
+  padding: 8px 14px 10px;
+  line-height: 1;
+}
+.evento-giorno-settimana {
+  font-size: 0.7rem;
+  font-weight: var(--peso-medio);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--giallo);
+  margin-bottom: 6px;
+}
+.evento-numero {
+  font-size: 2.1rem;
+  font-weight: var(--peso-titolo);
+  letter-spacing: -0.02em;
+}
+.evento-mese {
+  font-size: 0.78rem;
+  font-weight: var(--peso-forte);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+.evento-ora {
+  font-size: 0.95rem;
+  font-weight: var(--peso-medio);
+  color: var(--nero-secondario);
+  padding-bottom: 4px;
+}
+
+/* Appuntamento che si ripete: nessun numero da mostrare, l'etichetta e' il
+   dato. Fondo giallo, testo nero, forma a pastiglia per distinguerla dal
+   blocco-data dei datati. */
+.evento-ricorrenza {
+  align-self: flex-start;
+  background: var(--giallo);
+  color: var(--nero);
+  font-weight: var(--peso-forte);
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: var(--raggio-pill);
+}
+
+.evento-titolo {
+  font-size: 1.35rem;
+  font-weight: var(--peso-titolo);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+}
+.evento-titolo a {
+  color: var(--nero);
+  text-decoration: none;
+}
+.evento-titolo a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--rosa);
+}
+
+.evento-luogo {
+  font-size: 0.95rem;
+  font-weight: var(--peso-medio);
+  color: var(--verde);
+  overflow-wrap: break-word;
+}
+
+.evento-sommario {
+  color: var(--nero-secondario);
+  max-width: 62ch;
+  overflow-wrap: break-word;
+}
+
+/* Titoletti dei gruppi dell'agenda. */
+.agenda-gruppo {
+  margin-top: 56px;
+}
+.agenda-gruppo:first-of-type { margin-top: 0; }
+.agenda-gruppo-titolo {
+  font-size: 1.1rem;
+  font-weight: var(--peso-forte);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-bottom: 10px;
+  margin-bottom: 24px;
+  border-bottom: 3px solid var(--rosa);
+}
+.agenda-vuoto {
+  color: var(--nero-secondario);
+}
+
+/* Pagina del singolo evento: la scheda dei dati sta sopra il testo, e i dati
+   pratici — quando, dove — vengono prima di tutto il resto. */
+.evento-intestazione {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 24px;
+  margin-bottom: 20px;
+}
+/* I dati pratici dell'appuntamento: quando, dove, indirizzo.
+
+   Fondo NERO con etichette gialle, non il giallo diluito che usava prima. Due
+   motivi, e nessuno dei due e' estetico:
+
+   1. quel giallo al 22% su bianco diventa un sabbia (#FDF6D7) che nella palette
+      non c'e'. La palette e' cinque colori — bianco, nero, rosa, verde, giallo —
+      e il giallo il manuale lo vuole "solo come fondo con testo nero", pieno,
+      non annacquato;
+   2. il nero con il giorno in giallo e' gia' il linguaggio del blocco-data nelle
+      schede dell'agenda. Ritrovarlo qui lega l'elenco alla pagina invece di
+      introdurre una terza superficie.
+
+   Contrasti: bianco su nero 21:1, giallo su nero 14,47:1.
+   La classe `sezione-scura` nell'HTML porta il token del focus a giallo — sul
+   nero un contorno nero sparirebbe. */
+.evento-dati {
+  list-style: none;
+  padding: 20px 22px;
+  margin: 0 0 28px;
+  background: var(--nero);
+  color: var(--bianco);
+  border-radius: var(--raggio-m);
+  display: grid;
+  gap: 8px;
+  font-size: 0.98rem;
+}
+.evento-dati dt {
+  font-weight: var(--peso-forte);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--giallo);
+}
+.evento-dati dd {
+  margin: 0 0 10px;
+  overflow-wrap: break-word;
+}
+.evento-dati dd:last-child { margin-bottom: 0; }
+/* Il primo dato — quando — e' quello che si cerca per primo: pesa di piu'. */
+.evento-dati dd:first-of-type {
+  font-size: 1.12rem;
+  font-weight: var(--peso-medio);
+}
+.evento-dati a {
+  color: var(--giallo);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.evento-link-esterno {
+  margin-top: 28px;
+}
+
+/* Richiamo dell'agenda in home: stessa scheda, più compatta. */
+.agenda-home-azioni {
+  margin-top: 32px;
+}
+
+/* La locandina nella pagina dell'evento: intera, e non piu' larga di quanto
+   serva a leggerla. A piena larghezza una locandina verticale spingerebbe il
+   testo sotto la piega. */
+.evento-copertina {
+  max-width: 480px;
+}
+
+/* L'indirizzo di posta: in risalto, ma non cliccabile.
+
+   Sul sito non c'e' piu' nessun `mailto:` — niente deve aprire il programma di
+   posta — quindi l'indirizzo e' testo. Testo che pero' va trovato subito, perche'
+   oggi e' l'unico modo per farsi sentire.
+
+   L'evidenziatore giallo dietro le parole e' il linguaggio che il sito usa gia'
+   per dare peso a una parola (la parola chiave dell'hero ha lo stesso giallo
+   sotto). I link nel corpo sono invece verdi e sottolineati sottili: due segni
+   diversi per due cose diverse, cosi' nessuno prova a cliccare qualcosa che non
+   si clicca.
+
+   Il testo resta nero: su giallo pieno da' 14,47:1. */
+.indirizzo {
+  font-weight: var(--peso-forte);
+  background-image: linear-gradient(transparent 62%, var(--giallo) 62%);
+  /* Un indirizzo e' una parola sola e lunga: a 320px deve poter andare a capo
+     invece di sfondare la colonna. */
+  overflow-wrap: anywhere;
+}
+
+/* Nel banner rosa l'evidenziatore giallo si vedrebbe appena (giallo su rosa e'
+   2,85) e sarebbe comunque di troppo: quel fondo e' gia' un'evidenza. Resta il
+   peso. */
+.scrivici-banner .indirizzo {
+  background-image: none;
+}
+
+/* ============================================================================
+   MANIFESTO — la locandina affissa a metà pagina
+
+   Fondo nero per un motivo preciso: la locandina è stampata su bianco e la home
+   è bianca. Su fondo chiaro i suoi bordi sparirebbero e il foglio sembrerebbe
+   una parte della pagina. Il nero lo stacca senza cornici né ombre finte.
+
+   Nessun raggio sugli angoli: un foglio stampato ha gli angoli vivi.
+   ========================================================================= */
+.manifesto {
+  background: var(--nero);
+  color: var(--bianco);
+  border-bottom: none;
+  text-align: center;
+}
+/* Etichetta, non titolo di sezione: piccola, gialla su nero (14,47:1), serve a
+   dire di che manifesto si tratta — lo stesso numero stampato sulla locandina.
+   Niente maiuscolo forzato: la regola redazionale vale anche per le etichette. */
+.manifesto-etichetta {
+  font-size: 0.82rem;
+  font-weight: var(--peso-forte);
+  letter-spacing: 0.14em;
+  color: var(--giallo);
+  margin-bottom: 28px;
+}
+.manifesto-figura {
+  margin: 0;
+}
+/* La locandina è verticale (991x1400): a piena larghezza su desktop sarebbe
+   alta due schermate. 460px la tengono leggibile senza costringere a scorrere
+   per vederla tutta; sotto quella soglia prende la larghezza disponibile. */
+.manifesto-figura img {
+  display: block;
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  margin-inline: auto;
+}

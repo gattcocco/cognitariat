@@ -1,0 +1,65 @@
+---
+// Copy: docs/copy-home-v2.md §3. Unica illustrazione della home (momento 1:
+// la domanda sul lavoro). Decorativa: alt="" e aria-hidden sull'SVG.
+// Assorbe l'ancora storica #contract-support per non rompere i vecchi link.
+---
+<section id="lavoro">
+  <span id="contract-support" class="ancora-storica" aria-hidden="true"></span>
+  <div class="container blocco-illustrato">
+    <div class="prosa">
+      <h2 class="section-title">Raramente te lo tolgono tutto in una volta</h2>
+
+      <p>
+        Raramente l'intelligenza artificiale ti toglie il lavoro in un colpo solo. Se ne prende un
+        pezzo alla volta: prima una mansione, poi un'altra. Un giorno ti accorgi che il tuo mestiere
+        è diventato controllare l'output di qualcos'altro, con la stessa paga di prima. O meno.
+      </p>
+      <p>
+        Chi scrive, traduce, progetta, programma o modera contenuti lavora dentro strumenti che non
+        ha scelto, a tariffe che non contratta, con ritmi decisi da un'azienda che sta da un'altra
+        parte. Non è una novità assoluta. La novità è la velocità.
+      </p>
+      <p>
+        Così la domanda giusta non è «l'AI ci ruberà il lavoro», ma: <strong>chi decide come entra
+        nel mio lavoro, e chi si tiene il risparmio che produce.</strong> Il passaggio da
+        sostituzione a complementarietà non è automatico: dipende da come sono scritti i contratti,
+        da come sono organizzate le redazioni e gli studi, da chi ha voce quando si sceglie uno
+        strumento.
+      </p>
+      <p>
+        Su questo, oggi, chi fa lavoro cognitivo in Italia ha poca voce. Le partite IVA non
+        contrattano. Chi collabora spesso non sa se il proprio lavoro finisce in un dataset. Le
+        clausole sulla proprietà intellettuale si firmano senza leggerle, perché rifiutare significa
+        perdere l'incarico.
+      </p>
+      <p class="nota-metodo">
+        Non abbiamo una risposta pronta. Abbiamo un metodo: raccogliere i casi, leggere i contratti,
+        capire quali clausole ricorrono, restituire quello che impariamo a chi ci si trova dentro.
+      </p>
+
+      <p>Raccontacelo: <span class="indirizzo">cognitariatz@proton.me</span></p>
+    </div>
+
+    <figure class="figura">
+      {/*
+        Il file SVG porta width e height sulla propria radice, non solo il
+        viewBox. Senza, l'illustrazione non ha una dimensione propria: il
+        browser le assegna il riquadro predefinito di un elemento sostituito
+        (300x150, qui 104x150 una volta applicate le proporzioni del viewBox),
+        e i motori che pretendono una dimensione intrinseca per disegnare
+        un'immagine vettoriale si comportano ognuno a modo suo — c'e' chi la
+        scala lo stesso e chi non disegna niente. Gli attributi qui sotto
+        riservano lo spazio nella pagina; quelli nel file rendono l'immagine
+        una dimensione, non un'ipotesi.
+      */}
+      <img
+        src="/images/illustrazioni/figura-domanda-lavoro.svg"
+        alt=""
+        width="637"
+        height="920"
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+  </div>
+</section>

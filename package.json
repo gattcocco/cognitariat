@@ -1,0 +1,40 @@
+{
+  "name": "cognitariat",
+  "type": "module",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "wrangler pages dev -- npm run dev:astro",
+    "dev:astro": "astro dev",
+    "build": "astro build && npm run genera:slug",
+    "preview": "wrangler pages dev ./dist",
+    "astro": "astro",
+    "check": "astro check",
+    "check:functions": "tsc --noEmit -p functions/tsconfig.json",
+    "check:all": "npm run check && npm run check:functions",
+    "check:glifi": "node scripts/verifica-glifi.mjs",
+    "test:functions": "node --test --import ./test/registra-hook.mjs test/pagamenti.test.ts test/sezione.test.ts",
+    "verify": "npm run build && npm run check:all && npm run check:glifi && npm run check:testi && npm run check:cms && npm run test:functions",
+    "check:testi": "node scripts/verifica-testi.mjs",
+    "check:supabase": "node scripts/verifica-supabase.mjs",
+    "check:cms": "node scripts/verifica-cms.mjs",
+    "check:cms-oauth": "node scripts/verifica-cms-oauth.mjs",
+    "check:produzione": "node scripts/verifica-produzione.mjs",
+    "genera:slug": "node scripts/genera-slug.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "animejs": "4.5.0",
+    "astro": "^7.2.4",
+    "stripe": "^17.3.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@cloudflare/workers-types": "^5.20260815.1",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.124.0"
+  }
+}

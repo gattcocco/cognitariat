@@ -1,0 +1,84 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Icona from '../../components/Icona.astro';
+import { articoliDaCostruire, dataItaliana, dataIso } from '../../lib/articoli';
+import '../../styles/articolo.css';
+
+/**
+ * Pagina del singolo articolo.
+ *
+ * `articoliDaCostruire` e non `getCollection` diretto: e' il punto in cui una
+ * bozza smette di esistere. In una build pubblica la pagina non viene proprio
+ * generata, quindi l'indirizzo risponde 404 — non basta toglierla dagli elenchi,
+ * perche' un indirizzo indovinato o condiviso resterebbe raggiungibile.
+ */
+export async function getStaticPaths() {
+  const articoli = await articoliDaCostruire();
+  return articoli.map((articolo) => ({
+    params: { slug: articolo.id },
+    props: { articolo },
+  }));
+}
+
+const { articolo } = Astro.props;
+const { title, excerpt, autore, date, cover, coverAlt, bozza, notaRedazione } = articolo.data;
+const { Content } = await render(articolo);
+
+// og:image: si preferisce il JPEG allo stesso nome, se c'e'. Alcuni scraper
+// social non gestiscono ancora bene il WebP, e una copertina che non compare
+// vanifica il senso di averla.
+const immagineSocial = cover?.replace(/\.webp$/i, '.jpg') ?? undefined;
+---
+<BaseLayout
+  title={`${title} — COG U`}
+  description={excerpt}
+  immagine={immagineSocial}
+  tipo="article"
+  pubblicatoIl={dataIso(date)}
+  autore={autore}
+  noindex={bozza}
+>
+  <Header />
+  <main id="contenuto" tabindex="-1" class="container pagina-testo" style="padding-block: 48px 90px;">
+    <article class="articolo">
+      <p class="articolo-torna">
+        <a class="link" href="/blog/"><Icona nome="chevron-sinistra" /> Tutti gli articoli</a>
+      </p>
+
+      {bozza && (
+        <p class="occhiello occhiello--progetto">Bozza — non pubblicata</p>
+      )}
+
+      <h1 class="articolo-titolo">{title}</h1>
+
+      <p class="articolo-meta">
+        <time datetime={dataIso(date)}>{dataItaliana(date)}</time>
+        <span aria-hidden="true"> · </span>
+        <span>{autore}</span>
+      </p>
+
+      <p class="articolo-sommario">{excerpt}</p>
+
+      {cover && (
+        <figure class="articolo-copertina">
+          <img src={cover} alt={coverAlt} width="1200" height="800" decoding="async" />
+        </figure>
+      )}
+
+      <div class="articolo-corpo prosa">
+        <Content />
+      </div>
+
+      {notaRedazione && (
+        <aside class="articolo-nota" aria-label="Nota della redazione">
+          <p class="articolo-nota-etichetta">Nota della redazione</p>
+          <p>{notaRedazione}</p>
+        </aside>
+      )}
+    </article>
+  </main>
+  <Footer />
+</BaseLayout>

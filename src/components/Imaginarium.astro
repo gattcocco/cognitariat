@@ -1,0 +1,47 @@
+---
+import Icona from './Icona.astro';
+---
+<section id="immaginario" class="imaginarium">
+  <div class="container">
+    <h2 class="section-title">Immaginario</h2>
+    <p class="section-sub">Illustrazioni e satira visiva sul lavoro cognitivo e le infrastrutture che lo reggono.</p>
+    <div class="slideshow">
+      <div class="slideshow-track" id="slideshowTrack">
+        <div class="slide">
+          <img src="/images/manifestazione-scifi.jpeg" alt="Illustrazione sci-fi di una manifestazione del cognitariato contro le sedi fortificate di Big Tech">
+          <div class="slide-caption">North Milano, zona autonoma temporanea.</div>
+        </div>
+        <div class="slide">
+          <img src="/images/runlocal.png" alt="Grafica «run local»: un modello di intelligenza artificiale che gira su una macchina propria invece che nel data center di qualcun altro">
+          <div class="slide-caption">AI locale e frugale, fai da te.</div>
+        </div>
+      </div>
+      <button class="slideshow-nav prev" type="button" aria-label="Immagine precedente" data-slide-prev><Icona nome="chevron-sinistra" /></button>
+      <button class="slideshow-nav next" type="button" aria-label="Immagine successiva" data-slide-next><Icona nome="chevron-destra" /></button>
+    </div>
+    <div class="slideshow-dots" id="slideshowDots">
+      <button class="active" type="button" aria-label="Vai alla slide 1" data-slide-goto="0"></button>
+      <button type="button" aria-label="Vai alla slide 2" data-slide-goto="1"></button>
+    </div>
+  </div>
+</section>
+
+<script>
+  let cogUSlideIndex = 0;
+  const track = document.getElementById('slideshowTrack');
+  const dots = document.querySelectorAll('#slideshowDots button');
+
+  function cogUSlideshowGoto(i: number) {
+    if (!track) return;
+    const total = track.children.length;
+    cogUSlideIndex = (i + total) % total;
+    (track as HTMLElement).style.transform = `translateX(-${cogUSlideIndex * 100}%)`;
+    dots.forEach((dot, idx) => dot.classList.toggle('active', idx === cogUSlideIndex));
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-slide-goto]').forEach((btn) => {
+    btn.addEventListener('click', () => cogUSlideshowGoto(Number(btn.dataset.slideGoto)));
+  });
+  document.querySelector('[data-slide-prev]')?.addEventListener('click', () => cogUSlideshowGoto(cogUSlideIndex - 1));
+  document.querySelector('[data-slide-next]')?.addEventListener('click', () => cogUSlideshowGoto(cogUSlideIndex + 1));
+</script>

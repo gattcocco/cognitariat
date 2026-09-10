@@ -1,0 +1,35 @@
+---
+import { associazione } from '../lib/associazione';
+// Fase 4: il footer diceva due cose non vere. «Sindacato del Cognitariato» da
+// solo nascondeva meta' dell'identita' (l'osservatorio e' l'attivita' che esiste
+// gia'), e «GDPR compliant · crittografia end-to-end» era una promessa tecnica
+// che il sito non puo' mantenere ne' dimostrare: al suo posto un link semplice
+// all'informativa. Rimosso anche il blocco centrale che stampava due virgolette.
+import Icona from './Icona.astro';
+---
+<footer class="footer">
+  <div class="container">
+    <div class="footer-cols">
+      <div>
+        <p class="footer-firma">COG U — Sindacato e osservatorio sul lavoro cognitivo</p>
+        <p>Documentiamo cosa succede al lavoro cognitivo e alle infrastrutture che lo reggono.</p>
+        <p>
+          © 2026 {associazione.denominazione}, {associazione.formaGiuridica}, costituita il{' '}
+          {associazione.costituitaIlTesto} · C.F. {associazione.codiceFiscale}.
+          Tesseramento e servizi online in preparazione.
+        </p>
+      </div>
+      <div>
+        <p>
+          <Icona nome="busta" />
+          <span class="indirizzo">cognitariatz@proton.me</span>{' '}
+          — scrivici per info, casi e collaborazioni
+        </p>
+        <p><a href="/privacy">Privacy e trattamento dei dati</a></p>
+        <p>
+          <a href="https://gattcocco.github.io/mappa-e-contenuti/" rel="noopener">Resistenze AI — mappa e contenuti</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>

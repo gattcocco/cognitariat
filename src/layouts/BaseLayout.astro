@@ -1,0 +1,183 @@
+---
+import { associazione, haSede } from '../lib/associazione';
+import '../styles/font.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Immagine per le anteprime social. Percorso assoluto dal sito, es. /images/... */
+  immagine?: string;
+  tipo?: 'website' | 'article';
+  /** Solo per gli articoli: data di pubblicazione in forma AAAA-MM-GG. */
+  pubblicatoIl?: string;
+  autore?: string;
+  /** Forza il noindex su una singola pagina, oltre alla regola sulle anteprime. */
+  noindex?: boolean;
+}
+
+const {
+  title = "COG U · Sindacato e osservatorio sul lavoro cognitivo",
+  description = "Sindacato del cognitariato e osservatorio sul lavoro cognitivo e sulle infrastrutture dell'AI: data center, energia, contratti. Documentiamo e mettiamo in comune quello che troviamo.",
+  immagine,
+  tipo = 'website',
+  pubblicatoIl,
+  autore,
+  noindex = false,
+} = Astro.props;
+
+/**
+ * Le anteprime non vanno indicizzate. Cloudflare passa il nome del ramo in
+ * CF_PAGES_BRANCH: se c'e' e non e' quello di produzione, questa build sta
+ * su un URL *.pages.dev che non deve finire nei motori di ricerca — altrimenti
+ * il lavoro in corso compare nelle ricerche accanto al sito vero.
+ *
+ * In locale CF_PAGES_BRANCH non esiste e non cambia niente. Il ramo di
+ * produzione si dichiara con BRANCH_PRODUZIONE nelle variabili del progetto
+ * Cloudflare.
+ *
+ * ATTENZIONE al valore predefinito `main`: quale sia davvero il ramo di
+ * produzione del progetto Pages NON e' confermato — la documentazione interna
+ * dice `feat/membership-v2-1`, ma si legge solo dalla configurazione Cloudflare
+ * e nessuno l'ha ancora letta (vedi docs/rilascio-e-ripristino.md §5). Se al
+ * cutover la variabile resta al predefinito e il ramo reale e' un altro, il sito
+ * pubblico esce con noindex. Va impostata esplicitamente, non lasciata decidere
+ * a questa riga.
+ */
+const ramo = import.meta.env.CF_PAGES_BRANCH ?? process.env?.CF_PAGES_BRANCH;
+const ramoProduzione = import.meta.env.BRANCH_PRODUZIONE ?? process.env?.BRANCH_PRODUZIONE ?? 'main';
+const anteprima = Boolean(ramo) && ramo !== ramoProduzione;
+const robots = noindex || anteprima ? 'noindex, nofollow' : 'index, follow';
+
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const immagineAssoluta = immagine && Astro.site ? new URL(immagine, Astro.site).href : immagine;
+
+const ogTitolo = tipo === 'article' ? title : 'COG U · Sindacato e osservatorio sul lavoro cognitivo';
+const ogDescrizione =
+  tipo === 'article'
+    ? description
+    : "Chi sta costruendo l'intelligenza artificiale, con quali soldi, a spese di cosa. E chi la sta costruendo in un altro modo.";
+---
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>{title}</title>
+
+  <meta name="description" content={description}>
+  <meta name="theme-color" content="#e5376a">
+  <meta name="robots" content={robots}>
+  {canonical && <link rel="canonical" href={canonical} />}
+
+  <meta property="og:type" content={tipo}>
+  <meta property="og:title" content={ogTitolo}>
+  <meta property="og:description" content={ogDescrizione}>
+  <meta property="og:locale" content="it_IT">
+  {canonical && <meta property="og:url" content={canonical} />}
+  {immagineAssoluta && <meta property="og:image" content={immagineAssoluta} />}
+  {tipo === 'article' && pubblicatoIl && <meta property="article:published_time" content={pubblicatoIl} />}
+  {tipo === 'article' && autore && <meta property="article:author" content={autore} />}
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={ogTitolo}>
+  <meta name="twitter:description" content={ogDescrizione}>
+  {immagineAssoluta && <meta name="twitter:image" content={immagineAssoluta} />}
+
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "COG U — Cognitive Workers Union",
+    "alternateName": "Sindacato e osservatorio sul lavoro cognitivo",
+    "description": "Associazione sindacale del cognitariato, costituita il 12 luglio 2026, e osservatorio sul lavoro cognitivo e sulle infrastrutture dell'intelligenza artificiale: data center, energia, contratti.",
+    "foundingDate": associazione.costituitaIl,
+    // taxID e' il codice fiscale dell'ente. NON va aggiunto vatID: la partita IVA
+    // non esiste (confermato 07/09/2026) e il codice fiscale non la sostituisce.
+    "taxID": associazione.codiceFiscale,
+    "email": associazione.email,
+    // L'indirizzo compare solo quando c'e': meglio un dato assente di un dato sbagliato.
+    ...(haSede ? { "address": { "@type": "PostalAddress", "streetAddress": associazione.sede, "addressCountry": "IT" } } : {}),
+    "url": "https://cognitariatzone.org/",
+    "logo": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5376a'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Inter,sans-serif' font-size='34' font-weight='800' fill='%23ffffff' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E",
+    "areaServed": { "@type": "AdministrativeArea", "name": "Italia" },
+    "knowsAbout": ["Intelligenza artificiale e lavoro", "Data center e consumo energetico", "Lavoro cognitivo precario", "AI open source e frugale"],
+    "sameAs": [
+      "https://github.com/gattcocco/cognitariat",
+      "https://gattcocco.github.io/mappa-e-contenuti/"
+    ]
+  })} />
+  {/*
+    hasOfferCatalog rimosso finche' il tesseramento e' chiuso: dichiarare Offer
+    con prezzo nei dati strutturati direbbe ai motori di ricerca che le quote
+    sono acquistabili, mentre la pagina dice il contrario. Va ripristinato
+    insieme alla riattivazione dei pagamenti.
+  */}
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e5376a'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Inter,sans-serif' font-size='34' font-weight='800' fill='%23ffffff' dominant-baseline='middle'%3EC%3C/text%3E%3C/svg%3E">
+
+  {/*
+    Niente piu' preconnect ne' fogli di stile da fonts.googleapis.com e da cdnjs:
+    i font sono in public/fonts/ (src/styles/font.css) e le icone sono SVG
+    disegnati in src/components/Icona.astro. Il sito non contatta piu' nessuna
+    terza parte per rendersi leggibile.
+    Il preload riguarda il solo file latino di Inter, quello che serve alla prima
+    riga di testo: gli altri arrivano quando servono, per unicode-range.
+  */}
+  <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+
+  <script is:inline>
+    (function () {
+      try {
+        var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (rm) return; // niente intro: l'hero resta visibile
+        var d = document.documentElement;
+        d.classList.add('cogu-intro');
+        window.__coguReveal = function () {
+          // Traccia condivisa: se il failsafe ha gia' scoperto la pagina, il
+          // modulo dell'intro (che puo' arrivare molto dopo, con una rete lenta)
+          // deve rinunciare invece di calare di nuovo il pannello nero su un
+          // contenuto che si stava gia' leggendo.
+          window.__coguRivelato = true;
+          d.classList.remove('cogu-intro');
+          // Se la timeline non arriva al suo cleanup (CDN lenta, scheda in background
+          // che sospende i rAF) l'overlay resterebbe sopra il contenuto: il failsafe
+          // deve rimuoverlo, non limitarsi a riaccendere l'opacita'.
+          var ov = document.querySelector('.cogu-intro-overlay');
+          if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+          // Le parole del titolo hanno opacity inline: senza questo reset
+          // resterebbero invisibili anche a gate CSS rimosso.
+          if (window.__coguHeroReset) window.__coguHeroReset();
+        };
+        // Se il modulo anime.js non parte (CDN bloccata / browser vecchio), rivela comunque.
+        window.__coguFailsafe = setTimeout(window.__coguReveal, 3000);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <a class="salta-al-contenuto" href="#contenuto">Salta al contenuto</a>
+  <slot />
+
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener('click', function (this: HTMLAnchorElement, e: Event) {
+        const hash = this.getAttribute('href');
+        if (hash && hash.length > 1 && hash.startsWith('#')) {
+          const target = document.querySelector(hash);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth' });
+            // Lo scroll non sposta il focus: senza questo, chi usa il link
+            // «Salta al contenuto» vedrebbe scorrere la pagina ma resterebbe
+            // con il focus nell'header. main ha tabindex="-1" apposta; sugli
+            // altri bersagli, non focalizzabili, focus() non fa nulla.
+            if (target instanceof HTMLElement) target.focus({ preventScroll: true });
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

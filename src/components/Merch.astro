@@ -1,0 +1,29 @@
+---
+// Fase 4: struttura conservata, acquisti DISABILITATI.
+// I tre articoli restano descritti, ma senza pulsanti d'acquisto: la Function
+// functions/api/checkout-merch.ts resta in codice per la riattivazione futura.
+const items = [
+  { id: 't-shirt', title: 'Magliette', desc: 'Design sul lavoro cognitivo e le infrastrutture dell\'AI.' },
+  { id: 'pin', title: 'Spille e pin', desc: 'Edizioni limitate legate alle campagne.' },
+  { id: 'poster', title: 'Poster e sticker', desc: 'Grafiche da attaccare dove serve.' },
+];
+---
+<section id="merch">
+  <div class="container">
+    <p class="occhiello occhiello--progetto">Non ancora in vendita</p>
+    <h2 class="section-title">Merchandising</h2>
+    <p class="section-sub">
+      Il merch è in preparazione e non è ancora acquistabile. Quando lo sarà, i proventi andranno al
+      fondo di solidarietà e alle campagne.
+    </p>
+
+    <div class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(240px,1fr));">
+      {items.map((item) => (
+        <div class="card">
+          <h3>{item.title}</h3>
+          <p>{item.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

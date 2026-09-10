@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": [
+      "@cloudflare/workers-types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "../src/lib/**/*.ts",
+    "../generato/**/*.ts"
+  ],
+  "exclude": [
+    "../src/lib/supabase-browser.ts",
+    "../src/lib/articoli.ts",
+    "../src/lib/eventi.ts"
+  ]
+}

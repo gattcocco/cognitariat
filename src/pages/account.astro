@@ -1,0 +1,162 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Icona from '../components/Icona.astro';
+---
+<BaseLayout title="Area membro — COG U">
+  <Header />
+  <main id="contenuto" tabindex="-1" class="container pagina-testo" style="padding-block: 60px;">
+    <div id="account-loading" style="text-align:center;">Carico la tua tessera…</div>
+
+    <div id="account-signed-out" style="display:none; text-align:center;">
+      <!--
+        Il tesseramento non e' aperto: questa schermata non deve mandare a una
+        pagina d'iscrizione che non esiste piu'. Dice cosa e' vero adesso e
+        lascia l'unica azione davvero disponibile, scriverci.
+      -->
+      <p class="prosa" style="margin: 0 auto;">
+        Quest'area serve a chi ha una tessera COG U. Il tesseramento non è ancora aperto:
+        per ora non ci sono tessere da mostrare.
+      </p>
+      <p class="prosa" style="margin: 12px auto 0;">
+        Se hai già ricevuto un link d'accesso, aprilo dalla mail: la sessione si crea da lì.
+      </p>
+      <a class="btn-primary" href="/" style="margin-top: 20px;">Torna alla home</a>
+    </div>
+
+    <div id="account-error" style="display:none; text-align:center;">
+      <!--
+        Stato distinto dal precedente: qui la sessione non e' assente, e' il
+        caricamento ad avere fallito. Dirlo evita che una tessera esistente
+        sembri sparita.
+      -->
+      <p class="form-error" style="margin: 0 auto; max-width: 52ch;">
+        Non riusciamo a caricare la tua tessera in questo momento. Non significa che sia stata
+        annullata: riprova fra qualche minuto e, se il problema resta, scrivici a{' '}
+        <span class="indirizzo">cognitariatz@proton.me</span>.
+      </p>
+      <p style="margin-top: 12px; font-size: 0.8rem; color: var(--nero-secondario);">
+        Dettaglio tecnico: <span id="account-error-detail">—</span>
+      </p>
+    </div>
+
+    <div id="account-content" style="display:none;">
+      <div class="member-card">
+        <div class="member-card-tier" id="mc-tier">—</div>
+        <span class="member-card-status" id="mc-status">—</span>
+        <dl>
+          <dt>Iscritto/a come</dt><dd id="mc-name">—</dd>
+          <dt>Email</dt><dd id="mc-email">—</dd>
+          <dt>Quota versata</dt><dd id="mc-amount">—</dd>
+          <dt>Valida fino al</dt><dd id="mc-valid-until">—</dd>
+          <dt>Informativa privacy</dt><dd id="mc-privacy">—</dd>
+        </dl>
+      </div>
+
+      <div class="account-actions">
+        <!--
+          Niente Customer Portal Stripe: la quota 2026 è un pagamento one-off, senza
+          rinnovo automatico — non c'è un abbonamento da gestire (piano v3). La ricevuta
+          arriva via email da Stripe automaticamente.
+        -->
+        <button class="btn-outline" type="button" id="btn-logout">
+          <Icona nome="esci" /> Esci
+        </button>
+        <!--
+          La cancellazione automatica è disabilitata di proposito finché la retention
+          matrix non è definita (piano §6) — vedi functions/api/account-delete.ts.
+          Nel frattempo si passa da una richiesta via email, non da self-service.
+        -->
+        <p style="font-size:0.85rem; margin-top: 8px;">
+          Richiedi la cancellazione del tuo account scrivendo a <span class="indirizzo">cognitariatz@proton.me</span>
+        </p>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  import { TIER_LABELS } from '../lib/tiers';
+
+  const STATUS_LABELS: Record<string, string> = {
+    pending: 'Iscrizione avviata, in attesa di pagamento',
+    payment_pending: 'Pagamento in corso di conferma',
+    active: 'Attiva',
+    payment_failed: 'Pagamento non riuscito — riprova dall\'iscrizione',
+    rejected: 'Iscrizione non accettata — quota rimborsata, scrivici per informazioni',
+  };
+
+  const el = (id: string) => document.getElementById(id)!;
+  const mostra = (id: string) => { el(id).style.display = 'block'; };
+
+  function mostraErrore(dettaglio: string) {
+    el('account-loading').style.display = 'none';
+    el('account-error-detail').textContent = dettaglio;
+    mostra('account-error');
+  }
+
+  async function init() {
+    // Import dinamico: se PUBLIC_SUPABASE_URL/ANON_KEY mancano, createClient lancia
+    // durante la valutazione del modulo. Con l'import statico l'eccezione usciva dal
+    // try e la pagina restava per sempre su «Carico la tua tessera…».
+    const { supabase } = await import('../lib/supabase-browser');
+
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+
+    if (!session) {
+      el('account-loading').style.display = 'none';
+      mostra('account-signed-out');
+      return;
+    }
+
+    // maybeSingle(): «nessuna riga» e' uno stato legittimo (profilo creato, tessera
+    // non ancora presa) e non deve diventare un errore di caricamento.
+    const [profileRes, membershipRes, acceptanceRes] = await Promise.all([
+      supabase.from('member_profiles').select('first_name, last_name').eq('id', session.user.id).maybeSingle(),
+      supabase.from('memberships').select('tier, status, amount_paid_cents, valid_until').eq('user_id', session.user.id).maybeSingle(),
+      supabase
+        .from('privacy_acceptances')
+        .select('version, accepted_at')
+        .eq('user_id', session.user.id)
+        .order('accepted_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    const erroreQuery = profileRes.error || membershipRes.error || acceptanceRes.error;
+    if (erroreQuery) throw erroreQuery;
+
+    const profile = profileRes.data;
+    const membership = membershipRes.data;
+    const acceptance = acceptanceRes.data;
+
+    el('account-loading').style.display = 'none';
+    mostra('account-content');
+
+    const tierValue = membership?.tier as string | null | undefined;
+    const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ');
+
+    el('mc-tier').textContent = tierValue ? (TIER_LABELS[tierValue as keyof typeof TIER_LABELS] ?? tierValue) : 'Nessuna fascia attiva';
+    el('mc-status').textContent = membership
+      ? (STATUS_LABELS[membership.status as string] ?? membership.status as string)
+      : 'Nessuna tessera: il tesseramento non è ancora aperto';
+    el('mc-name').textContent = displayName || session.user.email || '—';
+    el('mc-email').textContent = session.user.email ?? '—';
+    el('mc-amount').textContent =
+      typeof membership?.amount_paid_cents === 'number' ? `€${(membership.amount_paid_cents / 100).toFixed(2)}` : '—';
+    el('mc-valid-until').textContent = membership?.valid_until ?? '—';
+    el('mc-privacy').textContent = acceptance
+      ? `accettata il ${new Date(acceptance.accepted_at).toLocaleDateString('it-IT')} (versione ${acceptance.version})`
+      : '—';
+
+    el('btn-logout').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    });
+  }
+
+  init().catch((e) => mostraErrore(e?.message ?? String(e)));
+</script>

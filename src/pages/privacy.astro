@@ -1,0 +1,279 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { PRIVACY_POLICY_VERSION } from '../lib/consent';
+import { associazione, haSede, haPec } from '../lib/associazione';
+
+/**
+ * Informativa ai sensi dell'art. 13 GDPR, scritta sui trattamenti che il sito
+ * fa davvero adesso — non su quelli che farà quando apriranno tesseramento e
+ * pagamenti.
+ *
+ * Quello che c'è scritto è stato verificato sul sito costruito e sul sito
+ * online, non dedotto dal codice: nessun cookie impostato da noi, niente scritto
+ * in localStorage o sessionStorage e — da questa versione — nessun host di terze
+ * parti contattato. I video di YouTube erano l'ultimo rimasto: erano incorporati
+ * in modalità nocookie e caricati in differita, ma arrivare in fondo alla pagina
+ * bastava a mandare a Google l'indirizzo IP di chi legge. Ora sono link.
+ *
+ * «Nessuna terza parte» non vuol dire «nessun altro host»: le risposte portano le
+ * intestazioni NEL/Report-To della piattaforma, che chiedono al browser di
+ * segnalare a a.nel.cloudflare.com gli errori di rete (success_fraction 0, cioè
+ * solo i fallimenti). Cloudflare è il nostro responsabile, non una terza parte, e
+ * su pages.dev quelle intestazioni non sono nostre da togliere — ma vanno dette,
+ * non nascoste dentro una formula assoluta.
+ *
+ * I log del fornitore ESISTONO: che noi non li scarichiamo non li fa sparire. La
+ * sezione 2 distingue quello che conserva l'associazione (niente) da quello che
+ * conserva Cloudflare (lo decide Cloudflare), e dice apertamente quale parte non
+ * siamo in grado di verificare.
+ *
+ * I tempi di conservazione dichiarati qui descrivono la pratica reale di oggi.
+ * Dove un termine numerico non è ancora stato deliberato dall'associazione, la
+ * pagina dice il criterio invece di inventare una politica: la proposta da
+ * confermare sta in docs/conservazione-dati.md, e quando è approvata si scrive
+ * qui il numero.
+ *
+ * La sede non compare: è un aggiornamento amministrativo pendente e il campo in
+ * src/lib/associazione.ts è vuoto. Quando ci sarà, comparirà da sola. Il perché
+ * manchi non è affare di chi legge: sta nella documentazione interna.
+ */
+const versione = PRIVACY_POLICY_VERSION;
+---
+<BaseLayout
+  title="Privacy e trattamento dei dati — COG U"
+  description="Chi tratta i dati di chi visita il sito di COG U, per quali finalità, con quale base giuridica e per quanto tempo."
+>
+  <Header />
+  <main id="contenuto" tabindex="-1" class="container pagina-testo" style="max-width: 820px;">
+    <div class="prosa">
+      <h1 class="section-title">Privacy e trattamento dei dati</h1>
+      <p class="section-sub">
+        Informativa ai sensi dell'articolo 13 del Regolamento (UE) 2016/679 — versione {versione}
+      </p>
+
+      <h2>1. Chi tratta i dati</h2>
+      <p>
+        Il titolare del trattamento è <strong>{associazione.denominazione}</strong>,
+        {' '}{associazione.formaGiuridica}, costituita il{' '}
+        <strong>{associazione.costituitaIlTesto}</strong> ai sensi degli articoli 36 e seguenti del
+        Codice Civile e dell'articolo 39 della Costituzione. Codice fiscale{' '}
+        <strong>{associazione.codiceFiscale}</strong>.
+      </p>
+      {haSede && <p>Sede: {associazione.sede}.</p>}
+      <p>
+        Per qualunque cosa riguardi i tuoi dati — chiedere, correggere, cancellare, opporti — il
+        riferimento è{' '}
+        <span class="indirizzo">{associazione.email}</span>{haPec ? ',' : '.'}
+        {haPec && <> oppure la PEC {associazione.pec}.</>}
+      </p>
+      <p>
+        Non è stato nominato un responsabile della protezione dei dati: per la dimensione e le
+        attività dell'associazione non è obbligatorio. Le richieste arrivano all'indirizzo qui
+        sopra e le gestisce il titolare.
+      </p>
+
+      <h2>2. Quando visiti il sito</h2>
+      <p>
+        Il sito è statico: pagine, caratteri tipografici e icone arrivano dal nostro dominio, senza
+        passare da servizi di terzi. <strong>Non usiamo strumenti di statistica, non profiliamo chi
+        legge, non impostiamo cookie e non scriviamo niente nella memoria del tuo browser</strong>
+        — è stato verificato sul sito online, non solo nel codice.
+      </p>
+      <p>
+        Resta quello che fa qualunque server quando gli chiedi una pagina: il nostro hosting,{' '}
+        <strong>Cloudflare Pages</strong>, registra i dati tecnici della richiesta — indirizzo IP,
+        data e ora, pagina richiesta, tipo di browser — per consegnare le pagine, tenere in piedi
+        il servizio e difenderlo dagli abusi. <strong>Quei log esistono.</strong> Il fatto che noi
+        non li scarichiamo non li fa sparire, e sarebbe scorretto lasciartelo credere.
+      </p>
+      <p>
+        Cloudflare tratta quei dati come <em>responsabile</em> per nostro conto, come dichiara nella
+        propria informativa. Le nostre pagine arrivano dalla sua rete anche quando ti rispondono
+        delle intestazioni che chiedono al browser di segnalare a Cloudflare stessa
+        (<code>a.nel.cloudflare.com</code>) gli <strong>errori</strong> di rete: sono impostate
+        dalla piattaforma, riguardano solo le richieste fallite, e su un indirizzo{' '}
+        <code>pages.dev</code> non possiamo disattivarle.
+      </p>
+      <ul class="elenco-progetto">
+        <li><strong>Finalità</strong>: erogare il sito e proteggerlo da attacchi e abusi.</li>
+        <li>
+          <strong>Base giuridica</strong>: legittimo interesse del titolare a rendere disponibile e
+          sicuro il proprio sito (art. 6.1.f).
+        </li>
+        <li>
+          <strong>Conservazione presso di noi: nessuna.</strong> Non teniamo un archivio delle
+          visite, non usiamo strumenti di statistica, non abbiamo attivato l'analitica di Cloudflare
+          e non esportiamo i log. Non è una scelta di facciata: l'esportazione dei log delle
+          richieste è una funzione riservata ai piani Enterprise e disattivata per impostazione
+          predefinita, quindi con il piano che usiamo <strong>non possiamo</strong> né consultarli
+          né conservarli.
+        </li>
+        <li>
+          <strong>Conservazione presso Cloudflare</strong>: la decide Cloudflare. Pubblicamente
+          dichiara di scartare i log di accesso <strong>entro quattro ore</strong> per la maggior
+          parte dei clienti, e di conservarli per impostazione predefinita tre giorni per i clienti
+          Enterprise che ne chiedono l'esportazione; la sua informativa non fissa invece un termine
+          numerico generale. <strong>Non possiamo verificare quale di questi tempi si applichi al
+          nostro progetto</strong>: nessuno strumento a nostra disposizione lo mostra. Riportiamo
+          quello che il fornitore dichiara, e diciamo che è quello che dichiara lui.
+        </li>
+      </ul>
+
+      <h2>3. I video</h2>
+      <p>
+        Nella sezione «Video &amp; Interviste» <strong>non ci sono riquadri di YouTube</strong>:
+        ci sono dei link. Finché non ne clicchi uno, da questo sito non parte nessuna richiesta
+        verso Google — né quando apri la pagina, né quando scorri fino a quel punto.
+      </p>
+      <p>
+        Prima erano incorporati, in modalità <em>nocookie</em> e caricati in differita. Anche così,
+        arrivare in fondo alla pagina bastava a far conoscere a Google il tuo indirizzo IP senza
+        che tu avessi chiesto niente. Li abbiamo tolti: adesso quel passaggio lo decidi tu.
+      </p>
+      <p>
+        Quando clicchi, esci da questo sito e vai su <strong>youtube.com</strong>: da lì in poi vale
+        l'informativa di Google, non la nostra, e noi non riceviamo niente di quella visita. I link
+        sono impostati in modo da non comunicare a YouTube nemmeno da quale pagina arrivi
+        (<code>rel="noreferrer"</code>).
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Dati trattati da noi</strong>: nessuno. Un link non è un trattamento: finché non
+          lo apri, non succede niente.
+        </li>
+        <li>
+          <strong>Conservazione</strong>: non c'è niente da conservare, perché non raccogliamo
+          niente.
+        </li>
+      </ul>
+
+      <h2>4. Se ci scrivi</h2>
+      <p>
+        Scrivere a{' '}
+        <span class="indirizzo">{associazione.email}</span> è, oggi,
+        l'unico modo per farci arrivare dei dati. La casella è ospitata da <strong>Proton</strong>
+        {' '}(Proton AG, Svizzera): i messaggi stanno sui suoi server, come per qualunque posta
+        elettronica.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Finalità</strong>: risponderti e, se ci hai raccontato un caso, usarlo per il
+          lavoro dell'osservatorio.
+        </li>
+        <li>
+          <strong>Base giuridica</strong>: legittimo interesse a dare seguito a chi ci scrive
+          (art. 6.1.f) per la risposta. Per pubblicare un caso in forma riconoscibile serve invece
+          il tuo consenso esplicito (art. 6.1.a): senza, lo trattiamo in forma anonima.
+        </li>
+        <li>
+          <strong>Conservazione</strong>: il criterio è l'uso, non un termine uguale per tutti. Un
+          messaggio a cui abbiamo risposto e che non ha seguito resta nella casella finché la si
+          riordina; un caso che l'osservatorio sta seguendo resta finché quel lavoro è aperto e
+          finché può ancora servire a far valere o difendere un diritto. Quando il materiale
+          diventa anonimo — è la forma in cui i casi finiscono nei dossier — non è più un dato che
+          ti riguarda e smette di rientrare qui.
+        </li>
+        <li>
+          <strong>Cancellazione</strong>: non c'è cancellazione automatica. Puoi chiedere in
+          qualsiasi momento che cancelliamo la tua corrispondenza, e lo facciamo.
+        </li>
+      </ul>
+      <p>
+        Non usiamo quell'indirizzo per mandarti altro: niente newsletter, niente liste, nessuna
+        comunicazione che non sia la risposta a quello che hai scritto.
+      </p>
+
+      <h2>5. Chi scrive sul sito</h2>
+      <p>
+        Gli articoli si pubblicano da un'area di redazione che sta sul sito stesso. Chi ci entra si
+        autentica con il proprio account <strong>GitHub</strong>, perché pubblicare un articolo
+        significa scrivere nel repository del sito. Riguarda solo le persone della redazione, non
+        chi legge.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Dati trattati</strong>: nome utente GitHub e le informazioni che GitHub associa
+          alle modifiche (autore e data di ogni contributo, che restano nella cronologia pubblica
+          del repository).
+        </li>
+        <li>
+          <strong>Finalità</strong>: permettere alla redazione di pubblicare e tenere traccia di chi
+          ha scritto cosa.
+        </li>
+        <li>
+          <strong>Base giuridica</strong>: legittimo interesse dell'associazione a gestire il
+          proprio sito (art. 6.1.f), nell'ambito del rapporto associativo con chi collabora.
+        </li>
+        <li>
+          <strong>Dove stanno</strong>: su GitHub (GitHub Inc., Stati Uniti). Il codice di accesso
+          personale resta nel browser di chi ha fatto l'accesso: non passa da nessun nostro archivio
+          e non viene registrato da nessuna parte.
+        </li>
+        <li>
+          <strong>Conservazione</strong>: l'attribuzione di ogni modifica resta nella cronologia del
+          repository <strong>a tempo indeterminato</strong>, perché è la cronologia stessa a essere
+          il registro di chi ha scritto cosa: è la natura dello strumento, e chi entra in redazione
+          lo sa. Il codice di accesso vale per la sessione e si può revocare quando si vuole dalle
+          impostazioni del proprio account GitHub.
+        </li>
+      </ul>
+
+      <h2>6. Tesseramento e pagamenti</h2>
+      <p>
+        Il sito contiene le pagine del tesseramento e del merchandising, ma <strong>sono
+        disattivate</strong>: non c'è nessun modulo da compilare, non si raccolgono adesioni e non
+        si incassa niente. Le richieste di pagamento vengono rifiutate dal server prima di
+        raggiungere qualunque fornitore. Nessun dato viene raccolto per queste vie.
+      </p>
+      <p>
+        Quando apriranno, i trattamenti relativi — dati di iscrizione, quota, fornitore dei
+        pagamenti — saranno descritti qui <strong>prima</strong> che il primo dato venga raccolto.
+      </p>
+
+      <h2>7. A chi arrivano i dati</h2>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Cloudflare</strong> (responsabile del trattamento) — hosting del sito, dati
+          tecnici delle richieste e segnalazione degli errori di rete.
+        </li>
+        <li><strong>Proton</strong> (Svizzera) — la casella di posta a cui scrivi.</li>
+        <li>
+          <strong>GitHub</strong> (Stati Uniti) — solo per chi fa parte della redazione, per
+          l'accesso all'area di pubblicazione.
+        </li>
+      </ul>
+      <p>
+        <strong>Google non è più in questo elenco.</strong> Finché i video erano incorporati lo
+        era, per chi arrivava in fondo alla pagina. Adesso sono link: se ne apri uno vai su
+        YouTube di tua iniziativa, e non è un trattamento che facciamo noi.
+      </p>
+      <p>
+        Non vendiamo, non cediamo e non scambiamo dati con nessun altro, e non li usiamo per
+        pubblicità.
+      </p>
+
+      <h2>8. I tuoi diritti</h2>
+      <p>
+        Puoi chiederci accesso, rettifica, cancellazione, limitazione e portabilità dei dati che ti
+        riguardano, e opporti al trattamento fondato sul legittimo interesse. Dove abbiamo chiesto
+        il tuo consenso puoi ritirarlo quando vuoi, senza che questo tocchi quello che è stato
+        fatto prima. Si scrive a{' '}
+        <span class="indirizzo">{associazione.email}</span>.
+      </p>
+      <p>
+        Se pensi che qualcosa non vada puoi rivolgerti al Garante per la protezione dei dati
+        personali (<a class="link" href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>).
+      </p>
+
+      <h2>9. Aggiornamenti</h2>
+      <p>
+        Questa informativa descrive il sito come è oggi. Cambierà quando cambieranno i trattamenti
+        — a cominciare dall'apertura del tesseramento — e la versione in cima serve a distinguere
+        una stesura dall'altra.
+      </p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

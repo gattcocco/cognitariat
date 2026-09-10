@@ -1,0 +1,70 @@
+---
+import CardEvento from './CardEvento.astro';
+import Icona from './Icona.astro';
+import { eventiPubblicati, raggruppa } from '../lib/eventi';
+
+/**
+ * Richiamo dell'agenda in home: al massimo tre appuntamenti, e il link a tutta
+ * l'agenda.
+ *
+ * `eventiPubblicati` e non `eventiDaCostruire`: in home le bozze non entrano
+ * nemmeno in una build che le costruisce, perché la home è la prima cosa che
+ * qualcuno vede.
+ *
+ * Se non c'è nessun appuntamento datato in arrivo, la sezione mostra quelli che
+ * si ripetono; se non c'è proprio niente, non compare affatto — una sezione
+ * «Agenda» vuota dice al lettore che l'associazione non fa niente.
+ */
+const tutti = await eventiPubblicati();
+const { prossimi, ricorrenti } = raggruppa(tutti);
+
+const MASSIMO = 3;
+const daMostrare = [...prossimi, ...ricorrenti].slice(0, MASSIMO);
+const altri = prossimi.length + ricorrenti.length - daMostrare.length;
+---
+{daMostrare.length > 0 && (
+  <section id="agenda">
+    <div class="container">
+      <h2 class="section-title">Agenda</h2>
+      <p class="section-sub">Dove ci si incontra nelle prossime settimane.</p>
+
+      <ul class="agenda-elenco" id="agenda-home">
+        {daMostrare.map((voce) => (
+          <li><CardEvento voce={voce} compatta /></li>
+        ))}
+      </ul>
+
+      <p class="agenda-home-azioni">
+        <a class="btn-outline" href="/agenda/">
+          Tutta l'agenda{altri > 0 && <> ({altri} in più)</>}
+        </a>
+      </p>
+    </div>
+  </section>
+)}
+
+<script>
+  /**
+   * Toglie dalla home gli appuntamenti già finiti.
+   *
+   * Stesso motivo della pagina dell'agenda: la divisione fra prossimi e passati
+   * è calcolata alla build, e la home resta ferma finché nessuno pubblica. Qui
+   * la scheda scaduta si nasconde e basta — l'archivio sta in /agenda/.
+   *
+   * Gli appuntamenti che si ripetono non hanno una data e non vengono toccati.
+   */
+  const elenco = document.getElementById('agenda-home');
+  if (elenco) {
+    const adesso = Date.now();
+    for (const li of Array.from(elenco.children)) {
+      const scade = li.querySelector('[data-scade-il]')?.getAttribute('data-scade-il');
+      if (!scade) continue;
+      const t = Date.parse(scade);
+      if (!Number.isNaN(t) && t < adesso) (li as HTMLElement).hidden = true;
+    }
+    // Se non resta niente da mostrare, la sezione intera esce di scena: meglio
+    // nessuna agenda che un'agenda vuota.
+    const restano = Array.from(elenco.children).some((li) => !(li as HTMLElement).hidden);
+    if (!restano) document.getElementById('agenda')?.setAttribute('hidden', '');
+  }
+</script>

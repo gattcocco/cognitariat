@@ -9,6 +9,7 @@ import Lavoro from '../components/Lavoro.astro';
 import Alternative from '../components/Alternative.astro';
 import AssemblyBanner from '../components/AssemblyBanner.astro';
 import CosaFacciamo from '../components/CosaFacciamo.astro';
+import Agenda from '../components/Agenda.astro';
 import Articoli from '../components/Articoli.astro';
 import VideoInterviews from '../components/VideoInterviews.astro';
 import CosaCostruiamo from '../components/CosaCostruiamo.astro';
@@ -38,6 +39,12 @@ import Footer from '../components/Footer.astro';
     <Alternative />
     <AssemblyBanner />
     <CosaFacciamo />
+    <!--
+      L'agenda sta prima degli articoli: un appuntamento ha una scadenza, un
+      articolo no. Se una sola delle due cose viene letta, meglio che sia quella
+      a cui si puo' ancora partecipare.
+    -->
+    <Agenda />
     <Articoli />
     <VideoInterviews />
     <CosaCostruiamo />

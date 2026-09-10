@@ -1891,3 +1891,128 @@ E la prova che conta, nel runtime di Pages in locale:
 
 La regola di reindirizzamento temporanea sul vecchio slug **non è stata toccata**: va rimossa a
 mano dopo che questa soluzione è verificata sul dominio, altrimenti non si vedrebbe la differenza.
+
+---
+
+## Margini mobile, e un'agenda gestita dalla redazione — 09/09/2026
+
+Solo su `dev`. Nessun merge, nessuna modifica a produzione, DNS, Cloudflare, OAuth, regole di
+cache o di reindirizzamento, pagamenti, registrazioni.
+
+### 1. Il testo degli articoli attaccato al bordo
+
+**Causa, misurata sul dominio pubblico a 360px prima di toccare qualsiasi cosa**: titolo, data,
+autore, sommario, corpo e navigazione avevano `left: 0`, `right: 0` e larghezza uguale al
+viewport. Il `main` riportava `padding: 0px / 0px`.
+
+Non era una regola mancante. Era questa riga:
+
+```astro
+<main class="container" style="padding: 48px 0 90px;">
+```
+
+Uno stile inline batte qualunque regola di classe, e la scorciatoia `padding` con tre valori
+dichiara anche `padding-left: 0` e `padding-right: 0`: azzerava il gutter che `.container`
+forniva. Su desktop non si vedeva perché `.articolo` ha `max-width: 72ch` e si centra da sola —
+a 360px 72ch è più larga dello schermo, e il testo arrivava al bordo.
+
+Lo stesso identico difetto era su `/blog/`, `/privacy/`, `/404`, `/account` e `/auth/callback`:
+tutte pagine scritte con lo stesso schema.
+
+**Correzione**: una classe `.pagina-testo` che mette il respiro **solo sopra e sotto**
+(`padding-block`), e le pagine che la usano. Dove serviva un valore diverso resta inline, ma come
+`padding-block`, che non porta con sé i due lati. `.container` non è stata toccata: home, header e
+componenti hanno esattamente il CSS di prima.
+
+Aggiunto `overflow-wrap: break-word` al corpo dell'articolo: a 320px basta un indirizzo web non
+spezzabile per far comparire la barra orizzontale su tutta la pagina.
+
+**Verificato sull'articolo vero** a 320, 360, 390, 768 e 1440px: titolo, data, autore, sommario,
+corpo, navigazione e copertina tutti a **20px** dai due bordi in mobile e tablet, centrati a
+desktop, nessuno scorrimento orizzontale a nessuna larghezza. Il gutter è quello del sistema
+grafico (24px, 20px sotto gli 800px), sopra i 16px richiesti.
+
+### 2. L'agenda
+
+Una collection separata dagli articoli, perché un evento ha domande diverse — quando, dove, si
+ripete? — e perché **un articolo invecchia mentre un appuntamento scade**.
+
+**Due forme di appuntamento.** Datato, con `inizio` e magari `fine`; oppure ricorrente, con
+un'etichetta scritta a mano (`Ogni mercoledì · dalle 19`). Uno dei due deve esserci.
+
+**Il sito non calcola la prossima occorrenza di un ricorrente**, e non è una mancanza: si
+costruisce una volta e poi sta fermo finché qualcuno non pubblica. Una data calcolata resterebbe
+quella del giorno della build, e mercoledì prossimo sarebbe sbagliata senza che nessuno se ne
+accorga. L'etichetta è vera sempre.
+
+**Il fuso.** `new Date('2026-10-04T19:00')` interpreta la stringa nel fuso di chi esegue il
+codice. La build gira su Cloudflare, dove il fuso è UTC: le 19:00 di Milano sarebbero diventate le
+21:00 d'estate e le 20:00 d'inverno — e la stessa build fatta su un portatile a Milano avrebbe
+dato 19:00. Cioè l'ora di un evento sarebbe dipesa da dove è stato costruito il sito, che è il
+tipo di difetto che si scopre il giorno dell'appuntamento.
+
+In `src/lib/eventi.ts` la stringa non finisce mai nel costruttore di `Date`: si spezza, e i pezzi
+restano numeri. Per stampare si usano quei numeri; per `<time datetime>` si aggiunge l'offset di
+Roma **calcolato per quel giorno** — non è una costante, l'ora legale cambia due volte l'anno. Il
+giorno della settimana si ricava con l'algoritmo di Sakamoto, che lavora sul calendario e non su
+un istante. Risultato in pagina: `datetime="2026-10-04T19:00:00+02:00"` e «domenica 4 ottobre
+2026», corretti a prescindere da dove gira la build.
+
+Una cosa scoperta strada facendo: **YAML converte da sé `2026-10-03` in una data** se non è fra
+virgolette, e il CMS serializza da solo. Lo schema accetta quindi anche una `Date` e la rilegge
+**in UTC** — lo stesso fuso con cui il parser l'ha costruita non trovandone uno indicato: andata e
+ritorno senza perdite, si torna alla stringa che era nel file.
+
+**Prossimi e passati.** La divisione è calcolata alla build, e questo è un limite reale di un sito
+statico: se nessuno pubblica per un mese, un appuntamento finito resterebbe dalla parte sbagliata.
+Le pagine la rivalutano nel browser, dove la data di oggi è quella vera: le schede scadute
+scivolano nell'archivio in `/agenda/`, e in home spariscono. Senza JavaScript resta la divisione
+della build — completa e leggibile, solo meno aggiornata.
+
+**Il 404 degli eventi non è una seconda implementazione.** La protezione introdotta ieri per
+`/blog/` è stata generalizzata in `functions/_lib/sezione.ts`, e i due middleware sono quattro
+righe che passano il nome della sezione. Due implementazioni separate divergono: una viene
+corretta e l'altra no, e il difetto torna solo su una — il modo peggiore, perché sembra risolto.
+Il generatore degli slug ora scrive un elenco per sezione, sempre leggendo `dist/`.
+
+### 3. Direzione visiva
+
+La data è trattata come un oggetto grafico: rettangolo nero, giorno della settimana in giallo
+sopra, numero grande, mese sotto. È il segno che distingue un appuntamento da un articolo prima di
+aver letto una parola, e costa **una sola forma**.
+
+Il giallo compare in un posto solo — l'etichetta degli appuntamenti che si ripetono — sempre con
+testo nero (14,47:1).
+
+**Le locandine si vedono intere, non ritagliate.** Erano in un quadrato con `object-fit: cover`, e
+di una locandina verticale si perdeva metà: in un manifesto il titolo, l'ora e l'indirizzo stanno
+dentro la composizione. Tolto l'`aspect-ratio` imposto, l'immagine tiene la sua forma. È anche il
+motivo per cui intorno non c'è nessuna decorazione: sono già molto cariche.
+
+Contrasti misurati in pagina: giorno della settimana 14,47 · numero e mese 21 · ora 8,86 · luogo
+4,95 · sommario 8,86 · titolo 21 · etichetta ricorrenza 14,47. Focus da tastiera: contorno nero
+3px con scostamento 2px, `:focus-visible` attivo. Le locandine hanno `tabindex="-1"` e
+`aria-hidden`, così chi naviga da tastiera non passa due volte sullo stesso link.
+
+### 4. Contenuti importati, e cosa manca
+
+| Evento | Cosa c'è | Cosa manca |
+|---|---|---|
+| Manifestazione data center, Rho | sabato 3 ottobre 2026, testo integrale, luogo generico | **l'ora** e **il punto di ritrovo**: non sono nel testo né nella locandina |
+| Serata benefit con Kenobit | ore 19, Circolo Anarchico Ponte della Ghisolfa, viale Monza 255, attività dalla locandina | **la data è in conflitto** — vedi sotto |
+| Assemblea e workshop del mercoledì | titolo e ricorrenza, ricavati dal nome del file | **luogo** e **corpo**: il file di testo è vuoto e non è stato inventato niente |
+
+Del testo di Rho sono stati corretti solo due refusi — «alla porte di Milano» → «alle porte», e la
+citazione finale che restava aperta — e le virgolette uniformate a quelle italiane. Nessuna
+dichiarazione, attribuzione o cifra è stata toccata. Da sapere: il testo chiama la manifestazione
+«Data center, fermarli è possibile!» mentre la locandina scrive «Data center: fermarli si può!».
+Il titolo pubblicato è quello dato dal committente.
+
+**La data della serata Kenobit non torna.** Il testo e il nome del file dicono **4 ottobre 2026**,
+che è una **domenica**. La locandina dice **«MERCOLEDÌ 14 OTTOBRE»**, e il 14 ottobre 2026 è
+davvero un mercoledì: la locandina è coerente con se stessa. Pubblicato il 4 ottobre come indicato
+dal committente, **da confermare prima di portarlo in produzione**: se fosse il 14, sono dieci
+giorni di differenza su un appuntamento pubblico.
+
+Le tre immagini sono state ridotte a 1200 px di lato (1000 per la più pesante), con WebP e JPEG
+affiancati: 736 KB in tutto per sei file. Gli originali restano fuori dal repository.

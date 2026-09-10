@@ -194,6 +194,48 @@ file di lavoro.
 
 ---
 
+## 5.1 L'agenda
+
+Nel CMS c'è una seconda raccolta, **Agenda**: gli appuntamenti. Funziona come gli articoli — bozza
+accesa finché non si pubblica, copertina obbligatoria con la sua descrizione — con tre campi in
+più che vale la pena capire.
+
+**Inizio** è il giorno e l'ora. Si scrive nell'ora italiana e resta quella: il sito non la
+converte, non la sposta e non la riscrive. Se metti le 19:00, in pagina si legge 19:00 anche se
+la build è girata su un server americano.
+
+**Si ripete** è per gli appuntamenti che tornano ogni settimana. Si scrive a mano, per esteso:
+`Ogni mercoledì · dalle 19`. Un evento ha «Inizio» **oppure** «Si ripete» — uno dei due deve
+esserci, altrimenti non dice quando succede e il sito rifiuta di costruirlo.
+
+> **Il sito non calcola la prossima data di un appuntamento ricorrente**, ed è una scelta. Un
+> sito statico si costruisce una volta e poi sta fermo finché qualcuno non pubblica: una data
+> calcolata resterebbe quella del giorno della build, e mercoledì prossimo sarebbe sbagliata
+> senza che nessuno se ne accorga. L'etichetta scritta a mano è vera sempre.
+
+**Fine** serve solo se l'ora di chiusura è un'informazione utile. Quasi mai lo è.
+
+### Dove finiscono gli eventi
+
+- in `/agenda/`, divisi in *prossimi appuntamenti*, *ogni settimana* e *già passati*;
+- in home, al massimo i **primi tre**, con il link a tutta l'agenda;
+- ognuno ha la sua pagina, `/agenda/<slug>/`.
+
+Un appuntamento che passa scivola nell'archivio da solo, senza che nessuno debba toccarlo: la
+pagina se ne accorge nel browser, dove la data di oggi è quella vera.
+
+### Le locandine
+
+Si vedono **intere**, non ritagliate: in una locandina il titolo, l'ora e l'indirizzo stanno
+dentro la composizione, e un ritaglio quadrato ne butterebbe via metà. Caricale a 1200 pixel di
+lato al massimo, in WebP, con un JPEG dello stesso nome accanto se vuoi che si vedano bene
+quando qualcuno condivide il link.
+
+Il testo alternativo racconta **cosa si vede**, non ricopia tutto il testo del manifesto: chi usa
+un lettore di schermo ha già il titolo, la data e il luogo scritti sopra.
+
+---
+
 ## 6. Cosa succede dopo che salvi
 
 1. Il CMS fa un commit su `dev` con un messaggio del tipo `Articolo: aggiorna "…"`.

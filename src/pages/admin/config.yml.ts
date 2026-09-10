@@ -67,6 +67,9 @@ backend:
     uploadMedia: 'Media: aggiunge {{path}}'
     deleteMedia: 'Media: rimuove {{path}}'
 
+# Ogni collection dichiara la propria cartella di immagini (vedi piu' sotto):
+# gli articoli in public/images/articoli, gli eventi in public/images/agenda.
+# Le due chiavi qui restano come valore di ripiego.
 media_folder: public/images/articoli
 public_folder: /images/articoli
 
@@ -166,6 +169,153 @@ collections:
           testo. Serve per aggiungere un contesto senza toccare il testo di
           qualcun altro: per esempio dire che una cosa annunciata nell'articolo
           non e' ancora disponibile.
+
+  - name: eventi
+    label: Agenda
+    label_singular: Evento
+    description: >-
+      Appuntamenti: assemblee, manifestazioni, workshop, serate. Come per gli
+      articoli, finche' "Bozza" e' attivo l'evento non esiste per chi visita il
+      sito. Un appuntamento con una data finisce in ordine cronologico e a un
+      certo punto passa nell'archivio; uno che si ripete si descrive con
+      l'etichetta "Si ripete" e resta sempre valido.
+    folder: src/content/eventi
+    create: true
+    slug: '{{slug}}'
+    extension: md
+    format: frontmatter
+    media_folder: ../../../public/images/agenda
+    public_folder: /images/agenda
+    sortable_fields: ['inizio', 'title']
+    view_filters:
+      - label: Solo bozze
+        field: bozza
+        pattern: true
+      - label: Solo pubblicati
+        field: bozza
+        pattern: false
+    fields:
+      - label: Titolo
+        name: title
+        widget: string
+        hint: Come apparira' nell'agenda, in home e nella scheda condivisa sui social.
+
+      - label: Bozza
+        name: bozza
+        widget: boolean
+        default: true
+        hint: >-
+          Acceso, l'evento non compare da nessuna parte: ne' in agenda, ne' in
+          home, ne' nella mappa del sito. Spegnerlo e' l'atto con cui si
+          pubblica.
+
+      - label: Sommario
+        name: excerpt
+        widget: text
+        hint: >-
+          Due o tre righe: cos'e' e perche' venire. Si legge nell'agenda, nel
+          richiamo in home e nell'anteprima quando qualcuno condivide il link.
+
+      - label: Inizio
+        name: inizio
+        widget: datetime
+        required: false
+        date_format: 'YYYY-MM-DD'
+        time_format: 'HH:mm'
+        format: 'YYYY-MM-DDTHH:mm'
+        picker_utc: false
+        hint: >-
+          Giorno e ora di inizio, nell'ora italiana. Lascialo vuoto solo per gli
+          appuntamenti che si ripetono, che vanno descritti nel campo "Si
+          ripete" qui sotto.
+
+      - label: Fine
+        name: fine
+        widget: datetime
+        required: false
+        date_format: 'YYYY-MM-DD'
+        time_format: 'HH:mm'
+        format: 'YYYY-MM-DDTHH:mm'
+        picker_utc: false
+        hint: Facoltativa. Serve solo se l'orario di chiusura e' un'informazione utile.
+
+      - label: Si ripete
+        name: ricorrenza
+        widget: string
+        required: false
+        hint: >-
+          Facoltativo, scritto a mano: per esempio "Ogni mercoledi' - dalle 19".
+          Il sito non calcola la prossima data da questa frase, la mostra cosi'
+          com'e': un sito statico non potrebbe tenerla aggiornata da se'.
+
+      - label: Luogo
+        name: luogo
+        widget: string
+        required: false
+        hint: Il nome del posto, se c'e'. Per esempio "Circolo Anarchico Ponte della Ghisolfa".
+
+      - label: Indirizzo
+        name: indirizzo
+        widget: string
+        required: false
+        hint: Via, numero e citta', se si sanno.
+
+      - label: Copertina
+        name: copertina
+        widget: object
+        required: true
+        collapsed: false
+        hint: >-
+          Ogni evento ha una copertina. Servono tutte e due le cose, l'immagine e
+          la descrizione: e' il modo per non pubblicare una locandina che una
+          parte delle persone non puo' leggere.
+        fields:
+          - label: Immagine
+            name: file
+            widget: image
+            required: true
+            hint: >-
+              Rimpiccioliscila prima di caricarla: 1200 pixel di lato bastano.
+              WebP per la pagina, e un JPEG con lo stesso nome accanto se vuoi
+              che si veda bene quando qualcuno condivide il link.
+
+          - label: Testo alternativo
+            name: alt
+            widget: string
+            required: true
+            hint: >-
+              Descrivi la copertina per chi non puo' vederla. Racconta cosa si
+              vede, non ricopiare tutto il testo della locandina.
+
+      - label: Corpo
+        name: body
+        widget: markdown
+        required: false
+        hint: >-
+          Il racconto dell'evento. Puo' restare vuoto: per un appuntamento
+          ricorrente spesso non c'e' niente da aggiungere oltre a quando e dove.
+
+      - label: Link esterno
+        name: linkEsterno
+        widget: object
+        required: false
+        collapsed: false
+        hint: >-
+          Facoltativo. Se lo aggiungi servono tutte e due le parti: un indirizzo
+          senza etichetta diventa un "clicca qui", e un'etichetta senza
+          indirizzo non porta da nessuna parte.
+        fields:
+          - label: Indirizzo
+            name: url
+            widget: string
+            required: true
+            hint: Completo, con https://
+
+          - label: Etichetta
+            name: etichetta
+            widget: string
+            required: true
+            hint: Cosa ci si trova, per esempio "L'evento su Mastodon".
 `;
 
   return new Response(yaml, {

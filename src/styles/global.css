@@ -20,6 +20,33 @@ body {
   padding: 0 24px;
 }
 
+/* Pagine di testo: articolo, elenco del blog, informativa, pagina di errore.
+   Mettono il proprio respiro sopra e sotto **senza toccare il gutter laterale**
+   della .container, e qui sta il motivo per cui questa classe esiste.
+
+   IL DIFETTO CHE HA CORRETTO, misurato il 09/09/2026 sul dominio pubblico a
+   360px: titolo, data, autore, sommario, corpo e navigazione dell'articolo
+   avevano `left: 0` e larghezza uguale al viewport, cioe' erano attaccati al
+   bordo. La causa non era una regola mancante: era
+   `<main class="container" style="padding: 48px 0 90px">`. Uno stile inline
+   batte qualunque regola di classe, e quella scorciatoia dichiara anche
+   `padding-left: 0` e `padding-right: 0` — quindi azzerava il gutter che
+   .container forniva. Su desktop non si vedeva perche' `.articolo` ha
+   `max-width: 72ch` e centra; a 360px 72ch e' piu' larga dello schermo, e il
+   testo arrivava al bordo.
+
+   Regola pratica: sulle pagine si usa questa classe, o al massimo
+   `padding-block` inline. Mai la scorciatoia `padding`, che porta con se' i due
+   lati. */
+.pagina-testo {
+  padding-block: 60px 90px;
+}
+@media (max-width: 800px) {
+  .pagina-testo {
+    padding-block: 32px 64px;
+  }
+}
+
 /* header sticky */
 .site-header {
   position: sticky;
@@ -1083,4 +1110,258 @@ main[tabindex='-1']:focus-visible {
 .form-error a.link:hover {
   color: var(--nero);
   text-decoration-thickness: 2px;
+}
+
+/* ============================================================================
+   AGENDA
+   Le locandine degli eventi sono immagini molto cariche: qui intorno serve
+   silenzio, non altre decorazioni. Il solo segno grafico e' la data, trattata
+   come un blocco tipografico — numero grande, mese sotto, giorno della
+   settimana sopra — perche' e' quello che distingue un appuntamento da un
+   articolo prima di aver letto una parola.
+   Il giallo compare in un posto solo, sull'etichetta degli appuntamenti che si
+   ripetono, e sempre con testo nero (14,47:1).
+   ========================================================================= */
+
+.agenda-elenco {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 28px;
+}
+
+/* Scheda: locandina e testo affiancati, con un rapporto volutamente disuguale —
+   l'immagine non deve prendersi meta' della riga. Sotto gli 800px si impila. */
+.evento {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--bordo);
+}
+.agenda-elenco > li:last-child .evento {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+@media (max-width: 800px) {
+  .evento {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* La locandina si vede INTERA, non ritagliata in un quadrato.
+   Le copertine degli eventi sono manifesti: il titolo, l'ora, l'indirizzo e
+   spesso il senso stesso stanno nella composizione, e un ritaglio quadrato con
+   object-fit: cover ne butterebbe via meta'. Niente aspect-ratio imposto,
+   quindi: l'immagine tiene la sua forma e la scheda si adatta. */
+.evento-figura {
+  display: block;
+  border-radius: var(--raggio-m);
+  overflow: hidden;
+  background: var(--nero);
+  width: 100%;
+}
+.evento-figura img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+@media (max-width: 800px) {
+  /* Impilata, una locandina verticale a piena larghezza occuperebbe uno
+     schermo intero: si limita, restando centrata. */
+  .evento-figura {
+    max-width: 320px;
+  }
+}
+
+.evento-testo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* La data e l'ora stanno sulla stessa riga, allineate in basso: il numero e'
+   grande e l'ora gli sta accanto come una didascalia. */
+.evento-quando {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.evento-data {
+  display: grid;
+  grid-template-columns: auto;
+  justify-items: start;
+  background: var(--nero);
+  color: var(--bianco);
+  border-radius: var(--raggio-s);
+  padding: 8px 14px 10px;
+  line-height: 1;
+}
+.evento-giorno-settimana {
+  font-size: 0.7rem;
+  font-weight: var(--peso-medio);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--giallo);
+  margin-bottom: 6px;
+}
+.evento-numero {
+  font-size: 2.1rem;
+  font-weight: var(--peso-titolo);
+  letter-spacing: -0.02em;
+}
+.evento-mese {
+  font-size: 0.78rem;
+  font-weight: var(--peso-forte);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+.evento-ora {
+  font-size: 0.95rem;
+  font-weight: var(--peso-medio);
+  color: var(--nero-secondario);
+  padding-bottom: 4px;
+}
+
+/* Appuntamento che si ripete: nessun numero da mostrare, l'etichetta e' il
+   dato. Fondo giallo, testo nero, forma a pastiglia per distinguerla dal
+   blocco-data dei datati. */
+.evento-ricorrenza {
+  align-self: flex-start;
+  background: var(--giallo);
+  color: var(--nero);
+  font-weight: var(--peso-forte);
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: var(--raggio-pill);
+}
+
+.evento-titolo {
+  font-size: 1.35rem;
+  font-weight: var(--peso-titolo);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+}
+.evento-titolo a {
+  color: var(--nero);
+  text-decoration: none;
+}
+.evento-titolo a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--rosa);
+}
+
+.evento-luogo {
+  font-size: 0.95rem;
+  font-weight: var(--peso-medio);
+  color: var(--verde);
+  overflow-wrap: break-word;
+}
+
+.evento-sommario {
+  color: var(--nero-secondario);
+  max-width: 62ch;
+  overflow-wrap: break-word;
+}
+
+/* Titoletti dei gruppi dell'agenda. */
+.agenda-gruppo {
+  margin-top: 56px;
+}
+.agenda-gruppo:first-of-type { margin-top: 0; }
+.agenda-gruppo-titolo {
+  font-size: 1.1rem;
+  font-weight: var(--peso-forte);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-bottom: 10px;
+  margin-bottom: 24px;
+  border-bottom: 3px solid var(--rosa);
+}
+.agenda-vuoto {
+  color: var(--nero-secondario);
+}
+
+/* Pagina del singolo evento: la scheda dei dati sta sopra il testo, e i dati
+   pratici — quando, dove — vengono prima di tutto il resto. */
+.evento-intestazione {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 24px;
+  margin-bottom: 20px;
+}
+/* I dati pratici dell'appuntamento: quando, dove, indirizzo.
+
+   Fondo NERO con etichette gialle, non il giallo diluito che usava prima. Due
+   motivi, e nessuno dei due e' estetico:
+
+   1. quel giallo al 22% su bianco diventa un sabbia (#FDF6D7) che nella palette
+      non c'e'. La palette e' cinque colori — bianco, nero, rosa, verde, giallo —
+      e il giallo il manuale lo vuole "solo come fondo con testo nero", pieno,
+      non annacquato;
+   2. il nero con il giorno in giallo e' gia' il linguaggio del blocco-data nelle
+      schede dell'agenda. Ritrovarlo qui lega l'elenco alla pagina invece di
+      introdurre una terza superficie.
+
+   Contrasti: bianco su nero 21:1, giallo su nero 14,47:1.
+   La classe `sezione-scura` nell'HTML porta il token del focus a giallo — sul
+   nero un contorno nero sparirebbe. */
+.evento-dati {
+  list-style: none;
+  padding: 20px 22px;
+  margin: 0 0 28px;
+  background: var(--nero);
+  color: var(--bianco);
+  border-radius: var(--raggio-m);
+  display: grid;
+  gap: 8px;
+  font-size: 0.98rem;
+}
+.evento-dati dt {
+  font-weight: var(--peso-forte);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--giallo);
+}
+.evento-dati dd {
+  margin: 0 0 10px;
+  overflow-wrap: break-word;
+}
+.evento-dati dd:last-child { margin-bottom: 0; }
+/* Il primo dato — quando — e' quello che si cerca per primo: pesa di piu'. */
+.evento-dati dd:first-of-type {
+  font-size: 1.12rem;
+  font-weight: var(--peso-medio);
+}
+.evento-dati a {
+  color: var(--giallo);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.evento-link-esterno {
+  margin-top: 28px;
+}
+
+/* Richiamo dell'agenda in home: stessa scheda, più compatta. */
+.agenda-home-azioni {
+  margin-top: 32px;
+}
+
+/* La locandina nella pagina dell'evento: intera, e non piu' larga di quanto
+   serva a leggerla. A piena larghezza una locandina verticale spingerebbe il
+   testo sotto la piega. */
+.evento-copertina {
+  max-width: 480px;
 }

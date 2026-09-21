@@ -5,7 +5,12 @@
 --
 -- Richiede l'estensione pg_cron abilitata sul progetto (Database → Extensions, o la riga
 -- sotto se il progetto lo consente da migration).
-create extension if not exists pg_cron with schema extensions;
+-- pg_cron si installa nello schema pg_catalog: il suo file di controllo lo
+-- impone, e su Supabase "with schema extensions" fallisce con "extension
+-- pg_cron must be installed in schema pg_catalog". Corretto il 21/09/2026,
+-- prima della prima esecuzione. Se il Cron e' gia' stato attivato dal pannello
+-- (Integrations -> Cron), questa riga non fa niente.
+create extension if not exists pg_cron with schema pg_catalog;
 
 select
   cron.schedule(

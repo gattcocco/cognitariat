@@ -1,0 +1,53 @@
+name: Supabase sveglia
+
+# Tiene sveglio il progetto Supabase finche' il tesseramento non e' aperto.
+#
+# Perche' serve. Sul piano gratuito Supabase mette in pausa i progetti che per
+# circa una settimana non ricevono richieste, e manda prima una mail di
+# preavviso. Finche' il sito non usa Supabase (iscrizioni chiuse), nessuna
+# richiesta arriva mai da li'. Quando il tesseramento sara' aperto il traffico
+# vero bastera', e questo workflow si potra' togliere.
+#
+# Cosa fa: due volte a settimana legge UNA riga di una tabella pubblica e
+# senza dati personali (privacy_versions: l'elenco delle versioni
+# dell'informativa), con la chiave pubblica del progetto. Non scrive niente e
+# non tocca nessun dato di persone.
+#
+# Cosa serve per funzionare, in Settings -> Secrets and variables -> Actions:
+#   SUPABASE_URL       https://<progetto>.supabase.co
+#   SUPABASE_ANON_KEY  la chiave "anon public" (Project Settings -> API)
+# Senza questi due valori il workflow si ferma con un avviso e non fallisce:
+# nessuna mail di errore finche' non e' configurato.
+#
+# ATTENZIONE: i workflow pianificati GitHub li esegue solo dal ramo predefinito
+# del repository (oggi `main`). Su qualunque altro ramo questo file non parte.
+
+on:
+  schedule:
+    - cron: '17 6 * * 1,4' # lunedi' e giovedi' alle 06:17 UTC
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  sveglia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Lettura innocua sul database
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::notice::SUPABASE_URL o SUPABASE_ANON_KEY non configurati: niente da fare."
+            exit 0
+          fi
+          # Si stampa solo il codice HTTP, non il contenuto della risposta. Un
+          # codice diverso da 200 fa fallire il job, cosi' GitHub avvisa.
+          codice=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 \
+            "$SUPABASE_URL/rest/v1/privacy_versions?select=version&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          echo "Risposta di Supabase: HTTP $codice"
+          [ "$codice" = "200" ]

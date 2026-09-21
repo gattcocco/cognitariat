@@ -1,13 +1,22 @@
 ---
-// Navigazione riordinata secondo docs/copy-home-v2.md: le voci seguono l'ordine
-// editoriale e mettono per prime le cose che esistono.
-// Membership e Merch escono dal menu principale perche' non sono operativi
-// (le sezioni restano nella pagina, con acquisti disabilitati).
+// Menu minimale, cinque voci, deciso dal committente il 21/09/2026.
 //
-// Le ancore sono assolute ("/#lavoro", non "#lavoro"): l'intestazione compare
-// anche su /blog, /privacy e /account, dove un'ancora relativa non porta da
-// nessuna parte perche' quella sezione in pagina non c'e'. Prima da quelle
-// pagine meta' del menu non faceva niente.
+// Esce "Osservatorio": Resistenze AI al momento non riceve aggiornamenti, e una
+// voce di menu promette qualcosa di vivo. Escono anche le ancore alle sezioni
+// argomentative della home (Cosa succede, Il lavoro, Alternative, Cosa
+// facciamo): si raggiungono scorrendo, il menu tiene solo le destinazioni.
+//
+// - Chi siamo: il manifesto, cioe' il testo con cui COG U si presenta. E' un
+//   indirizzo di un articolo: se la redazione ne cambiasse lo slug dal CMS,
+//   questa voce porterebbe a un 404 e va aggiornata qui.
+// - AI news: il blog. Cambia solo l'etichetta nel menu; la pagina resta /blog/.
+// - Iscriviti: la sezione del tesseramento, che oggi dice apertamente che le
+//   iscrizioni non sono ancora aperte.
+// - Contatti: la sezione "Avvicinarsi", dove c'e' l'indirizzo per scriverci.
+//
+// Le ancore sono assolute ("/#membership", non "#membership"): l'intestazione
+// compare anche su /blog, /agenda, /privacy e /account, dove un'ancora
+// relativa non porterebbe da nessuna parte.
 ---
 <header class="site-header">
   <div class="container header-flex">
@@ -17,14 +26,11 @@
     </a>
     <nav class="main-nav" aria-label="Navigazione principale">
       <ul>
-        <li><a href="/#cosa-succede">Cosa succede</a></li>
-        <li><a href="/#lavoro">Il lavoro</a></li>
-        <li><a href="/#alternative">Alternative</a></li>
-        <li><a href="/#cosa-facciamo">Cosa facciamo</a></li>
+        <li><a href="/blog/manifesto-cognitario-contro-oligarchia-ai/">Chi siamo</a></li>
         <li><a href="/agenda/">Agenda</a></li>
-        <li><a href="/blog/">Blog</a></li>
-        <li><a href="https://gattcocco.github.io/mappa-e-contenuti/" target="_blank" rel="noopener">Osservatorio</a></li>
-        <li><a href="/#avvicinarsi">Scrivici</a></li>
+        <li><a href="/blog/">AI news</a></li>
+        <li><a href="/#membership">Iscriviti</a></li>
+        <li><a href="/#avvicinarsi">Contatti</a></li>
       </ul>
     </nav>
   </div>

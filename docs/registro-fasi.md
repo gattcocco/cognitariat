@@ -2016,3 +2016,39 @@ giorni di differenza su un appuntamento pubblico.
 
 Le tre immagini sono state ridotte a 1200 px di lato (1000 per la più pesante), con WebP e JPEG
 affiancati: 736 KB in tutto per sei file. Gli originali restano fuori dal repository.
+
+---
+
+## 21/09/2026 — Supabase: database preparato
+
+Su richiesta del committente, che riceveva le mail di preavviso di pausa del piano gratuito.
+La regola «non applicare migrazioni al database remoto» è superata da questa decisione: le
+istruzioni le ha eseguite il committente dall'editor SQL del pannello, non chi scrive il codice.
+
+**Progetto**: regione **Central EU (Frankfurt)**, cioè nell'Unione europea, come promette la
+sezione 6 dell'informativa v6. **Registrazioni chiuse** («Allow new users to sign up»
+disattivato): si riaprono con il tesseramento, insieme al captcha.
+
+**Cosa è stato trovato.** L'inventario ha mostrato che le migrazioni **0001–0006 erano già state
+eseguite** in passato: tabelle, funzioni e il job `cleanup-unconfirmed-users` c'erano. Mancavano
+0007 e 0008. Nessun utente registrato (`count(*) from auth.users` = 0).
+
+**Cosa è stato eseguito**: 0006 (di nuovo, senza effetti: `create or replace`), 0007, 0008.
+
+**Verificato dopo**, con una query di sola lettura:
+
+- 5 tabelle: `member_profiles`, `memberships`, `privacy_acceptances`, `privacy_versions`,
+  `stripe_events`;
+- **protezione RLS attiva su tutte e 5**;
+- `member_profiles` senza più `codice_fiscale`: restano `id`, `first_name`, `last_name`,
+  `created_at`;
+- 2 job pianificati: `cleanup-unconfirmed-users` e `scadenze-dati-iscritti`;
+- 6 versioni dell'informativa registrate, da `v1-2026-08-20` a `v6-2026-09-21`.
+
+**Correzione fatta prima dell'esecuzione**: in 0004 e 0008 `pg_cron` era installato «with schema
+extensions»; su Supabase va in `pg_catalog`. Il Cron era già attivo dal pannello, quindi la riga
+non ha avuto effetto, ma ora è giusta per un'installazione da zero.
+
+**Resta da fare**: il workflow `supabase-sveglia` (una lettura innocua due volte a settimana, per
+evitare la pausa) deve stare sul ramo predefinito `main` per partire, e richiede i secret
+`SUPABASE_URL` e `SUPABASE_ANON_KEY` su GitHub.

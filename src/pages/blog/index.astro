@@ -19,12 +19,11 @@ const bozze = articoli.filter((a) => a.data.bozza).length;
 ---
 <BaseLayout
   title="Blog — COG U"
-  description="Analisi, manifesti e casi documentati dall'osservatorio sul lavoro cognitivo e sulle infrastrutture dell'AI."
+  description="Analisi, manifesti e casi documentati da COG U sul lavoro cognitivo e sulle infrastrutture dell'AI."
 >
   <Header />
   <main id="contenuto" tabindex="-1" class="container pagina-testo">
     <div class="prosa">
-      <p class="occhiello">Osservatorio</p>
       <h1 class="section-title">Blog</h1>
       <p>
         Quello che scriviamo: analisi, posizioni, casi documentati. I dossier con le mappe e le
@@ -44,7 +43,7 @@ const bozze = articoli.filter((a) => a.data.bozza).length;
 
     {articoli.length === 0 ? (
       <p class="prosa" style="margin-top: 40px;">
-        Non abbiamo ancora pubblicato niente qui. Nel frattempo c'è l'osservatorio.
+        Non abbiamo ancora pubblicato niente qui. Nel frattempo ci sono i dossier di Resistenze AI.
       </p>
     ) : (
       <div class="griglia-articoli">

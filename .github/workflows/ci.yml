@@ -9,30 +9,35 @@ jobs:
   check-and-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # v5: la v4 gira su Node 20, che GitHub ha deprecato per le action.
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
 
       - run: npm ci
 
-      # Tipi: pagine e componenti Astro, piu' le Pages Functions.
-      - run: npm run check:all
-
-      - run: npm run build
-
-      # I font sono ospitati da noi e in sottoinsiemi ridotti: se un testo nuovo
-      # introduce un carattere fuori dagli unicode-range dichiarati, il browser
-      # tornerebbe in silenzio al font di sistema. Qui l'errore e' rumoroso.
-      - run: npm run check:glifi
-
-      # Nessuna pagina pubblica deve mostrare segnaposto di bozza, e nessun testo
-      # deve restare attaccato al link che segue (Astro toglie lo spazio prima di
-      # un a capo: e' successo sette volte, ora lo prende il controllo).
-      - run: npm run check:testi
-
-      # I tre checkout devono restare bloccati lato server finche' i pagamenti
-      # sono in pausa, senza nemmeno una chiamata di rete.
-      - run: npm run test:functions
+      # Un solo comando, lo stesso che si lancia in locale prima di ogni
+      # rilascio: build, tipi (pagine e Pages Functions), glifi, testi, CMS e
+      # test dei checkout. Tenere qui un elenco di passi a parte l'ha gia' fatto
+      # divergere una volta, ed e' cosi' che la CI e' rimasta rossa dal 9/09/2026
+      # senza che il sito avesse niente.
+      #
+      # L'ORDINE CONTA, ed e' il motivo del guasto di allora: il middleware di
+      # /blog/ e /agenda/ importa generato/slug-pagine.ts, un file che scrive la
+      # build (scripts/genera-slug.mjs) e che non sta in Git. Il controllo dei
+      # tipi delle Functions deve quindi venire DOPO la build. La vecchia CI lo
+      # faceva prima, e falliva su un modulo che non poteva ancora esistere.
+      # `verify` costruisce per primo.
+      #
+      # Cosa controlla, in breve:
+      # - glifi: i font sono ospitati da noi in sottoinsiemi; un carattere fuori
+      #   dagli unicode-range tornerebbe in silenzio al font di sistema.
+      # - testi: nessun segnaposto di bozza in pagina, nessun testo attaccato al
+      #   link che segue.
+      # - cms: la configurazione di Sveltia corrisponde alle raccolte del sito.
+      # - test delle Functions: i tre checkout restano bloccati lato server
+      #   finche' i pagamenti sono in pausa, senza nemmeno una chiamata di rete.
+      - run: npm run verify

@@ -6,7 +6,7 @@ import { glob } from 'astro/loaders';
 import { z } from 'zod';
 
 /**
- * Modello dei contenuti per gli articoli dell'osservatorio.
+ * Modello dei contenuti per gli articoli del blog.
  *
  * I nomi dei campi coincidono con quelli in /admin/config.yml, che e' l'altra
  * meta' dello stesso contratto: se cambia uno, va cambiato l'altro, altrimenti

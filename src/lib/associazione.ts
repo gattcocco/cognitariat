@@ -29,6 +29,16 @@ export const associazione = {
   /** Associazione sindacale non riconosciuta, artt. 36 ss. c.c. e art. 39 Cost. */
   formaGiuridica: 'associazione sindacale non riconosciuta, senza fini di lucro',
 
+  /**
+   * Forma giuridica come compare nel footer. Senza «non riconosciuta» su
+   * richiesta del committente (21/09/2026): in Italia tutte le organizzazioni
+   * sindacali operano come associazioni non riconosciute (artt. 36-38 c.c.),
+   * quindi la precisazione non distingue COG U da nessun'altra e letta di
+   * passaggio suona come una mancanza. La forma completa resta in
+   * formaGiuridica, per i contesti in cui serve l'esattezza giuridica.
+   */
+  formaBreve: 'associazione sindacale senza fini di lucro',
+
   /** Atto costitutivo del 12 luglio 2026, registrato all'Agenzia delle Entrate. */
   costituitaIl: '2026-07-12',
   costituitaIlTesto: '12 luglio 2026',

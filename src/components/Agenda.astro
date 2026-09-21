@@ -14,6 +14,23 @@ import { eventiPubblicati, raggruppa } from '../lib/eventi';
  * Se non c'è nessun appuntamento datato in arrivo, la sezione mostra quelli che
  * si ripetono; se non c'è proprio niente, non compare affatto — una sezione
  * «Agenda» vuota dice al lettore che l'associazione non fa niente.
+ *
+ * PERCHÉ UN CAROSELLO E NON UN ELENCO. Le locandine sono verticali: tre schede
+ * una sotto l'altra, sul telefono, facevano quasi tre schermate di scorrimento
+ * subito sotto la prima. Qui si vede un appuntamento alla volta e si passa al
+ * successivo di lato.
+ *
+ * COME È FATTO, e perché così e non come lo slideshow dell'Immaginario. Il
+ * nastro è un normale contenitore a scorrimento orizzontale con lo «scatto»
+ * (scroll-snap), non una fila spostata con transform. Tre conseguenze:
+ * - senza JavaScript funziona lo stesso: col dito si scorre, con la rotella o
+ *   i tasti anche;
+ * - chi naviga con il tabulatore e arriva al link di un appuntamento non
+ *   visibile se lo vede portare in vista dal browser; con transform il fuoco
+ *   finirebbe su qualcosa fuori dallo schermo;
+ * - pulsanti e pallini sono un'aggiunta: lo script li mostra solo se ci sono
+ *   almeno due appuntamenti, e solo se c'è JavaScript per farli funzionare.
+ *   Nessun pulsante morto nella pagina.
  */
 const tutti = await eventiPubblicati();
 const { prossimi, ricorrenti } = raggruppa(tutti);
@@ -28,11 +45,34 @@ const altri = prossimi.length + ricorrenti.length - daMostrare.length;
       <h2 class="section-title">Agenda</h2>
       <p class="section-sub">Dove ci si incontra nelle prossime settimane.</p>
 
-      <ul class="agenda-elenco" id="agenda-home">
-        {daMostrare.map((voce) => (
-          <li><CardEvento voce={voce} compatta /></li>
-        ))}
-      </ul>
+      <div
+        class="agenda-carosello"
+        role="region"
+        aria-roledescription="carosello"
+        aria-label="Prossimi appuntamenti"
+      >
+        <ul class="agenda-nastro" id="agenda-home">
+          {daMostrare.map((voce, i) => (
+            <li
+              class="agenda-slide"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} di ${daMostrare.length}`}
+            >
+              <CardEvento voce={voce} compatta />
+            </li>
+          ))}
+        </ul>
+
+        <div class="agenda-comandi" id="agenda-comandi" hidden>
+          <button class="agenda-freccia" type="button" data-agenda-prec aria-controls="agenda-home" aria-label="Appuntamento precedente">
+            <Icona nome="chevron-sinistra" />
+          </button>
+          <div class="agenda-pallini" id="agenda-pallini"></div>
+          <button class="agenda-freccia" type="button" data-agenda-succ aria-controls="agenda-home" aria-label="Appuntamento successivo">
+            <Icona nome="chevron-destra" />
+          </button>
+        </div>
+      </div>
 
       <p class="agenda-home-azioni">
         <a class="btn-outline" href="/agenda/">
@@ -45,26 +85,146 @@ const altri = prossimi.length + ricorrenti.length - daMostrare.length;
 
 <script>
   /**
-   * Toglie dalla home gli appuntamenti già finiti.
+   * 1. Toglie dalla home gli appuntamenti già finiti.
    *
    * Stesso motivo della pagina dell'agenda: la divisione fra prossimi e passati
    * è calcolata alla build, e la home resta ferma finché nessuno pubblica. Qui
-   * la scheda scaduta si nasconde e basta — l'archivio sta in /agenda/.
+   * la scheda scaduta esce dal nastro — l'archivio sta in /agenda/. Si toglie
+   * dal DOM e non si nasconde soltanto: una slide nascosta dentro il nastro
+   * sballerebbe il conto dei pallini e le etichette «2 di 3».
    *
    * Gli appuntamenti che si ripetono non hanno una data e non vengono toccati.
    */
-  const elenco = document.getElementById('agenda-home');
-  if (elenco) {
+  const nastro = document.getElementById('agenda-home');
+  if (nastro) {
     const adesso = Date.now();
-    for (const li of Array.from(elenco.children)) {
+    for (const li of Array.from(nastro.children)) {
       const scade = li.querySelector('[data-scade-il]')?.getAttribute('data-scade-il');
       if (!scade) continue;
       const t = Date.parse(scade);
-      if (!Number.isNaN(t) && t < adesso) (li as HTMLElement).hidden = true;
+      if (!Number.isNaN(t) && t < adesso) li.remove();
     }
-    // Se non resta niente da mostrare, la sezione intera esce di scena: meglio
-    // nessuna agenda che un'agenda vuota.
-    const restano = Array.from(elenco.children).some((li) => !(li as HTMLElement).hidden);
-    if (!restano) document.getElementById('agenda')?.setAttribute('hidden', '');
+
+    const slide = Array.from(nastro.children) as HTMLElement[];
+
+    if (slide.length === 0) {
+      // Meglio nessuna agenda che un'agenda vuota.
+      document.getElementById('agenda')?.setAttribute('hidden', '');
+    } else {
+      slide.forEach((li, i) => li.setAttribute('aria-label', `${i + 1} di ${slide.length}`));
+      if (slide.length > 1) avviaComandi(nastro, slide);
+    }
+  }
+
+  /**
+   * 2. Pulsanti e pallini.
+   *
+   * La posizione si legge dallo scorrimento vero del nastro, non da un contatore
+   * tenuto a parte: chi scorre col dito o col trackpad non passa dai pulsanti, e
+   * un contatore separato resterebbe indietro.
+   */
+  function avviaComandi(nastro: HTMLElement, slide: HTMLElement[]) {
+    const comandi = document.getElementById('agenda-comandi');
+    const pallini = document.getElementById('agenda-pallini');
+    const prec = document.querySelector<HTMLButtonElement>('[data-agenda-prec]');
+    const succ = document.querySelector<HTMLButtonElement>('[data-agenda-succ]');
+    if (!comandi || !pallini || !prec || !succ) return;
+
+    const movimentoRidotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const bottoni = slide.map((_, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'agenda-pallino';
+      b.setAttribute('aria-label', `Vai all'appuntamento ${i + 1} di ${slide.length}`);
+      b.setAttribute('aria-controls', 'agenda-home');
+      b.addEventListener('click', () => vai(i));
+      pallini.appendChild(b);
+      return b;
+    });
+
+    function attuale() {
+      // La slide il cui bordo sinistro è più vicino a quello del nastro.
+      // offsetLeft è misurato dal nastro perché il nastro è position: relative
+      // (vedi il CSS): senza, sarebbe misurato da un antenato qualsiasi.
+      const x = nastro.scrollLeft;
+      let migliore = 0;
+      let distanza = Infinity;
+      slide.forEach((li, i) => {
+        const d = Math.abs(li.offsetLeft - x);
+        if (d < distanza) { distanza = d; migliore = i; }
+      });
+      return migliore;
+    }
+
+    // Dove sta andando il nastro, finche' ci sta andando. Serve al doppio clic
+    // veloce: durante lo scorrimento animato la slide «attuale» e' ancora quella
+    // di partenza, e il secondo clic ripeterebbe il primo invece di avanzare.
+    //
+    // Il bersaglio scade da solo quando il nastro si ferma. Non basta
+    // azzerarlo all'arrivo: uno scorrimento animato si puo' interrompere in
+    // modi che lo script non vede tutti — la tastiera, il tabulatore che porta
+    // in vista un link di un'altra slide — e un bersaglio vecchio farebbe
+    // saltare il clic successivo nel posto sbagliato.
+    let bersaglio: number | null = null;
+    let scadenza = 0;
+    const scadiDopo = (ms: number) => {
+      clearTimeout(scadenza);
+      scadenza = window.setTimeout(() => { bersaglio = null; aggiorna(); }, ms);
+    };
+
+    function vai(i: number) {
+      const n = Math.max(0, Math.min(slide.length - 1, i));
+      bersaglio = n;
+      // Rete di sicurezza per il caso in cui lo scorrimento non parta affatto.
+      scadiDopo(1000);
+      nastro.scrollTo({
+        left: slide[n].offsetLeft,
+        behavior: movimentoRidotto ? 'auto' : 'smooth',
+      });
+    }
+
+    // Funzione freccia e non dichiarazione: una `function` viene sollevata in
+    // cima, e TypeScript non le applica il controllo su prec/succ fatto sopra.
+    const aggiorna = () => {
+      const i = attuale();
+      if (bersaglio === i) bersaglio = null;
+      bottoni.forEach((b, k) => {
+        if (k === i) b.setAttribute('aria-current', 'true');
+        else b.removeAttribute('aria-current');
+      });
+      // Ai capi del nastro la freccia si spegne invece di ricominciare dal
+      // primo: con tre appuntamenti in ordine di data, ripartire in silenzio
+      // dall'inizio farebbe credere che ce ne siano altri.
+      //
+      // aria-disabled e non disabled: un pulsante `disabled` perde il fuoco, e
+      // chi arriva all'ultimo appuntamento con la tastiera si ritroverebbe col
+      // fuoco sparito in cima alla pagina. Così resta dov'è; il clic a vuoto
+      // non fa niente perché vai() non esce dai capi.
+      prec.setAttribute('aria-disabled', String(i === 0));
+      succ.setAttribute('aria-disabled', String(i === slide.length - 1));
+    };
+
+    prec.addEventListener('click', () => vai((bersaglio ?? attuale()) - 1));
+    succ.addEventListener('click', () => vai((bersaglio ?? attuale()) + 1));
+
+    // Se chi legge prende il nastro col dito o con la rotella a meta' di uno
+    // scorrimento animato, il bersaglio non vale piu': decide il gesto.
+    const annullaBersaglio = () => { bersaglio = null; };
+    nastro.addEventListener('pointerdown', annullaBersaglio, { passive: true });
+    nastro.addEventListener('wheel', annullaBersaglio, { passive: true });
+
+    let inAttesa = 0;
+    nastro.addEventListener('scroll', () => {
+      cancelAnimationFrame(inAttesa);
+      inAttesa = requestAnimationFrame(aggiorna);
+      // Finche' arrivano eventi di scorrimento il nastro si sta muovendo; 150 ms
+      // di silenzio e si e' fermato.
+      if (bersaglio !== null) scadiDopo(150);
+    }, { passive: true });
+    window.addEventListener('resize', aggiorna);
+
+    comandi.hidden = false;
+    aggiorna();
   }
 </script>

@@ -75,11 +75,21 @@ for (const f of file) {
     }
   }
 
-  for (const m of html.matchAll(SPAZI)) {
+  // Gli spazi mangiati si cercano nel markup, non dentro script, stili e
+  // commenti. Uno script minificato e' pieno di sequenze come `a<i&&(i=a` che
+  // somigliano a un tag attaccato a una parola e non lo sono: e' successo col
+  // carosello dell'agenda, il 21/09/2026. Un falso allarme qui insegna a
+  // ignorare il controllo.
+  const markup = html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '<script></script>')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '<style></style>')
+    .replace(/<!--[\s\S]*?-->/g, '<!---->');
+
+  for (const m of markup.matchAll(SPAZI)) {
     problemi.push({
       file: nome,
       tipo: 'spazio mancante prima o dopo un elemento in linea',
-      brano: html.slice(Math.max(0, m.index - 34), m.index + 46).replace(/\s+/g, ' '),
+      brano: markup.slice(Math.max(0, m.index - 34), m.index + 46).replace(/\s+/g, ' '),
     });
   }
 }

@@ -1432,3 +1432,129 @@ main[tabindex='-1']:focus-visible {
   height: auto;
   margin-inline: auto;
 }
+
+/* ============================================================================
+   AGENDA IN HOME — carosello
+
+   Un appuntamento alla volta invece di tre in colonna: con locandine verticali
+   la colonna, sul telefono, erano quasi tre schermate di scorrimento subito
+   sotto la prima.
+
+   Il nastro e' un contenitore a scorrimento orizzontale con scroll-snap: si
+   scorre col dito anche senza JavaScript, e il browser porta in vista il link
+   su cui arriva il tabulatore. overflow-x: auto qui e' del nastro, non della
+   pagina: e' il componente a scorrere, come una tabella larga.
+   ========================================================================= */
+.agenda-nastro {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* offsetLeft delle slide misurato da qui: lo script lo usa. */
+  position: relative;
+  /* La barra di scorrimento non serve: ci sono i pulsanti, e sul telefono il
+     gesto. Resta lo scorrimento, sparisce solo la barra. */
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.agenda-nastro::-webkit-scrollbar { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .agenda-nastro { scroll-behavior: smooth; }
+}
+
+.agenda-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: start;
+  /* Un po' d'aria fra una slide e l'altra durante lo scorrimento, senza che la
+     successiva si affacci nel riquadro. */
+  padding-right: 2px;
+}
+
+/* Dentro il carosello la scheda non ha il separatore dell'elenco. */
+.agenda-slide .evento {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Locandina intera ma contenuta in altezza: il riquadro non deve diventare piu'
+   alto di uno schermo. La larghezza segue l'immagine, cosi' il fondo nero della
+   figura non lascia bande ai lati. */
+.agenda-slide .evento-figura {
+  width: fit-content;
+  max-width: 100%;
+}
+.agenda-slide .evento-figura img {
+  width: auto;
+  max-width: 100%;
+  max-height: 420px;
+}
+@media (max-width: 800px) {
+  .agenda-slide .evento-figura img { max-height: 300px; }
+}
+
+/* Comandi sotto il nastro, non sopra le locandine: le locandine sono gia'
+   piene di scritte, e una freccia sovrapposta ne coprirebbe una. */
+.agenda-comandi {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 24px;
+}
+.agenda-freccia {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--nero);
+  color: var(--bianco);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+/* Rosa con icona nera: 5,09:1. Con l'icona bianca sarebbe 4,13. */
+.agenda-freccia:hover { background: var(--rosa); color: var(--nero); }
+.agenda-freccia[aria-disabled="true"] {
+  background: var(--bianco);
+  color: var(--nero-secondario);
+  box-shadow: inset 0 0 0 2px var(--bordo-campo);
+  cursor: default;
+}
+
+.agenda-pallini {
+  display: flex;
+  gap: 4px;
+}
+/* Il pallino si vede piccolo, ma il bersaglio e' 24x24 (WCAG 2.5.8): un
+   bottone di 10px col pollice si sbaglia. Attivo e inattivi si distinguono per
+   forma e riempimento, non solo per colore: inattivo e' un anello, attivo e'
+   una pastiglia piena e piu' larga. */
+.agenda-pallino {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.agenda-pallino::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: var(--raggio-pill);
+  box-shadow: inset 0 0 0 2px var(--nero-secondario);
+  transition: width 0.2s;
+}
+.agenda-pallino[aria-current="true"]::before {
+  width: 22px;
+  background: var(--nero);
+  box-shadow: none;
+}

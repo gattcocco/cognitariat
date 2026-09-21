@@ -91,9 +91,11 @@ export const onRequestPost: PagesFunction<RuntimeEnv> = async (context) => {
   async function createSessionFor(claimToken: string): Promise<Response> {
     const priceId = priceIdForTier(env, tier);
 
-    // Nota: il codice fiscale (member_profiles.codice_fiscale) non viene letto né inviato
-    // qui di proposito — non deve mai raggiungere Stripe, salvo necessità verificata in
-    // seguito (vedi piano v3).
+    // A Stripe arrivano l'email (per la ricevuta), l'identificativo interno
+    // dell'account e la fascia: nient'altro. Nome e cognome restano nel nostro
+    // database. Il codice fiscale non si raccoglie piu' affatto: la colonna e'
+    // tolta dalla migration 0008. Qualunque dato nuovo mandato a Stripe va
+    // dichiarato prima nella sezione 6 di /privacy.
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       line_items: [{ price: priceId, quantity: 1 }],

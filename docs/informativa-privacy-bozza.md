@@ -1,5 +1,10 @@
 # Informativa privacy — la parte che riguarda tesseramento e pagamenti
 
+> **Superata il 21/09/2026.** Il testo di questa bozza è stato riscritto e integrato nella
+> sezione 6 di `/privacy` (informativa v6), con dati ridotti al minimo: niente codice fiscale,
+> niente consenso come condizione per iscriversi, scadenze applicate dal database. Questo file
+> resta come storia delle decisioni; il riferimento è la pagina.
+
 **L'informativa del sito è pubblicata**: `/privacy` è oggi un'informativa ex art. 13 GDPR sui
 trattamenti realmente attivi — visita del sito e log dell'hosting, video incorporati,
 corrispondenza, accesso della redazione — con titolare, finalità, basi giuridiche, destinatari,

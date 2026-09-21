@@ -86,6 +86,28 @@ scadenza che incombe.
 
 ## 3. Prima di riaprire tesseramento e pagamenti
 
+> **Aggiornamento 21/09/2026.** I termini qui sotto sono stati scritti nell'informativa **v6**
+> (sezione 6 di `/privacy`, per ora solo sulla preview `dev`) e sono applicati dal database con
+> la migration `supabase/migrations/0008_dati_minimi_e_scadenze.sql`, non ancora eseguita. Sono
+> una **proposta da deliberare**, scelta col criterio indicato dal committente: meno dati, per
+> meno tempo.
+>
+> | Dato | Termine proposto | Chi lo applica |
+> |---|---|---|
+> | Account non confermato | 48 ore | job `cleanup-unconfirmed-users` (0004) |
+> | Account confermato senza tessera pagata (anche iscrizione rifiutata e rimborsata) | 30 giorni dalla creazione | job `scadenze-dati-iscritti` (0008) |
+> | Iscritto: nome, cognome, email, tessera, pagamento, presa visione dell'informativa | durata dell'iscrizione + 12 mesi dalla scadenza | job `scadenze-dati-iscritti` (0008) |
+> | Eventi Stripe elaborati (identificativi tecnici) | 90 giorni | job `scadenze-dati-iscritti` (0008) |
+> | Cancellazione su richiesta | entro 30 giorni dalla richiesta | a mano, dall'indirizzo dell'associazione |
+> | Rendiconti Stripe per la contabilità | il tempo previsto dalla legge per i documenti contabili | fuori dal database |
+>
+> Il **codice fiscale** non si raccoglie più: la 0008 toglie la colonna.
+>
+> **Resta da chiedere al commercialista**: se per la contabilità di un'associazione come COG U
+> basta conservare i rendiconti di Stripe, o se serve anche un elenco nominativo delle quote.
+> Se serve, va tenuto fuori dal database delle iscrizioni, con solo nome, anno e importo, e va
+> scritto nella sezione 6.5 dell'informativa.
+
 Non serve adesso — non si raccoglie niente — ma è l'elenco che andrà riempito, e conviene sapere
 che esiste:
 

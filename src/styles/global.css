@@ -900,6 +900,22 @@ html.cogu-intro .hero-content > .btn-primary {
   margin-bottom: 0;
 }
 
+/* Titoli dentro un testo lungo (informativa, condizioni). Il reset globale
+   azzera i margini, e fino al 21/09/2026 i titoli di sezione dell'informativa
+   pubblicata stavano attaccati al paragrafo che segue: un titolo deve stare
+   piu' vicino a quello che introduce che a quello che chiude.
+   :not(.section-title) perche' i titoli di sezione della home sono anch'essi
+   figli di .prosa e hanno gia' la loro spaziatura. */
+.prosa > h2:not(.section-title) {
+  margin: 40px 0 12px;
+  line-height: 1.25;
+}
+.prosa > h3 {
+  font-size: 1.12rem;
+  margin: 28px 0 8px;
+  line-height: 1.3;
+}
+
 /* Occhiello: dice se la sezione descrive attivita' reali o progetti. */
 .occhiello {
   display: inline-block;

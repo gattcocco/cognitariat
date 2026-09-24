@@ -8,7 +8,7 @@ ricorrenza: ''
 luogo: Rho, alle porte di Milano
 indirizzo: ''
 copertina:
-  file: /images/agenda/manifestazione-data-center-rho.webp
+  file: /images/articoli/816928994_2121680208722577_4242575810946274060_n.jpg
   alt: "Locandina: foto notturna di un'assemblea pubblica all'aperto, decine di persone sedute in cerchio su sedie di plastica in un cortile, con un cane al centro. In alto la scritta «Bloccarli a Rho per bloccarli ovunque» e il titolo «Data center: fermarli si può!»; in basso «Sabato 03 ottobre — Manifestazione a Rho»."
 linkEsterno: null
 ---

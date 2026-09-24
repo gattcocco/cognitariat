@@ -1,6 +1,6 @@
 ---
 title: 'Sabato 3 ottobre h15, Stazione RHO: «Data center, fermarli è possibile!»'
-bozza: false
+bozza: true
 excerpt: Convocata per sabato 3 ottobre a Rho il primo corteo in italia che va davvero davanti ai luoghi dove si progettano o si costruiscono data center
 inizio: 2026-10-03T14:30
 fine: ''

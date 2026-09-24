@@ -8,7 +8,7 @@ ricorrenza: ''
 luogo: Piano Terra
 indirizzo: Via Federico Confalonieri, 1, 20124 Milano MI
 copertina:
-  file: /images/articoli/WhatsApp Image 2026-09-23 at 10.00.36 AM.jpeg
+  file: /images/articoli/83eb4d3d-69bc-4c3a-841c-366c5c02f448.jpg
   alt: collage pezzi di carta che formano il testo AI strappato
 linkEsterno: null
 ---

@@ -1,104 +1,119 @@
-# COG U — Sindacato del Cognitariato
+# COG U — Sindacato del lavoro cognitivo
 
-Sito web di COG U. Attualmente in fase di migrazione da HTML statico monolitico a un progetto Astro con gestione collaborativa dei contenuti.
+Sito di **COG U**, associazione sindacale senza fini di lucro, costituita il 12 luglio 2026.
+Online su **[cognitariatzone.org](https://cognitariatzone.org)**.
 
-## Stato del progetto
+Sito statico costruito con **Astro**, pubblicato su **Cloudflare Pages**. I contenuti —
+articoli e appuntamenti — si scrivono da un CMS che sta sul sito stesso, senza toccare il
+codice.
 
-- **v0 (attuale)**: singolo `index.html` statico, ospitato su GitHub Pages, dominio via GoDaddy.
-- **v1 (in corso)**: refactor in componenti Astro + CMS per gli articoli, in modo che i contenuti (non il codice) possano essere scritti da più persone senza toccare git.
+---
 
-## Stack tecnico
+## Le tre cose da sapere prima di toccare qualcosa
+
+1. **Il ramo di produzione è `feat/membership-v2-1`.** Non `main`. È quello che Cloudflare
+   costruisce e pubblica sul dominio, ed è anche quello su cui scrive il CMS.
+2. **`main` è storia**: contiene il sito precedente, fermo ad agosto 2026. Non lo costruisce
+   e non lo pubblica più nessuno — GitHub Pages è stato spento il 24/09/2026. Non va unito
+   a niente.
+3. **Prima di ogni rilascio si esegue `npm run verify`.** Se non passa, non si rilascia.
+
+## Come è fatto
 
 | Livello | Scelta |
 |---|---|
-| Framework | [Astro](https://astro.build) (static site generator) |
-| Contenuti articoli | Astro Content Collections (`src/content/articles`) |
-| Editor per non-sviluppatori | [Sveltia CMS](https://github.com/sveltia/sveltia-cms) montato su `/admin` |
-| Hosting | Cloudflare Pages |
-| Dominio | GoDaddy (DNS puntato su Cloudflare Pages) |
-| Font/icone | Google Fonts (Inter), Font Awesome via CDN — invariati dalla v0 |
-| Animazioni | anime.js via CDN (import ESM) — invariato dalla v0 |
+| Sito | [Astro](https://astro.build) 7, statico, senza adapter |
+| Contenuti | Astro Content Collections: `src/content/articles` e `src/content/eventi` |
+| Redazione | [Sveltia CMS](https://github.com/sveltia/sveltia-cms) su `/admin`, accesso con GitHub |
+| Server | Cloudflare Pages Functions, in `/functions` (nessun server nostro) |
+| Account e database | Supabase (regione UE) — pronto, iscrizioni ancora chiuse |
+| Pagamenti | Stripe — predisposti e **spenti**: i tre checkout rispondono 503 |
+| Caratteri e icone | ospitati da noi: niente CDN, nessuna terza parte nelle pagine pubbliche |
 
-**Perché Cloudflare Pages**: build più veloci di GitHub Actions, preview deploy automatico per ogni PR (utile per rivedere un articolo prima che vada online), e configurazione OAuth più semplice per il CMS. Il repo resta su GitHub: cambia solo dove viene "buildato e servito" il sito, non dove vive il codice.
+Le pagine pubbliche **non contattano nessun servizio di terzi**, non impostano cookie e non
+usano strumenti di statistica. È una promessa scritta nell'[informativa](https://cognitariatzone.org/privacy/)
+e verificata a ogni build (`npm run check:testi` segnala anche un'immagine presa da un altro sito).
 
-## Struttura repo (target)
-
-```
-src/
-  layouts/
-    BaseLayout.astro       # head, meta, OG, JSON-LD Schema.org, font
-  components/
-    Header.astro
-    Footer.astro
-    Hero.astro
-    ContractSupport.astro
-    Imaginarium.astro      # slideshow immagini
-    Legal.astro
-    Strike.astro
-    Advocacy.astro
-    Membership.astro
-    Merch.astro
-    OrganizerCta.astro
-  content/
-    config.ts              # schema Zod per la collection "articles"
-    articles/               # file .md/.mdx, scritti via CMS
-    authors.json
-  pages/
-    index.astro             # assembla i componenti sopra
-  styles/
-    global.css              # CSS globale, migrato 1:1 dalla v0
-public/
-  admin/
-    index.html
-    config.yml               # config Sveltia CMS
-```
-
-Le sezioni della homepage (hero, membership, merch, ecc.) restano **codice**, editato via GitHub da chi contribuisce a design/struttura. Solo gli **articoli** passano dal CMS — nella v0 non esiste ancora un blog reale, quindi la collection parte vuota e si popola quando qualcuno inizia a scrivere.
-
-## Setup locale
+## Lavorare al sito
 
 ```bash
 npm install
-npm run dev
+npm run dev      # http://localhost:4321
+npm run verify   # build + tipi + glifi + testi + CMS + test: da fare prima di ogni rilascio
 ```
 
-Il sito è visibile su `http://localhost:4321`.
+Serve **Node 22.12 o superiore**.
 
-## Piano di migrazione (checklist)
+### Rami e rilascio
 
-1. Init progetto Astro (`npm create astro@latest`)
-2. Estrazione di head/meta/Open Graph/JSON-LD dalla v0 in `BaseLayout.astro` — **nessuna modifica ai dati strutturati**, devono restare identici per non perdere indicizzazione
-3. Migrazione del CSS globale in `src/styles/global.css`, import nel layout
-4. Split delle sezioni della v0 in componenti Astro (una sezione = un componente)
-5. Migrazione degli script vanilla (smooth scroll, handler CTA, slideshow) nei componenti pertinenti
-6. Migrazione dell'intro animation (anime.js via CDN) — resta un `<script type="module">`
-7. Setup `src/content/config.ts` con schema `articles` (title, data, autore, excerpt, cover, body)
-8. Setup Sveltia CMS in `public/admin/config.yml` — backend `github`, `editorial_workflow: true` (bozza → PR → revisione → pubblicazione, nessuno scrive direttamente su `main`)
-9. Collegamento repo GitHub → Cloudflare Pages (build automatica ad ogni push)
-10. Aggiornamento DNS su GoDaddy: CNAME verso l'hostname fornito da Cloudflare Pages
-11. Verifica end-to-end: build pulita, preview deploy su una PR di prova, pubblicazione di un articolo test via CMS
-12. Verifica SEO post-migrazione: stessi URL, stesso markup meta/OG/JSON-LD della v0, redirect se qualche path cambia
+```
+dev  ──►  feat/membership-v2-1  ──►  cognitariatzone.org
+ │                │
+ │                └── il CMS scrive qui, e ogni salvataggio ricostruisce il sito
+ └── anteprima: dev.cognitariat.pages.dev
+```
 
-## Come contribuire
+Si lavora su `dev`, si guarda l'anteprima, poi si porta in produzione con un **merge normale**
+(niente rebase, niente force push, niente riscritture di cronologia). Dopo ogni tornata di
+lavoro conviene riportare in `dev` i contenuti che la redazione ha scritto in produzione.
 
-### Codice (componenti, grafica, struttura)
-- Branch da `main`, PR con descrizione chiara di cosa cambia
-- Revisione prima del merge
+### I controlli, e cosa hanno imparato a evitare
 
-### Contenuti (articoli)
-- Accesso a `/admin` via login GitHub (OAuth)
-- Flusso: bozza → anteprima (deploy preview) → revisione → pubblicazione
-- *Non ancora attivo in v0 — parte con il completamento della checklist sopra*
+`npm run verify` esegue, in quest'ordine: build, controllo dei tipi (pagine e Functions),
+glifi, testi, configurazione del CMS, test delle Functions. **L'ordine conta**: il controllo
+dei tipi deve venire dopo la build, perché il codice che protegge `/blog/` e `/agenda/` legge
+un file che genera la build.
+
+- **glifi**: i caratteri tipografici sono ospitati da noi in sottoinsiemi ridotti. Un carattere
+  fuori da quei sottoinsiemi tornerebbe in silenzio al font di sistema.
+- **testi**: nessun segnaposto di bozza in pagina, nessuna parola incollata al tag che segue,
+  nessuna immagine presa da un altro sito.
+- **test delle Functions**: i tre checkout devono restare chiusi finché i pagamenti sono in
+  pausa, senza nemmeno una chiamata di rete.
+
+## Per chi scrive sul sito
+
+Si entra da **[/admin](https://cognitariatzone.org/admin/)** con il proprio account GitHub, che
+deve avere accesso in scrittura al repository. Ogni salvataggio è un commit, e ogni commit
+ricostruisce il sito: passano un paio di minuti.
+
+Due regole che nascono da guasti veri:
+
+- **le immagini si caricano, non si incollano.** Un indirizzo di un'altra pagina web fa
+  arrivare l'IP di chi legge a quel sito;
+- **se una pubblicazione non compare, il problema non è il CMS.** Il salvataggio riesce sempre;
+  può fallire la costruzione successiva, e di quella dal CMS non arriva nessun segnale. Si
+  guarda l'esito su Cloudflare o nella scheda Actions di GitHub.
+
+La guida completa è in **[docs/redazione-cms.md](docs/redazione-cms.md)**.
+
+## Documentazione
+
+| File | Cosa contiene |
+|---|---|
+| [docs/redazione-cms.md](docs/redazione-cms.md) | come si pubblica, e cosa fare quando qualcosa non esce |
+| [docs/rilascio-e-ripristino.md](docs/rilascio-e-ripristino.md) | come si rilascia e come si torna indietro |
+| [docs/registro-fasi.md](docs/registro-fasi.md) | registro del lavoro: cosa è stato fatto, quando e perché |
+| [docs/guida-stripe.md](docs/guida-stripe.md) | dall'account Stripe al primo pagamento di prova |
+| [docs/conservazione-dati.md](docs/conservazione-dati.md) | per quanto si tengono i dati, e cosa resta da deliberare |
+| [docs/dati-associazione.md](docs/dati-associazione.md) | dati dell'ente e da dove risultano |
+| [docs/manuale-brand.md](docs/manuale-brand.md) | colori, caratteri, contrasti |
+| [docs/copy-home-v2.md](docs/copy-home-v2.md) | i testi della home e le regole che li governano |
+
+## Dati e segreti
+
+Nel repository **non entrano** chiavi, token, IBAN, documenti firmati né dati personali. Le
+variabili d'ambiente si impostano nel pannello di Cloudflare Pages; i modelli senza valori
+sono in `.env.example` e `.dev.vars.example`.
+
+Le istruzioni per il database stanno in `supabase/migrations/` e si eseguono a mano dal pannello
+Supabase: nessuno script del repository tocca il database remoto.
 
 ## Licenza
 
 - **Codice**: [MIT](LICENSE)
 - **Contenuti** (testi, articoli, manifesto): [CC BY-SA 4.0](LICENSE-CONTENT)
 
-> Nota: i file `LICENSE` e `LICENSE-CONTENT` vanno ancora aggiunti alla root del repo — questo README li referenzia in anticipo.
+## Contatti
 
-## Contatti e governance
-
-- Email: cognitariatz@proton.me
-- Assemblee periodiche — per partecipare, scrivere all'indirizzo sopra
-- Linee guida di governance più dettagliate in arrivo in un documento separato
+Email: **cognitariatz@proton.me** — per informazioni, per raccontare un caso, per collaborare.

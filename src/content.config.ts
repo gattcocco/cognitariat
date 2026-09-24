@@ -69,13 +69,15 @@ const articles = defineCollection({
      * istruzioni. Rimandare l'obbligo di due righe fa uscire il messaggio giusto in
      * tutti i casi.
      */
-    copertina: z
-      .object({
-        /** Percorso pubblico, es. /images/articoli/nome.webp */
-        file: z.string(),
-        alt: z.string(),
-      })
-      .optional(),
+    copertina: daCms(
+      z
+        .object({
+          /** Percorso pubblico, es. /images/articoli/nome.webp */
+          file: z.string(),
+          alt: z.string(),
+        })
+        .optional()
+    ),
 
     /**
      * Forma precedente, due campi affiancati. Restano dichiarati solo per
@@ -83,8 +85,8 @@ const articles = defineCollection({
      * perche' il CMS non conosce piu' questi due nomi e al primo salvataggio li
      * toglierebbe — cioe' farebbe sparire la copertina senza dirlo a nessuno.
      */
-    cover: z.string().optional(),
-    coverAlt: z.string().optional(),
+    cover: daCms(z.string().optional()),
+    coverAlt: daCms(z.string().optional()),
 
     /**
      * Nota della redazione, stampata in coda all'articolo dentro un riquadro che
@@ -94,7 +96,7 @@ const articles = defineCollection({
      * Aggiungere una nota non e' modificare il testo — ed e' esattamente per non
      * doverlo modificare che il campo esiste.
      */
-    notaRedazione: z.string().optional(),
+    notaRedazione: daCms(z.string().optional()),
 
     /** Fuori dagli elenchi pubblici, dalla home e dalla sitemap finche' e' true. */
     bozza: z.boolean().default(false),
@@ -187,6 +189,34 @@ const articles = defineCollection({
  * cosi' si torna esattamente alla stringa che era nel file, senza che il fuso
  * della macchina entri nel risultato.
  */
+/**
+ * Campo facoltativo compilato dal CMS.
+ *
+ * IL DIFETTO CHE QUESTA FUNZIONE ESISTE PER CHIUDERE, misurato il 24/09/2026.
+ * Quando nel CMS un campo facoltativo resta vuoto, Sveltia non lo omette: lo
+ * scrive come `linkEsterno: null`. Per YAML quello e' un valore, e per zod un
+ * valore `null` non e' un campo assente: `.optional()` non lo accetta. La build
+ * si fermava con un messaggio che non aiutava nessuno —
+ *
+ *   eventi -> deadhead-economics-and-concert: data does not match collection schema.
+ *     linkEsterno: Expected type "object", received "object"
+ *
+ * («received object» perche' in JavaScript `typeof null` e' `'object'`.)
+ *
+ * Il guaio vero non era il messaggio: era che **la build fallisce per intero**.
+ * Dal 23/09/2026 il sito pubblico e' rimasto fermo all'ultimo deployment
+ * riuscito, quindi non solo quell'evento non si vedeva, ma non si sarebbe visto
+ * piu' niente di nuovo — articoli compresi — finche' quel file restava com'era.
+ * La redazione dal CMS non ha modo di accorgersene: salva, il CMS dice che e'
+ * fatto, e il sito non cambia.
+ *
+ * Qui `null` viene trattato come «campo non compilato», che e' quello che la
+ * persona ha fatto davvero.
+ */
+function daCms<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess((v) => (v === null || v === undefined ? undefined : v), schema);
+}
+
 function momentoScritto() {
   const p = (n: number, l = 2) => String(n).padStart(l, '0');
   return z
@@ -234,42 +264,46 @@ const eventi = defineCollection({
      * trovandone uno: andata e ritorno senza perdere niente, e si torna alla
      * stringa che era scritta nel file.
      */
-    inizio: momentoScritto(),
+    inizio: daCms(momentoScritto()),
 
     /** Fine, stessa forma. Facoltativa: molti appuntamenti non hanno un'ora di chiusura. */
-    fine: momentoScritto(),
+    fine: daCms(momentoScritto()),
 
     /**
      * Etichetta della ricorrenza, scritta dalla redazione: «Ogni mercoledi' ·
      * dalle 19». E' testo, non una regola da interpretare — vedi sopra.
      */
-    ricorrenza: z.string().optional(),
+    ricorrenza: daCms(z.string().optional()),
 
     /** Nome del posto, se c'e'. */
-    luogo: z.string().optional(),
+    luogo: daCms(z.string().optional()),
 
     /** Indirizzo, se c'e'. Separato dal luogo perche' spesso si sa uno e non l'altro. */
-    indirizzo: z.string().optional(),
+    indirizzo: daCms(z.string().optional()),
 
     /** Come per gli articoli: obbligatoria, immagine e descrizione insieme. */
-    copertina: z
-      .object({
-        file: z.string(),
-        alt: z.string(),
-      })
-      .optional(),
+    copertina: daCms(
+      z
+        .object({
+          file: z.string(),
+          alt: z.string(),
+        })
+        .optional()
+    ),
 
     /**
      * Link esterno con la sua etichetta, entrambi o nessuno dei due: un
      * indirizzo senza etichetta diventa un «clicca qui», e un'etichetta senza
      * indirizzo non porta da nessuna parte.
      */
-    linkEsterno: z
-      .object({
-        url: z.url('Indirizzo non valido: serve un URL completo, con https://'),
-        etichetta: z.string(),
-      })
-      .optional(),
+    linkEsterno: daCms(
+      z
+        .object({
+          url: z.url('Indirizzo non valido: serve un URL completo, con https://'),
+          etichetta: z.string(),
+        })
+        .optional()
+    ),
 
     /** Fuori da home, agenda pubblica, pagine generate e sitemap finche' e' true. */
     bozza: z.boolean().default(false),

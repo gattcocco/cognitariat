@@ -52,6 +52,23 @@ export const associazione = {
   email: 'cognitariatz@proton.me',
 
   /**
+   * IBAN del conto dell'associazione, per le quote versate con bonifico.
+   *
+   * Fino al 24/09/2026 la regola di lavoro era di non scrivere nessun IBAN nel
+   * repository. Cambia per decisione del committente, e con una ragione: questo
+   * IBAN va pubblicato sul sito, quindi non e' un segreto — e' un recapito. Un
+   * IBAN permette di ricevere denaro, non di prelevarlo.
+   *
+   * Resta valida la regola per tutto il resto: chiavi, token e credenziali non
+   * entrano qui ne' in nessun altro file del repository.
+   *
+   * Senza spazi: e' la forma che ogni banca accetta, ed e' quella che il
+   * pulsante «Copia» mette negli appunti. Nelle pagine si mostra raggruppata a
+   * quattro cifre, che si legge meglio.
+   */
+  iban: 'IT17J0200832650000107470800',
+
+  /**
    * Sede legale: aggiornamento amministrativo pendente. Finche' e' vuota, sulle
    * pagine pubbliche non compare nessun indirizzo e nessuna nota che spieghi
    * perche'. Quando e' confermata si scrive qui, per intero.

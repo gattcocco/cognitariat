@@ -2052,3 +2052,41 @@ non ha avuto effetto, ma ora è giusta per un'installazione da zero.
 **Resta da fare**: il workflow `supabase-sveglia` (una lettura innocua due volte a settimana, per
 evitare la pausa) deve stare sul ramo predefinito `main` per partire, e richiede i secret
 `SUPABASE_URL` e `SUPABASE_ANON_KEY` su GitHub.
+
+---
+
+## 24/09/2026 — Tesseramento aperto per bonifico
+
+Deciso dal committente: l'IBAN dell'associazione va pubblicato e la quota si puo' versare con
+bonifico, mentre l'iscrizione online resta chiusa.
+
+**La regola che cambia.** Fino a oggi valeva «nessun IBAN nel repository». L'IBAN sta ora in
+`src/lib/associazione.ts` con il perche' scritto accanto: deve comparire sul sito, quindi non e'
+un segreto ma un recapito, e permette di ricevere denaro, non di prelevarlo. Per chiavi, token e
+credenziali la regola resta identica.
+
+**Home**: riquadro nero con etichetta gialla, come i dati degli eventi. Numero a gruppi di
+quattro per ricopiarlo a mano; il pulsante copia la forma senza spazi. Il pulsante e' nascosto
+nell'HTML e lo mostra lo script, cosi' senza JavaScript non appare invece di apparire e non
+funzionare. Due strade per copiare: `navigator.clipboard`, e in caso di permesso negato
+selezione + `execCommand`. Provato nel riquadro incorporato del browser, dove la prima strada
+viene negata: la seconda copia lo stesso.
+
+**Cosa e' stato allineato, perche' «tesseramento aperto» tocca piu' di una pagina:**
+
+- **informativa v7**: la sezione 6 non dice piu' che non si raccoglie niente. Nuovo punto 6.1
+  sul bonifico — cosa arriva (nome e cognome nella causale, quello che si scrive per email, la
+  contabile con nome e IBAN di chi paga), chi altro lo vede (le banche), basi giuridiche,
+  conservazione. La banca entra fra i destinatari. I punti dal 6.2 restano «quando aprira'
+  l'iscrizione online»;
+- **condizioni di pagamento**: non sono piu' un testo «per quando apriremo». Nuova sezione sul
+  bonifico con causale e tempi, rimborso rimandato sul conto di partenza;
+- **footer**: «Tesseramento e servizi online in preparazione» diventa «Iscrizione online in
+  preparazione: per ora la quota si versa con bonifico»;
+- **area riservata**: dice che serve a chi si iscrive online, e rimanda al tesseramento per il
+  bonifico;
+- **migration 0009**: registra la versione v7 fra quelle note al server. **Da eseguire prima di
+  riaprire le registrazioni online**: il trigger della 0007 rifiuta una versione che non conosce.
+
+**Resta da decidere**: se la quota versata con bonifico vada annotata in un elenco nominativo
+tenuto fuori dal database (domanda al commercialista, gia' aperta in docs/conservazione-dati.md).

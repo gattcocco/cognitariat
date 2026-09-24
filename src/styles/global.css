@@ -1460,7 +1460,40 @@ main[tabindex='-1']:focus-visible {
    scorre col dito anche senza JavaScript, e il browser porta in vista il link
    su cui arriva il tabulatore. overflow-x: auto qui e' del nastro, non della
    pagina: e' il componente a scorrere, come una tabella larga.
+
+   LA CORNICE, aggiunta il 24/09/2026. Senza, il carosello era bianco su
+   bianco: niente diceva dove cominciava e dove finiva, e soprattutto niente
+   diceva che li' dentro ci si scorre. Tre segni, tutti dentro un solo bordo:
+
+   1. il bordo nero chiude il carosello e lo separa dal resto della pagina;
+   2. la slide successiva si affaccia di qualche decina di pixel dal bordo
+      destro. E' il segno che dice "qui c'e' dell'altro, di lato" meglio di
+      qualunque freccia, e sul telefono e' l'unico che si capisce senza
+      leggere;
+   3. i comandi stanno dentro la cornice, staccati da una riga sottile: fanno
+      parte dell'oggetto, non della pagina.
+
+   Le schede sono centrate in verticale perche' le locandine hanno proporzioni
+   molto diverse — una foto orizzontale e un manifesto verticale nello stesso
+   nastro — e il nastro e' alto quanto la piu' alta. Allineate in cima, le
+   schede basse lasciavano sotto un vuoto che sembrava un difetto.
    ========================================================================= */
+.agenda-carosello {
+  border: 2px solid var(--nero);
+  border-radius: var(--raggio-l);
+  padding: 20px 20px 16px;
+  background: var(--bianco);
+  /* Il bordo arrotondato ritaglia l'affaccio della slide successiva: senza,
+     spunterebbe oltre l'angolo. */
+  overflow: hidden;
+}
+@media (max-width: 800px) {
+  .agenda-carosello {
+    padding: 14px 14px 12px;
+    border-radius: var(--raggio-m);
+  }
+}
+
 .agenda-nastro {
   list-style: none;
   padding: 0;
@@ -1481,12 +1514,22 @@ main[tabindex='-1']:focus-visible {
 }
 
 .agenda-slide {
-  flex: 0 0 100%;
+  /* Non 100%: la slide successiva deve affacciarsi. Quello spiraglio e'
+     l'affordance del carosello — dice che di lato c'e' dell'altro. */
+  flex: 0 0 calc(100% - 34px);
   min-width: 0;
   scroll-snap-align: start;
-  /* Un po' d'aria fra una slide e l'altra durante lo scorrimento, senza che la
-     successiva si affacci nel riquadro. */
-  padding-right: 2px;
+  padding-right: 18px;
+  /* Le schede si allineano al centro dell'altezza del nastro: vedi sopra. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+@media (max-width: 800px) {
+  .agenda-slide {
+    flex-basis: calc(100% - 26px);
+    padding-right: 14px;
+  }
 }
 
 /* Dentro il carosello la scheda non ha il separatore dell'elenco. */
@@ -1518,7 +1561,10 @@ main[tabindex='-1']:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  margin-top: 24px;
+  margin-top: 18px;
+  padding-top: 14px;
+  /* Riga sottile: i comandi appartengono al carosello, non alla pagina. */
+  border-top: 1px solid var(--bordo);
 }
 .agenda-freccia {
   width: 44px;

@@ -8,7 +8,7 @@ ricorrenza: ''
 luogo: Ponte dalla Ghisolfa
 indirizzo: Viale Monza 255, Milano
 copertina:
-  file: /images/agenda/deadhead-economics-and-concert.webp
+  file: images/agenda/pasted-image-1790235977091.png
   alt: Concerto psichedelico per il cognitariato
 linkEsterno: null
 ---

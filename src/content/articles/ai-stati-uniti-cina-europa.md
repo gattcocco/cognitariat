@@ -1,11 +1,11 @@
 ---
-title: 'Nella corsa all''AI: Stati Uniti, Cina e un''Europa in ritardo'
+title: "Nella corsa all'AI: Stati Uniti, Cina e un'Europa in ritardo"
 bozza: false
 date: 2026-09-24
 autore: Editoriale
 excerpt: Modelli chiusi contro pesi aperti, data center e chip. Come la competizione fra America e Cina ridisegna gli equilibri, e dove sta l'Europa.
 copertina:
-  file: /images/articoli/ai-stati-uniti-cina-europa.webp
+  file: /images/articoli/WhatsApp Image 2026-09-24 at 15.08.43.jpeg
   alt: 'Disegno in bianco e nero: una persona accigliata a braccia conserte, con capelli mossi e una camicia a pois.'
 notaRedazione: ''
 ---

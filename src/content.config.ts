@@ -214,7 +214,16 @@ const articles = defineCollection({
  * persona ha fatto davvero.
  */
 function daCms<T extends z.ZodTypeAny>(schema: T) {
-  return z.preprocess((v) => (v === null || v === undefined ? undefined : v), schema);
+  return z.preprocess((v) => {
+    if (v === null || v === undefined) return undefined;
+    // Stringa vuota: stesso significato del null, altra forma. Il 24/09/2026 un
+    // evento risalvato dal CMS senza toccare il campo «Fine» e' uscito con
+    // `fine: ''`, e la build si e' fermata su «Data non valida: ""». Vale per
+    // tutti i campi facoltativi: un campo non compilato e' un campo non
+    // compilato, comunque il CMS decida di scriverlo.
+    if (typeof v === 'string' && v.trim() === '') return undefined;
+    return v;
+  }, schema);
 }
 
 function momentoScritto() {

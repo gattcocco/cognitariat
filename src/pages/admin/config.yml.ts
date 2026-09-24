@@ -184,7 +184,11 @@ collections:
     slug: '{{slug}}'
     extension: md
     format: frontmatter
-    media_folder: ../../../public/images/agenda
+    # Percorso dalla radice del repository, non relativo al file dell'evento:
+    # con la forma relativa (../../../public/images/agenda) le locandine
+    # caricate dal CMS finivano fra le immagini degli articoli, insieme a
+    # quelle del blog. Verificato il 24/09/2026 su due eventi.
+    media_folder: /public/images/agenda
     public_folder: /images/agenda
     sortable_fields: ['inizio', 'title']
     view_filters:

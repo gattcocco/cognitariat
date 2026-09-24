@@ -46,4 +46,9 @@
 //
 // Le versioni note al server stanno in supabase/migrations/0007_consenso_privacy_esplicito.sql,
 // che NON è ancora applicata al database remoto: v3, v4 e v5 sono state aggiunte lì.
-export const PRIVACY_POLICY_VERSION = 'v5-2026-09-08';
+//
+// v6: la sezione 6 descrive tesseramento e pagamenti prima dell'apertura, con i
+// dati ridotti al minimo (nome, cognome, email; niente codice fiscale) e
+// scadenze applicate dal database. Registrata nella migration 0008, insieme
+// alla rimozione del codice fiscale e al job delle scadenze.
+export const PRIVACY_POLICY_VERSION = 'v6-2026-09-21';

@@ -35,6 +35,21 @@ const SEGNAPOSTO = [
  */
 const SPAZI = /[\p{L}\p{N},:;)»]<(?:a|strong|em|b|i|span|code)\b|<\/(?:a|strong|em|b|i|span|code)>[\p{L}\p{N}(«]/gu;
 
+/**
+ * Immagini prese da un altro sito.
+ *
+ * IL CASO CHE HA FATTO NASCERE QUESTO CONTROLLO, 24/09/2026: un evento salvato
+ * dal CMS aveva come copertina `https://picsum.photos/...` invece di un file
+ * nostro. Sarebbe passato inosservato — la pagina si vede benissimo — ma ogni
+ * persona che apriva l'agenda mandava il proprio indirizzo IP a quel sito,
+ * mentre l'informativa dichiara che il sito non contatta nessuna terza parte.
+ * Una promessa del genere non si puo' affidare all'attenzione di chi rilegge.
+ *
+ * La pagina del CMS (/admin) e' esclusa: li' l'editor arriva da una CDN, e chi
+ * ci entra e' la redazione, non chi legge il sito.
+ */
+const IMMAGINI_ESTERNE = /<(?:img|source)\b[^>]*\b(?:src|srcset)="(https?:)?\/\/[^"]+"/gi;
+
 function testoVisibile(html) {
   return html
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
@@ -85,6 +100,16 @@ for (const f of file) {
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '<style></style>')
     .replace(/<!--[\s\S]*?-->/g, '<!---->');
 
+  if (!nome.startsWith('admin')) {
+    for (const m of markup.matchAll(IMMAGINI_ESTERNE)) {
+      problemi.push({
+        file: nome,
+        tipo: 'immagine presa da un altro sito',
+        brano: m[0].slice(0, 110),
+      });
+    }
+  }
+
   for (const m of markup.matchAll(SPAZI)) {
     problemi.push({
       file: nome,
@@ -105,6 +130,8 @@ for (const p of problemi) {
 }
 console.error(
   '\nGli spazi mangiati si risolvono nel sorgente con {\' \'} in fondo alla riga di testo.\n' +
-    'I segnaposto vanno completati o tolti: una pagina pubblica non deve mostrare una bozza.'
+      'I segnaposto vanno completati o tolti: una pagina pubblica non deve mostrare una bozza.\n' +
+    'Le immagini vanno caricate dal CMS, non incollate come indirizzo: un\'immagine ospitata\n' +
+    'altrove fa arrivare l\'IP di chi legge a quel sito, e l\'informativa dice che non succede.'
 );
 process.exit(1);

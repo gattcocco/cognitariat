@@ -23,6 +23,7 @@ export const GET: APIRoute = async ({ site }) => {
     { percorso: '/blog/', priorita: '0.8', frequenza: 'weekly' },
     { percorso: '/agenda/', priorita: '0.8', frequenza: 'weekly' },
     { percorso: '/privacy/', priorita: '0.3', frequenza: 'yearly' },
+    { percorso: '/condizioni/', priorita: '0.3', frequenza: 'yearly' },
   ];
 
   const articoli = await articoliPubblicati();

@@ -7,8 +7,14 @@ import { associazione, haSede, haPec } from '../lib/associazione';
 
 /**
  * Informativa ai sensi dell'art. 13 GDPR, scritta sui trattamenti che il sito
- * fa davvero adesso — non su quelli che farà quando apriranno tesseramento e
- * pagamenti.
+ * fa davvero adesso.
+ *
+ * v6 (21/09/2026): la sezione 6 descrive tesseramento e pagamenti PRIMA che
+ * aprano, come la pagina aveva promesso. Principio chiesto dal committente:
+ * chiedere meno dati possibile e tenerli il meno possibile. Ogni scadenza
+ * dichiarata nella sezione 6 e' applicata dal database
+ * (supabase/migrations/0008_dati_minimi_e_scadenze.sql), non dalla memoria di
+ * qualcuno. Se si cambia una scadenza qui, si cambia anche la', e viceversa.
  *
  * Quello che c'è scritto è stato verificato sul sito costruito e sul sito
  * online, non dedotto dal codice: nessun cookie impostato da noi, niente scritto
@@ -79,7 +85,9 @@ const versione = PRIVACY_POLICY_VERSION;
         Il sito è statico: pagine, caratteri tipografici e icone arrivano dal nostro dominio, senza
         passare da servizi di terzi. <strong>Non usiamo strumenti di statistica, non profiliamo chi
         legge, non impostiamo cookie e non scriviamo niente nella memoria del tuo browser</strong>
-        — è stato verificato sul sito online, non solo nel codice.
+        — è stato verificato sul sito online, non solo nel codice. L'unica eccezione, quando il
+        tesseramento sarà aperto, riguarderà chi entra nell'area riservata: è descritta nella
+        sezione 6.
       </p>
       <p>
         Resta quello che fa qualunque server quando gli chiedi una pagina: il nostro hosting,{' '}
@@ -220,16 +228,138 @@ const versione = PRIVACY_POLICY_VERSION;
         </li>
       </ul>
 
-      <h2>6. Tesseramento e pagamenti</h2>
+      <h2 id="tesseramento-e-pagamenti">6. Tesseramento e pagamenti</h2>
       <p>
-        Il sito contiene le pagine del tesseramento e del merchandising, ma <strong>sono
-        disattivate</strong>: non c'è nessun modulo da compilare, non si raccolgono adesioni e non
-        si incassa niente. Le richieste di pagamento vengono rifiutate dal server prima di
-        raggiungere qualunque fornitore. Nessun dato viene raccolto per queste vie.
+        <strong>Oggi il tesseramento e i pagamenti non sono aperti</strong>: non raccogliamo
+        adesioni e il server rifiuta ogni richiesta di pagamento prima che arrivi a un fornitore.
+        Quello che segue descrive come funzioneranno dall'apertura. Lo scriviamo adesso perché va
+        letto prima, non dopo.
       </p>
       <p>
-        Quando apriranno, i trattamenti relativi — dati di iscrizione, quota, fornitore dei
-        pagamenti — saranno descritti qui <strong>prima</strong> che il primo dato venga raccolto.
+        Il principio è uno: <strong>ti chiediamo solo quello che serve, e lo teniamo solo finché
+        serve</strong>. Le scadenze qui sotto le applica il database da solo, ogni giorno: non
+        dipendono dalla memoria di nessuno.
+      </p>
+
+      <h3>6.1 Iscriverti</h3>
+      <p>
+        Ti chiediamo tre cose: <strong>nome, cognome e indirizzo email</strong>. Nient'altro: non
+        il codice fiscale, non l'indirizzo di casa, non il telefono, non la data di nascita, non
+        il tuo datore di lavoro. La fascia di quota la scegli tu: non ti chiediamo di dimostrare
+        di essere studente o senza lavoro.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Perché</strong>: nome e cognome servono a sapere chi fa parte
+          dell'associazione, per le assemblee e per il voto. L'email serve a entrare nell'area
+          riservata e a ricevere le comunicazioni che riguardano la tua iscrizione.
+        </li>
+        <li>
+          <strong>Un dato delicato</strong>: essere iscritta o iscritto a COG U rivela
+          l'appartenenza a un sindacato, che il Regolamento tratta come categoria particolare di
+          dati (art. 9). Lo trattiamo in quanto associazione sindacale, e solo per i nostri
+          iscritti (art. 9.2.d), e <strong>non lo comunichiamo a nessuno fuori
+          dall'associazione</strong> senza il tuo consenso. I fornitori elencati qui sotto lo
+          trattano per nostro conto, non per conto proprio, salvo quanto detto per Stripe.
+        </li>
+        <li>
+          <strong>Base giuridica</strong>: il rapporto associativo (art. 6.1.b), insieme
+          all'art. 9.2.d per l'appartenenza sindacale.
+        </li>
+        <li>
+          <strong>Conservazione</strong>: per tutta la durata dell'iscrizione e per{' '}
+          <strong>12 mesi dopo la scadenza</strong>, così puoi rinnovare senza ricominciare e
+          l'associazione può dimostrare chi era iscritto quando si è votato. Poi l'account si
+          cancella, con tutto quello che contiene. Se cominci l'iscrizione e non paghi, si
+          cancella dopo <strong>30 giorni</strong>; se non confermi l'email, dopo{' '}
+          <strong>48 ore</strong>.
+        </li>
+        <li>
+          <strong>Presa visione di questa informativa</strong>: registriamo la data e la
+          versione che hai letto, per dimostrare che ti è stata mostrata. Si conserva e si
+          cancella insieme all'account.
+        </li>
+      </ul>
+
+      <h3>6.2 Entrare nell'area riservata</h3>
+      <p>
+        Non c'è una password da ricordare: ricevi via email un link che vale una volta sola.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Supabase</strong> (Supabase Inc.) gestisce l'accesso e il database delle
+          iscrizioni per nostro conto, su server nell'Unione europea. È lo stesso servizio che ti
+          manda l'email con il link.
+        </li>
+        <li>
+          Il modulo di iscrizione è protetto da <strong>Cloudflare Turnstile</strong>, che
+          verifica che la richiesta non arrivi da un programma automatico. Compare solo lì, non
+          nelle altre pagine.
+        </li>
+        <li>
+          Se entri nell'area riservata, il browser conserva la <strong>sessione di
+          accesso</strong> nella propria memoria locale: senza, a ogni pagina dovresti rifare
+          l'accesso. È uno strumento tecnico necessario, non serve a seguirti e sparisce quando
+          premi «Esci». A chi non entra nell'area riservata non succede niente di tutto questo.
+        </li>
+      </ul>
+
+      <h3>6.3 Pagare la quota</h3>
+      <p>
+        Il pagamento avviene su una pagina di <strong>Stripe</strong> (Stripe Payments Europe,
+        Limited, Irlanda), non sul nostro sito. <strong>I dati della tua carta o del tuo conto
+        non arrivano mai a noi</strong>: li vede solo Stripe.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Cosa mandiamo a Stripe</strong>: il tuo indirizzo email, perché ti arrivi la
+          ricevuta; un codice interno del tuo account, per collegare il pagamento alla tessera;
+          la fascia di quota. Non il tuo nome, che resta da noi.
+        </li>
+        <li>
+          <strong>Cosa sa Stripe, di conseguenza</strong>: che hai pagato una quota a COG U, cioè
+          che ti stai iscrivendo a un sindacato. Stripe lo tratta per nostro conto per eseguire
+          il pagamento, e come titolare autonomo per i propri obblighi di legge, come antifrode e
+          antiriciclaggio, con i tempi della propria informativa.
+        </li>
+        <li>
+          <strong>Cosa teniamo noi</strong>: importo, data, esito del pagamento e gli
+          identificativi di Stripe che lo collegano alla tessera. Si conservano e si cancellano
+          insieme all'account.
+        </li>
+        <li>
+          <strong>Ricevuta</strong>: te la manda Stripe via email. Non emettiamo fattura.
+        </li>
+      </ul>
+
+      <h3>6.4 Il contributo sostenitore</h3>
+      <p>
+        Chi fa un contributo senza iscriversi <strong>non entra nel nostro database</strong> e non
+        crea nessun account. Il pagamento avviene su Stripe come sopra.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Cosa vediamo</strong>: nel pannello di Stripe dell'associazione, chi lo gestisce
+          vede importo, data, l'indirizzo email che hai dato a Stripe e le informazioni che Stripe
+          mostra sul pagamento. Li usiamo solo per la contabilità e per un eventuale rimborso,
+          mai per scriverti per altro.
+        </li>
+        <li>
+          <strong>Base giuridica</strong>: dare seguito al contributo che hai scelto di fare
+          (art. 6.1.b) e tenere la contabilità dell'associazione (art. 6.1.c).
+        </li>
+      </ul>
+
+      <h3>6.5 Contabilità</h3>
+      <p>
+        Le entrate dell'associazione si documentano con i rendiconti di Stripe, che conserviamo
+        per il tempo che la legge prevede per i documenti contabili. È l'unico caso in cui un dato
+        può restare più a lungo dell'account: una richiesta di cancellazione non può toccare ciò
+        che la legge obbliga a conservare.
+      </p>
+      <p>
+        Prezzi, rinnovo e rimborsi sono nelle{' '}
+        <a class="link" href="/condizioni/">condizioni di pagamento e rimborsi</a>.
       </p>
 
       <h2>7. A chi arrivano i dati</h2>
@@ -244,6 +374,26 @@ const versione = PRIVACY_POLICY_VERSION;
           l'accesso all'area di pubblicazione.
         </li>
       </ul>
+      <p>Dall'apertura del tesseramento, e solo per chi si iscrive o fa un contributo:</p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Stripe</strong> (Irlanda) — il pagamento, come descritto nella sezione 6.3.
+        </li>
+        <li>
+          <strong>Supabase</strong> — accesso all'area riservata e database delle iscrizioni, su
+          server nell'Unione europea.
+        </li>
+        <li>
+          <strong>Cloudflare Turnstile</strong> — il controllo contro i programmi automatici sul
+          modulo di iscrizione.
+        </li>
+      </ul>
+      <p>
+        Alcuni di questi fornitori hanno la società capogruppo negli Stati Uniti. Per i dati che
+        potrebbero arrivare lì valgono le garanzie previste dal Regolamento, cioè le clausole
+        contrattuali standard o il quadro UE-USA sulla protezione dei dati, come ciascun
+        fornitore dichiara nella propria documentazione.
+      </p>
       <p>
         <strong>Google non è più in questo elenco.</strong> Finché i video erano incorporati lo
         era, per chi arrivava in fondo alla pagina. Adesso sono link: se ne apri uno vai su
@@ -263,15 +413,20 @@ const versione = PRIVACY_POLICY_VERSION;
         <span class="indirizzo">{associazione.email}</span>.
       </p>
       <p>
+        Se chiedi di cancellare la tua iscrizione, cancelliamo l'account e tutto quello che
+        contiene entro 30 giorni dalla richiesta. Resta solo ciò che la legge ci obbliga a tenere
+        per la contabilità (sezione 6.5).
+      </p>
+      <p>
         Se pensi che qualcosa non vada puoi rivolgerti al Garante per la protezione dei dati
         personali (<a class="link" href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>).
       </p>
 
       <h2>9. Aggiornamenti</h2>
       <p>
-        Questa informativa descrive il sito come è oggi. Cambierà quando cambieranno i trattamenti
-        — a cominciare dall'apertura del tesseramento — e la versione in cima serve a distinguere
-        una stesura dall'altra.
+        Questa informativa descrive il sito come è oggi, e nella sezione 6 come funzioneranno
+        tesseramento e pagamenti quando apriranno. Cambierà quando cambieranno i trattamenti, e la
+        versione in cima serve a distinguere una stesura dall'altra.
       </p>
     </div>
   </main>

@@ -385,3 +385,18 @@ La versione del CMS è fissata di proposito (`@sveltia/cms@0.206.1` in `public/a
 Prima era senza numero, cioè sempre l'ultima pubblicata: il programma che maneggia un token con
 permesso di scrittura sul repository poteva cambiare da solo. Per aggiornarlo si cambia il
 numero, deliberatamente.
+
+## Le immagini si caricano, non si incollano
+
+Nel campo «Immagine» della copertina va caricato un file, che finisce fra le
+immagini del sito. **Non** un indirizzo di un'altra pagina web.
+
+Il 24/09/2026 un evento era stato salvato con la copertina
+`https://picsum.photos/...`. La pagina si vedeva bene, e proprio per questo il
+problema sarebbe passato inosservato: ogni persona che apriva l'agenda mandava
+il proprio indirizzo IP a quel sito, mentre l'informativa dichiara che il sito
+non contatta nessuna terza parte. Ora `npm run check:testi` se ne accorge da
+solo e la CI diventa rossa.
+
+Se hai già salvato una copertina con un indirizzo, riaprila dal CMS e carica il
+file: il resto lo fa la build.

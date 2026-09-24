@@ -1,6 +1,6 @@
 ---
 title: 'COG-U a Piano Terra: presentazione e talk su lavoro e AI'
-bozza: true
+bozza: false
 excerpt: 'COG-U a Piano Terra: presentazione e talk su lavoro e AI'
 inizio: 2026-10-15T19:00
 fine: 2026-10-15T23:59

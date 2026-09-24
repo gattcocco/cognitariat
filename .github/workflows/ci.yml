@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main, dev]
+    # Il ramo di produzione e' feat/membership-v2-1, ed e' anche quello su cui
+    # scrive il CMS: e' li' che serve un controllo, non su main, che dal
+    # 24/09/2026 non costruisce e non pubblica piu' niente.
+    branches: [feat/membership-v2-1, dev]
   pull_request:
 
 jobs:

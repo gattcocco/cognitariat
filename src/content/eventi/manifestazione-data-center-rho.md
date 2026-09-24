@@ -1,12 +1,16 @@
 ---
-title: "Annunciata a Rho la manifestazione «Data center, fermarli è possibile!»"
-excerpt: "Convocata per sabato 3 ottobre a Rho, gli organizzatori chiedono una valutazione ambientale strategica."
-inizio: 2026-10-03
+title: 'Sabato 3 ottobre h15, Stazione RHO: «Data center, fermarli è possibile!»'
+bozza: false
+excerpt: Convocata per sabato 3 ottobre a Rho il primo corteo in italia che va davvero davanti ai luoghi dove si progettano o si costruiscono data center
+inizio: 2026-10-03T14:30
+fine: ''
+ricorrenza: ''
 luogo: Rho, alle porte di Milano
+indirizzo: ''
 copertina:
   file: /images/agenda/manifestazione-data-center-rho.webp
   alt: "Locandina: foto notturna di un'assemblea pubblica all'aperto, decine di persone sedute in cerchio su sedie di plastica in un cortile, con un cane al centro. In alto la scritta «Bloccarli a Rho per bloccarli ovunque» e il titolo «Data center: fermarli si può!»; in basso «Sabato 03 ottobre — Manifestazione a Rho»."
-bozza: false
+linkEsterno: null
 ---
 
 «Scenderemo in piazza per chiedere una moratoria immediata sui progetti di data center» annunciano gli organizzatori della manifestazione «Data center: fermarli è possibile!» convocata per sabato 3 ottobre 2026 a Rho, alle porte di Milano, decisa ieri al termine di un'assemblea pubblica presso lo spazio Fornace di Rho.

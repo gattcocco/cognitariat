@@ -8,7 +8,7 @@ ricorrenza: ''
 luogo: Ponte dalla Ghisolfa
 indirizzo: Viale Monza 255, Milano
 copertina:
-  file: /images/agenda/deadhead-economics-and-concert.webp
+  file: /images/articoli/concerto fumagalli.jpg
   alt: Concerto psichedelico per il cognitariato
 linkEsterno: null
 ---

@@ -51,4 +51,9 @@
 // dati ridotti al minimo (nome, cognome, email; niente codice fiscale) e
 // scadenze applicate dal database. Registrata nella migration 0008, insieme
 // alla rimozione del codice fiscale e al job delle scadenze.
-export const PRIVACY_POLICY_VERSION = 'v6-2026-09-21';
+//
+// v7: il tesseramento apre per bonifico. Cambia un trattamento, non una
+// formula: arrivano nome, cognome, email e la contabile del bonifico, con la
+// banca come nuovo destinatario. L'iscrizione online resta chiusa e la sezione
+// 6 tiene separate le due cose. Registrata nella migration 0009.
+export const PRIVACY_POLICY_VERSION = 'v7-2026-09-24';

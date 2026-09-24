@@ -1,21 +1,35 @@
 ---
-// Fase 4: struttura conservata, acquisti DISABILITATI.
-// Le quote 2026 e la logica Stripe restano intatte nel codice (functions/,
-// migrazioni, componenti) per poter essere riattivate senza ricostruire il
-// flusso, ma qui nessun pulsante deve suggerire che si possa gia' pagare:
-// l'etichetta dice cosa e' vero adesso, non cosa sara'.
+import { associazione } from '../lib/associazione';
+
+/**
+ * Tesseramento. Dal 24/09/2026 non e' piu' una sezione "in preparazione": la
+ * quota si puo' versare con un bonifico, e l'IBAN sta qui.
+ *
+ * Quello che resta chiuso e' l'iscrizione ONLINE (account, pagamento con carta,
+ * area riservata): le Functions rifiutano ancora i tre checkout. La sezione
+ * deve tenere insieme le due cose senza confonderle — si puo' fare una cosa,
+ * non se ne puo' fare un'altra — perche' e' esattamente il punto in cui una
+ * pagina promette piu' di quello che mantiene.
+ *
+ * L'IBAN si mostra raggruppato a quattro cifre perche' cosi' si legge e si
+ * ricopia a mano senza perdere il segno; il pulsante copia invece la forma
+ * senza spazi, che e' quella che le banche accettano sempre.
+ */
 const tiers = [
   { id: 'studente', title: 'Studentə / disoccupatə', desc: 'Accesso completo a tutte le funzioni sindacali.', price: 10 },
   { id: 'cognitario', title: 'Cognitariə', desc: 'La quota associativa standard per chi lavora nel cognitariato.', price: 20 },
 ];
+
+/** Forma leggibile, a gruppi di quattro. Quella da copiare non ha spazi. */
+const ibanLeggibile = associazione.iban.replace(/(.{4})/g, '$1 ').trim();
 ---
 <section id="membership">
   <div class="container">
-    <p class="occhiello occhiello--progetto">Non ancora aperto</p>
+    <p class="occhiello">Ci si può tesserare</p>
     <h2 class="section-title">Tesseramento</h2>
     <p class="section-sub">
-      Le quote sono definite, ma il tesseramento non è ancora aperto: non stiamo raccogliendo
-      iscrizioni né pagamenti. Quando apriremo lo scriveremo qui.
+      Ecco le quote che abbiamo stabilito. Presto ci si potrà iscrivere online: intanto puoi
+      tesserarti con un bonifico a COG U.
     </p>
 
     <div class="cards-grid">
@@ -33,16 +47,133 @@ const tiers = [
       </div>
     </div>
 
-    <p style="margin-top: 28px;">
-      Come funzioneranno quote, ricevute e rimborsi è già scritto nelle{' '}
-      <a class="link" href="/condizioni/">condizioni di pagamento</a>, e quali dati chiederemo
-      nell'<a class="link" href="/privacy/#tesseramento-e-pagamenti">informativa</a>: solo nome,
-      cognome ed email.
+    <div class="iban-riquadro sezione-scura">
+      <p class="iban-etichetta" id="iban-etichetta">IBAN di COG U</p>
+      <p class="iban-numero" id="iban-numero">{ibanLeggibile}</p>
+      {/*
+        Il pulsante nasce nascosto e lo mostra lo script: senza JavaScript
+        copiare non funzionerebbe, e un pulsante che non fa niente e' peggio
+        di nessun pulsante. L'IBAN resta comunque leggibile e selezionabile.
+      */}
+      <button
+        class="iban-copia"
+        type="button"
+        hidden
+        data-iban={associazione.iban}
+        aria-describedby="iban-etichetta"
+      >
+        Copia
+      </button>
+      <p class="iban-esito" role="status" aria-live="polite"></p>
+    </div>
+
+    <p style="margin-top: 22px;">
+      Nella causale scrivi <strong>quota associativa 2026</strong>, il tuo nome e il tuo cognome.
+      Poi scrivici a <span class="indirizzo">{associazione.email}</span>: il bonifico da solo
+      dice quanto hai versato, non che vuoi iscriverti, e senza un messaggio non sapremmo come
+      raggiungerti.
+    </p>
+
+    <p style="margin-top: 16px;">
+      Quote, ricevute e rimborsi sono scritti nelle{' '}
+      <a class="link" href="/condizioni/">condizioni di pagamento</a>; quali dati raccogliamo,
+      nell'<a class="link" href="/privacy/#tesseramento-e-pagamenti">informativa</a>: nome,
+      cognome ed email, nient'altro.
     </p>
 
     <p class="nota-metodo" style="margin-top: 20px;">
-      Nel frattempo la cosa più utile che puoi fare non è pagare: è{' '}
+      Se preferisci aspettare l'iscrizione online, o se vuoi solo darci una mano, la cosa più
+      utile resta{' '}
       <a class="link" href="#avvicinarsi">raccontarci un caso o segnalarci un progetto</a>.
     </p>
   </div>
 </section>
+
+<script>
+  /**
+   * Copia l'IBAN negli appunti.
+   *
+   * Il pulsante e' nascosto nell'HTML e lo mostra questo script: senza
+   * JavaScript non apparirebbe affatto, invece di apparire e non fare niente.
+   * L'IBAN resta comunque scritto in chiaro e selezionabile con il dito o con
+   * il mouse: quella strada non dipende da niente.
+   */
+  const bottone = document.querySelector<HTMLButtonElement>('.iban-copia');
+  const esito = document.querySelector<HTMLParagraphElement>('.iban-esito');
+
+  /** Seleziona il numero in pagina: serve anche come ultima spiaggia. */
+  function selezionaIban(): Range | null {
+    const numero = document.getElementById('iban-numero');
+    if (!numero) return null;
+    const intervallo = document.createRange();
+    intervallo.selectNodeContents(numero);
+    const selezione = window.getSelection();
+    selezione?.removeAllRanges();
+    selezione?.addRange(intervallo);
+    return intervallo;
+  }
+
+  /**
+   * Due strade, nell'ordine.
+   *
+   * 1. navigator.clipboard: quella moderna, ma non sempre concessa — serve una
+   *    connessione sicura e il permesso del contesto in cui gira la pagina. In
+   *    un riquadro incorporato, per esempio, viene negata.
+   * 2. selezione + document.execCommand('copy'): deprecata, ma funziona anche
+   *    dove la prima e' negata, e copia la forma senza spazi come la prima.
+   *
+   * Se falliscono entrambe il numero resta selezionato e il messaggio lo dice:
+   * basta il comando di copia del sistema.
+   */
+  async function copiaIban(iban: string): Promise<boolean> {
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(iban);
+        return true;
+      }
+    } catch {
+      // si prova l'altra strada
+    }
+
+    const appoggio = document.createElement('textarea');
+    appoggio.value = iban;
+    appoggio.setAttribute('readonly', '');
+    appoggio.setAttribute('aria-hidden', 'true');
+    // Fuori dallo schermo ma non display:none, altrimenti non si puo' selezionare.
+    appoggio.style.cssText = 'position:fixed;top:-1000px;left:-1000px;opacity:0;';
+    document.body.appendChild(appoggio);
+    appoggio.select();
+    let riuscito = false;
+    try {
+      riuscito = document.execCommand('copy');
+    } catch {
+      riuscito = false;
+    }
+    appoggio.remove();
+    return riuscito;
+  }
+
+  if (bottone && esito) {
+    bottone.hidden = false;
+    let ripristina = 0;
+
+    bottone.addEventListener('click', async () => {
+      const iban = bottone.dataset.iban ?? '';
+      if (await copiaIban(iban)) {
+        // Il messaggio sta in un elemento con aria-live: chi usa un lettore di
+        // schermo lo sente, e non serve spostare il fuoco da nessuna parte.
+        esito.textContent = 'IBAN copiato';
+        bottone.textContent = 'Copiato';
+      } else {
+        selezionaIban();
+        esito.textContent = 'Non riesco a copiarlo: l’ho selezionato, copialo tu.';
+      }
+
+      clearTimeout(ripristina);
+      ripristina = window.setTimeout(() => {
+        bottone.textContent = 'Copia';
+        esito.textContent = '';
+      }, 4000);
+    });
+  }
+</script>

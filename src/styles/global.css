@@ -1620,3 +1620,67 @@ main[tabindex='-1']:focus-visible {
   background: var(--nero);
   box-shadow: none;
 }
+
+/* ============================================================================
+   IBAN — il riquadro del bonifico nella sezione Tesseramento
+
+   Fondo nero ed etichetta gialla: lo stesso linguaggio del riquadro dati degli
+   eventi e del blocco-data dell'agenda. Non una superficie nuova.
+
+   Il numero e' grande e a gruppi di quattro perche' capita di ricopiarlo a
+   mano, dal telefono, guardando lo schermo: raggruppato si perde il segno meno
+   facilmente. Il pulsante copia la forma senza spazi.
+   Contrasti: bianco su nero 21:1, giallo su nero 14,47:1, nero su giallo 14,47:1.
+   ========================================================================= */
+.iban-riquadro {
+  margin-top: 32px;
+  padding: 22px 24px;
+  background: var(--nero);
+  color: var(--bianco);
+  border-radius: var(--raggio-m);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+.iban-etichetta {
+  flex-basis: 100%;
+  font-size: 0.78rem;
+  font-weight: var(--peso-forte);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--giallo);
+}
+.iban-numero {
+  font-size: 1.35rem;
+  font-weight: var(--peso-forte);
+  letter-spacing: 0.04em;
+  /* Su schermi stretti il numero va a capo invece di sfondare il riquadro. */
+  overflow-wrap: anywhere;
+  /* Cifre a larghezza fissa: le colonne dei gruppi restano allineate. */
+  font-variant-numeric: tabular-nums;
+}
+.iban-copia {
+  background: var(--giallo);
+  color: var(--nero);
+  border: 0;
+  border-radius: var(--raggio-pill);
+  padding: 10px 22px;
+  font: inherit;
+  font-weight: var(--peso-forte);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.iban-copia:hover { background: var(--giallo-hover); }
+.iban-esito {
+  flex-basis: 100%;
+  font-size: 0.9rem;
+  color: var(--giallo);
+  min-height: 1.2em;
+}
+@media (max-width: 600px) {
+  .iban-riquadro { padding: 18px; }
+  .iban-numero { font-size: 1.15rem; }
+  /* Il pulsante prende tutta la riga: col pollice si sbaglia meno. */
+  .iban-copia { flex-basis: 100%; }
+}

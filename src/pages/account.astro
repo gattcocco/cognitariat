@@ -16,8 +16,11 @@ import Icona from '../components/Icona.astro';
         lascia l'unica azione davvero disponibile, scriverci.
       -->
       <p class="prosa" style="margin: 0 auto;">
-        Quest'area serve a chi ha una tessera COG U. Il tesseramento non è ancora aperto:
-        per ora non ci sono tessere da mostrare.
+        Quest'area serve a chi si iscrive online. L'iscrizione online non è ancora aperta:
+        per ora ci si tessera con un bonifico, e quelle tessere non hanno una pagina qui.
+      </p>
+      <p class="prosa" style="margin: 12px auto 0;">
+        Come si fa è scritto in <a class="link" href="/#membership">tesseramento</a>.
       </p>
       <p class="prosa" style="margin: 12px auto 0;">
         Se hai già ricevuto un link d'accesso, aprilo dalla mail: la sessione si crea da lì.
@@ -142,7 +145,7 @@ import Icona from '../components/Icona.astro';
     el('mc-tier').textContent = tierValue ? (TIER_LABELS[tierValue as keyof typeof TIER_LABELS] ?? tierValue) : 'Nessuna fascia attiva';
     el('mc-status').textContent = membership
       ? (STATUS_LABELS[membership.status as string] ?? membership.status as string)
-      : 'Nessuna tessera: il tesseramento non è ancora aperto';
+      : 'Nessuna tessera collegata a questo account';
     el('mc-name').textContent = displayName || session.user.email || '—';
     el('mc-email').textContent = session.user.email ?? '—';
     el('mc-amount').textContent =

@@ -10,6 +10,12 @@ import { TIER_LABELS, TIER_PRICES_EUR } from '../lib/tiers';
  * pagamenti aprano: Stripe le cerca quando rivede il sito, e chi paga ha diritto
  * di saperle prima.
  *
+ * Aggiornate il 24/09/2026: la quota si puo' versare con bonifico, quindi le
+ * condizioni non sono piu' un testo "per quando apriremo" ma valgono da subito
+ * per chi lo fa. Il pagamento con carta resta spento e la pagina lo distingue:
+ * confondere le due cose sarebbe il modo piu' rapido per promettere quello che
+ * non c'e'.
+ *
  * Gli importi delle quote arrivano da src/lib/tiers.ts, la stessa fonte da cui
  * legge il checkout: se cambiano, cambiano qui da soli. Il minimo del contributo
  * sostenitore sta invece nel prezzo configurato su Stripe (custom_unit_amount),
@@ -25,6 +31,9 @@ import { TIER_LABELS, TIER_PRICES_EUR } from '../lib/tiers';
  * - la fascia di quota e' autodichiarata, coerente con l'informativa: non
  *   chiediamo documenti per dimostrare di essere studente o senza lavoro.
  */
+/** Stessa forma leggibile usata in home: gruppi di quattro cifre. */
+const ibanLeggibile = associazione.iban.replace(/(.{4})/g, '$1 ').trim();
+
 const [studente, cognitario] = (['studente', 'cognitario'] as const).map((t) => ({
   etichetta: TIER_LABELS[t],
   prezzo: TIER_PRICES_EUR[t],
@@ -38,11 +47,12 @@ const [studente, cognitario] = (['studente', 'cognitario'] as const).map((t) => 
   <main id="contenuto" tabindex="-1" class="container pagina-testo" style="max-width: 820px;">
     <div class="prosa">
       <h1 class="section-title">Condizioni di pagamento e rimborsi</h1>
-      <p class="section-sub">Versione del 21 settembre 2026</p>
+      <p class="section-sub">Versione del 24 settembre 2026</p>
 
       <p>
-        <strong>Oggi i pagamenti non sono aperti</strong>: queste condizioni valgono dal momento
-        in cui apriranno. Le pubblichiamo prima perché chi paga deve poterle leggere prima.
+        <strong>Oggi la quota si versa con un bonifico</strong>, e queste condizioni valgono da
+        subito per chi lo fa. Il pagamento online con carta non è ancora attivo: le parti che lo
+        riguardano valgono da quando aprirà.
       </p>
 
       <h2>1. Chi incassa</h2>
@@ -73,14 +83,37 @@ const [studente, cognitario] = (['studente', 'cognitario'] as const).map((t) => 
       </p>
 
       <h2>3. Come si paga</h2>
+      <h3>Oggi: bonifico</h3>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>IBAN</strong>: {ibanLeggibile}, intestato a {associazione.denominazione}.
+        </li>
+        <li>
+          <strong>Causale</strong>: «quota associativa 2026», con nome e cognome.
+        </li>
+        <li>
+          <strong>Scrivici</strong> a <span class="indirizzo">{associazione.email}</span>: un
+          bonifico dice quanto hai versato, non che vuoi iscriverti. Senza un messaggio non
+          sapremmo come raggiungerti né quale fascia hai scelto.
+        </li>
+        <li>
+          L'iscrizione è attiva quando il bonifico arriva sul conto, di solito in uno o due
+          giorni lavorativi. Te lo confermiamo per email.
+        </li>
+        <li>
+          Non emettiamo fattura e non rilasciamo ricevute valide per detrazioni o deduzioni
+          fiscali. La contabile del bonifico resta la tua prova del versamento.
+        </li>
+      </ul>
+
+      <h3>Quando aprirà: pagamento online</h3>
       <ul class="elenco-progetto">
         <li>
           Su una pagina di <strong>Stripe</strong>, con i metodi che Stripe ti propone. I dati
           della carta o del conto li vede solo Stripe, mai noi.
         </li>
         <li>
-          La <strong>ricevuta</strong> te la manda Stripe via email. Non emettiamo fattura e non
-          rilasciamo ricevute valide per detrazioni o deduzioni fiscali.
+          La <strong>ricevuta</strong> te la manda Stripe via email.
         </li>
         <li>
           L'iscrizione è attiva quando il pagamento è confermato. Con i pagamenti che richiedono
@@ -110,11 +143,11 @@ const [studente, cognitario] = (['studente', 'cognitario'] as const).map((t) => 
       </ul>
       <p>
         <strong>Come si chiede</strong>: scrivi a{' '}
-        <span class="indirizzo">{associazione.email}</span> dall'indirizzo con cui hai pagato,
-        indicando la data e l'importo. Avviamo il rimborso entro 14 giorni dalla richiesta, sullo
-        stesso metodo di pagamento; i tempi di accredito poi dipendono dalla tua banca.
-        <strong>Rimborsiamo l'importo pieno</strong>: le commissioni di Stripe restano a carico
-        dell'associazione.
+        <span class="indirizzo">{associazione.email}</span> indicando la data e l'importo.
+        Avviamo il rimborso entro 14 giorni dalla richiesta: con un bonifico rimandiamo i soldi
+        sul conto da cui sono partiti, e per questo ti chiederemo l'IBAN se non coincide. I tempi
+        di accredito poi dipendono dalla tua banca. <strong>Rimborsiamo l'importo pieno</strong>:
+        le eventuali commissioni restano a carico dell'associazione.
       </p>
       <p>
         Se qualcosa non ti torna, scrivici prima di contestare il pagamento con la tua banca: si

@@ -9,6 +9,11 @@ import { associazione, haSede, haPec } from '../lib/associazione';
  * Informativa ai sensi dell'art. 13 GDPR, scritta sui trattamenti che il sito
  * fa davvero adesso.
  *
+ * v7 (24/09/2026): il tesseramento e' aperto per bonifico, quindi arrivano
+ * dati veri — nome sulla contabile, causale, messaggio di chi si iscrive — e la
+ * sezione 6 lo dice al posto di dire che non si raccoglie niente. L'iscrizione
+ * online resta chiusa, e la pagina tiene separate le due cose.
+ *
  * v6 (21/09/2026): la sezione 6 descrive tesseramento e pagamenti PRIMA che
  * aprano, come la pagina aveva promesso. Principio chiesto dal committente:
  * chiedere meno dati possibile e tenerli il meno possibile. Ogni scadenza
@@ -85,9 +90,9 @@ const versione = PRIVACY_POLICY_VERSION;
         Il sito è statico: pagine, caratteri tipografici e icone arrivano dal nostro dominio, senza
         passare da servizi di terzi. <strong>Non usiamo strumenti di statistica, non profiliamo chi
         legge, non impostiamo cookie e non scriviamo niente nella memoria del tuo browser</strong>
-        — è stato verificato sul sito online, non solo nel codice. L'unica eccezione, quando il
-        tesseramento sarà aperto, riguarderà chi entra nell'area riservata: è descritta nella
-        sezione 6.
+        — è stato verificato sul sito online, non solo nel codice. L'unica eccezione, quando
+        l'iscrizione online sarà aperta, riguarderà chi entra nell'area riservata: è descritta
+        nella sezione 6.
       </p>
       <p>
         Resta quello che fa qualunque server quando gli chiedi una pagina: il nostro hosting,{' '}
@@ -230,10 +235,12 @@ const versione = PRIVACY_POLICY_VERSION;
 
       <h2 id="tesseramento-e-pagamenti">6. Tesseramento e pagamenti</h2>
       <p>
-        <strong>Oggi il tesseramento e i pagamenti non sono aperti</strong>: non raccogliamo
-        adesioni e il server rifiuta ogni richiesta di pagamento prima che arrivi a un fornitore.
-        Quello che segue descrive come funzioneranno dall'apertura. Lo scriviamo adesso perché va
-        letto prima, non dopo.
+        <strong>Ci si può tesserare con un bonifico</strong>, e da quel momento trattiamo dei
+        dati: quello che succede è descritto qui sotto, al punto 6.1.
+        <strong>L'iscrizione online non è ancora aperta</strong> — niente account, niente
+        pagamento con carta: il server rifiuta ogni richiesta di pagamento prima che arrivi a un
+        fornitore. I punti dal 6.2 in poi descrivono come funzionerà quando aprirà, e li
+        scriviamo adesso perché vanno letti prima, non dopo.
       </p>
       <p>
         Il principio è uno: <strong>ti chiediamo solo quello che serve, e lo teniamo solo finché
@@ -241,7 +248,41 @@ const versione = PRIVACY_POLICY_VERSION;
         dipendono dalla memoria di nessuno.
       </p>
 
-      <h3>6.1 Iscriverti</h3>
+      <h3>6.1 Iscriverti con un bonifico</h3>
+      <p>
+        È il modo con cui oggi si prende la tessera. Ti chiediamo di scriverci, perché un
+        bonifico da solo dice quanto hai versato ma non chi sei né come raggiungerti.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Cosa riceviamo</strong>: il nome e il cognome che scrivi nella causale, e
+          quello che ci mandi per email — di norma nome, cognome e indirizzo email. Dalla
+          contabile del bonifico la nostra banca ci mostra anche <strong>il nome e l'IBAN di chi
+          paga</strong>: non li chiediamo noi, arrivano con il pagamento.
+        </li>
+        <li>
+          <strong>Chi altro li vede</strong>: la banca dell'associazione e la tua, che trattano
+          il bonifico per obbligo di legge e con le proprie informative. Nessun altro.
+        </li>
+        <li>
+          <strong>Finalità e base giuridica</strong>: iscriverti e tenere il rapporto associativo
+          (art. 6.1.b), registrare l'incasso nella contabilità (art. 6.1.c). L'appartenenza
+          sindacale resta un dato particolare, trattato in quanto associazione sindacale e solo
+          per i propri iscritti (art. 9.2.d).
+        </li>
+        <li>
+          <strong>Conservazione</strong>: i messaggi seguono la regola della sezione 4. La
+          contabile del bonifico entra nella contabilità dell'associazione e si conserva per il
+          tempo che la legge prevede per i documenti contabili (sezione 6.5). L'elenco degli
+          iscritti si tiene finché dura l'iscrizione e per 12 mesi dopo la scadenza.
+        </li>
+        <li>
+          <strong>Cosa non ti chiediamo</strong>: codice fiscale, indirizzo di casa, telefono,
+          data di nascita, datore di lavoro. Nemmeno per il bonifico.
+        </li>
+      </ul>
+
+      <h3>6.2 Iscriverti online, quando aprirà</h3>
       <p>
         Ti chiediamo tre cose: <strong>nome, cognome e indirizzo email</strong>. Nient'altro: non
         il codice fiscale, non l'indirizzo di casa, non il telefono, non la data di nascita, non
@@ -281,7 +322,7 @@ const versione = PRIVACY_POLICY_VERSION;
         </li>
       </ul>
 
-      <h3>6.2 Entrare nell'area riservata</h3>
+      <h3>6.3 Entrare nell'area riservata</h3>
       <p>
         Non c'è una password da ricordare: ricevi via email un link che vale una volta sola.
       </p>
@@ -304,7 +345,7 @@ const versione = PRIVACY_POLICY_VERSION;
         </li>
       </ul>
 
-      <h3>6.3 Pagare la quota</h3>
+      <h3>6.4 Pagare la quota online</h3>
       <p>
         Il pagamento avviene su una pagina di <strong>Stripe</strong> (Stripe Payments Europe,
         Limited, Irlanda), non sul nostro sito. <strong>I dati della tua carta o del tuo conto
@@ -332,7 +373,7 @@ const versione = PRIVACY_POLICY_VERSION;
         </li>
       </ul>
 
-      <h3>6.4 Il contributo sostenitore</h3>
+      <h3>6.5 Il contributo sostenitore</h3>
       <p>
         Chi fa un contributo senza iscriversi <strong>non entra nel nostro database</strong> e non
         crea nessun account. Il pagamento avviene su Stripe come sopra.
@@ -350,10 +391,11 @@ const versione = PRIVACY_POLICY_VERSION;
         </li>
       </ul>
 
-      <h3>6.5 Contabilità</h3>
+      <h3>6.6 Contabilità</h3>
       <p>
-        Le entrate dell'associazione si documentano con i rendiconti di Stripe, che conserviamo
-        per il tempo che la legge prevede per i documenti contabili. È l'unico caso in cui un dato
+        Le entrate dell'associazione si documentano con gli estratti del conto corrente e, quando
+        i pagamenti online saranno attivi, con i rendiconti di Stripe: li conserviamo per il tempo
+        che la legge prevede per i documenti contabili. È l'unico caso in cui un dato
         può restare più a lungo dell'account: una richiesta di cancellazione non può toccare ciò
         che la legge obbliga a conservare.
       </p>
@@ -374,7 +416,14 @@ const versione = PRIVACY_POLICY_VERSION;
           l'accesso all'area di pubblicazione.
         </li>
       </ul>
-      <p>Dall'apertura del tesseramento, e solo per chi si iscrive o fa un contributo:</p>
+      <p>Per chi si tessera con un bonifico:</p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>La banca dell'associazione</strong> e la tua, che eseguono il bonifico e ne
+          conservano traccia per obbligo di legge.
+        </li>
+      </ul>
+      <p>Dall'apertura dell'iscrizione online, e solo per chi la usa:</p>
       <ul class="elenco-progetto">
         <li>
           <strong>Stripe</strong> (Irlanda) — il pagamento, come descritto nella sezione 6.3.
@@ -415,7 +464,7 @@ const versione = PRIVACY_POLICY_VERSION;
       <p>
         Se chiedi di cancellare la tua iscrizione, cancelliamo l'account e tutto quello che
         contiene entro 30 giorni dalla richiesta. Resta solo ciò che la legge ci obbliga a tenere
-        per la contabilità (sezione 6.5).
+        per la contabilità (sezione 6.6).
       </p>
       <p>
         Se pensi che qualcosa non vada puoi rivolgerti al Garante per la protezione dei dati

@@ -7,6 +7,10 @@ Sito statico costruito con **Astro**, pubblicato su **Cloudflare Pages**. I cont
 articoli e appuntamenti — si scrivono da un CMS che sta sul sito stesso, senza toccare il
 codice.
 
+> **Prendi in mano il progetto adesso?** Parti da **[docs/handoff.md](docs/handoff.md)**: stato
+> completo, questioni aperte con il nome di chi deve deciderle, e le trappole che questo progetto
+> ha gia' incontrato. Questo README dice come si lavora; l'handoff dice a che punto siamo.
+
 ---
 
 ## Le tre cose da sapere prima di toccare qualcosa
@@ -91,6 +95,7 @@ La guida completa è in **[docs/redazione-cms.md](docs/redazione-cms.md)**.
 
 | File | Cosa contiene |
 |---|---|
+| [docs/handoff.md](docs/handoff.md) | **passaggio di consegne**: stato, architettura, infrastruttura, questioni aperte |
 | [docs/redazione-cms.md](docs/redazione-cms.md) | come si pubblica, e cosa fare quando qualcosa non esce |
 | [docs/rilascio-e-ripristino.md](docs/rilascio-e-ripristino.md) | come si rilascia e come si torna indietro |
 | [docs/registro-fasi.md](docs/registro-fasi.md) | registro del lavoro: cosa è stato fatto, quando e perché |

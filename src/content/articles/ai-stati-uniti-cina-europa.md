@@ -5,8 +5,8 @@ date: 2026-09-24
 autore: Editoriale
 excerpt: Modelli chiusi contro pesi aperti, data center e chip. Come la competizione fra America e Cina ridisegna gli equilibri, e dove sta l'Europa.
 copertina:
-  file: /images/articoli/WhatsApp Image 2026-09-24 at 15.08.43.jpeg
-  alt: 'Disegno in bianco e nero: una persona accigliata a braccia conserte, con capelli mossi e una camicia a pois.'
+  file: /images/articoli/ai-stati-uniti-cina-europa-illustrazione.webp
+  alt: 'Illustrazione in stile stampa antica: a sinistra Zio Sam con un''aquila, i grattacieli e lo scudo a stelle e strisce; a destra un dragone dorato con la bandiera cinese, la Grande Muraglia e una pagoda; in mezzo un fiume con navi e un ponte, e nel cielo un sole, ingranaggi e un fulmine.'
 notaRedazione: ''
 ---
 

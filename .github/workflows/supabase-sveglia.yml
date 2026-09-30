@@ -1,26 +1,33 @@
 name: Supabase sveglia
 
-# Tiene sveglio il progetto Supabase finche' il tesseramento non e' aperto.
+# Tiene sveglio il progetto Supabase finche' il tesseramento online non e' aperto.
 #
 # Perche' serve. Sul piano gratuito Supabase mette in pausa i progetti che per
 # circa una settimana non ricevono richieste, e manda prima una mail di
-# preavviso. Finche' il sito non usa Supabase (iscrizioni chiuse), nessuna
-# richiesta arriva mai da li'. Quando il tesseramento sara' aperto il traffico
-# vero bastera', e questo workflow si potra' togliere.
+# preavviso. Finche' il sito non usa Supabase (iscrizioni online chiuse),
+# nessuna richiesta arriva mai da li'. Quando l'iscrizione online sara' aperta
+# il traffico vero bastera', e questo workflow si potra' togliere.
 #
-# Cosa fa: due volte a settimana legge UNA riga di una tabella pubblica e
-# senza dati personali (privacy_versions: l'elenco delle versioni
-# dell'informativa), con la chiave pubblica del progetto. Non scrive niente e
-# non tocca nessun dato di persone.
+# Cosa fa: due volte a settimana legge UNA riga di una tabella pubblica e senza
+# dati personali (privacy_versions: l'elenco delle versioni dell'informativa),
+# con la chiave pubblica del progetto. Non scrive niente e non tocca nessun
+# dato di persone.
 #
 # Cosa serve per funzionare, in Settings -> Secrets and variables -> Actions:
 #   SUPABASE_URL       https://<progetto>.supabase.co
 #   SUPABASE_ANON_KEY  la chiave "anon public" (Project Settings -> API)
-# Senza questi due valori il workflow si ferma con un avviso e non fallisce:
-# nessuna mail di errore finche' non e' configurato.
 #
-# ATTENZIONE: i workflow pianificati GitHub li esegue solo dal ramo predefinito
-# del repository (oggi `main`). Su qualunque altro ramo questo file non parte.
+# PERCHE' ORA FALLISCE SE I SECRET MANCANO. Fino al 30/09/2026 in quel caso il
+# job usciva con successo e una notice, per non mandare mail di errore prima
+# del provisioning. L'effetto: il workflow e' rimasto verde per settimane senza
+# aver mai interrogato il database, e dalla lista dei run non si distingueva il
+# caso "funziona" dal caso "non fa niente". Un allarme che non suona non e' un
+# allarme. Il provisioning e' avvenuto il 21/09: la ragione della scelta e'
+# decaduta, e adesso un job verde significa davvero che il database ha risposto.
+#
+# I workflow pianificati GitHub li esegue solo dal ramo predefinito del
+# repository, che dal 24/09/2026 e' `feat/membership-v2-1` (il ramo di
+# produzione). Su qualunque altro ramo questo file non parte.
 
 on:
   schedule:
@@ -40,8 +47,8 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::notice::SUPABASE_URL o SUPABASE_ANON_KEY non configurati: niente da fare."
-            exit 0
+            echo "::error::SUPABASE_URL o SUPABASE_ANON_KEY non sono configurati fra i secret del repository: il progetto Supabase non viene interrogato e rischia la pausa. Impostali in Settings -> Secrets and variables -> Actions."
+            exit 1
           fi
           # Si stampa solo il codice HTTP, non il contenuto della risposta. Un
           # codice diverso da 200 fa fallire il job, cosi' GitHub avvisa.
@@ -50,4 +57,7 @@ jobs:
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY")
           echo "Risposta di Supabase: HTTP $codice"
-          [ "$codice" = "200" ]
+          if [ "$codice" != "200" ]; then
+            echo "::error::Supabase ha risposto $codice invece di 200. Se il progetto e' in pausa va ripristinato dal pannello."
+            exit 1
+          fi

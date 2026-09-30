@@ -1,3 +1,9 @@
+> **Documento storico — fermo al 25/08/2026.** Descrive il progetto *prima* del passaggio a
+> Cloudflare: parla di GitHub Pages attivo, della PR #2 da unire e di un cutover da pianificare.
+> Sono tutte cose avvenute: il cutover e' stato fatto, GitHub Pages e' spento dal 24/09/2026 e la
+> PR #2 e' stata chiusa senza merge. **Per lo stato attuale vedi [docs/handoff.md](docs/handoff.md)
+> e il [README](README.md).** Questo file resta come traccia di come si ragionava allora.
+
 # Stato Build 1.0 — nota di allineamento
 
 **Aggiornato**: 2026-08-25 · **Branch**: `feat/membership-v2-1` · **PR**: #2 · **HEAD**: `754bd2d` (CI verde)

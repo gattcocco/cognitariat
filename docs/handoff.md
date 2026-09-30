@@ -679,7 +679,56 @@ Poi, a mano: pannello **Supabase** (progetto attivo o in pausa?), pannello **Clo
 
 ---
 
-## 15. Cosa è stato fatto il 30/09, chiudendo questo passaggio di consegne
+## 15. Partire da zero su un'altra macchina
+
+Per lavorare al sito basta il repository: **tutto quello che serve a costruirlo e pubblicarlo è
+versionato**. Quello che non viaggia con il repository è elencato più sotto, e per il sito non
+serve.
+
+```bash
+git clone https://github.com/gattcocco/cognitariat.git
+cd cognitariat
+npm install
+npm run verify        # deve passare: se passa, la macchina è a posto
+npm run dev           # http://localhost:4321
+```
+
+Serve **Node ≥ 22.12**. Il clone atterra sul ramo predefinito, che è **quello di produzione**: per
+lavorare si passa a `dev` (`git checkout dev`), e si rilascia come descritto in §2.
+
+**I file d'ambiente locali**: si copiano dai modelli versionati.
+
+```bash
+cp .env.example .env
+cp .dev.vars.example .dev.vars
+```
+
+I segnaposto bastano per costruire il sito, guardarlo in locale e passare tutte le verifiche. Servono
+valori veri solo per esercitare davvero Supabase o Stripe dalla propria macchina — e quei valori
+stanno nel pannello di Cloudflare e in un gestore di password, **non in un file da copiare da un
+computer all'altro**. Sulla macchina da cui viene questo documento, `.env` e `.dev.vars` contengono
+solo segnaposto [verificato 30/09]: non c'è niente da portarsi dietro.
+
+**Per pubblicare non serve niente in locale**: il sito lo costruisce Cloudflare a ogni push sul ramo
+di produzione. La build locale serve a verificare prima, non a pubblicare.
+
+### Cosa NON sta nel repository, e dove vive
+
+| Cosa | Dove | Serve per |
+|---|---|---|
+| **Gli accessi** (GitHub, Cloudflare, GoDaddy, Supabase, Proton, in futuro Stripe) | persone, non file | vedi §13: senza, si può leggere il codice ma non rilasciare |
+| `_local/` | solo sul computer di chi lavora | note operative e schermate dei pannelli. Fuori dal repo perché è pubblico |
+| `media/` | accanto alla cartella del repo | originali ad alta risoluzione delle locandine. Nel sito vanno solo le versioni web |
+| Set di illustrazioni in licenza, e i file dei caratteri | accanto alla cartella del repo | le licenze restano in locale per scelta |
+| Documenti firmati dell'associazione | accanto alla cartella del repo | **non vanno nel repository né nella build**: contengono dati personali |
+| `riassunto.md`, `landing.md` | sul disco, ignorati da Git | documenti di thread precedenti, superati da questo |
+
+Nessuno di questi serve a costruire o pubblicare il sito. Se la macchina nuova non li ha, il sito
+funziona lo stesso: manca solo il materiale di lavoro grafico e le note interne.
+
+---
+
+## 16. Cosa è stato fatto il 30/09, chiudendo questo passaggio di consegne
 
 Per non farlo cercare nei commit:
 
@@ -689,7 +738,8 @@ Per non farlo cercare nei commit:
 - **copertina e testo alternativo** dell'articolo sulla corsa all'AI: descrizione corretta,
   immagine da 310 KB a 128, nome senza spazi;
 - **`STATO-BUILD-1.0.md`**: avviso in testa che rimanda qui;
-- **questo documento** portato nel repository, in `docs/handoff.md`, con il rimando dal README.
+- **questo documento** portato nel repository, in `docs/handoff.md`, con il rimando dal README, e
+  completato con §15 su come ripartire da zero su un'altra macchina.
 
 E quello che **non** è stato fatto, di proposito: nessun secret inserito (li inserisce chi ha gli
 accessi), nessuna migration eseguita sul database remoto, nessuna decisione presa al posto del

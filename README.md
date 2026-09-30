@@ -41,12 +41,17 @@ e verificata a ogni build (`npm run check:testi` segnala anche un'immagine presa
 ## Lavorare al sito
 
 ```bash
+git clone https://github.com/gattcocco/cognitariat.git
+cd cognitariat
 npm install
 npm run dev      # http://localhost:4321
 npm run verify   # build + tipi + glifi + testi + CMS + test: da fare prima di ogni rilascio
 ```
 
-Serve **Node 22.12 o superiore**.
+Serve **Node 22.12 o superiore**. Il clone atterra sul ramo di produzione: per lavorare si passa a
+`dev`. Su una macchina nuova si copiano anche i due file d'ambiente dai modelli —
+`cp .env.example .env` e `cp .dev.vars.example .dev.vars` — e i segnaposto bastano per costruire e
+verificare. Il dettaglio sta in [docs/handoff.md §15](docs/handoff.md).
 
 ### Rami e rilascio
 

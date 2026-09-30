@@ -88,8 +88,8 @@ export const associazione = {
    */
   partitaIva: null,
 
-  /** PEC: da valorizzare se e quando esiste. Nessun recapito inventato. */
-  pec: '',
+  /** PEC dell'ente, comunicata dal committente il 30/09/2026. */
+  pec: 'cognitariatz@pec.it',
 } as const;
 
 /** Vero solo quando c'e' un indirizzo confermato da mostrare. */

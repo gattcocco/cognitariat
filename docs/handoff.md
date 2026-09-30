@@ -21,10 +21,11 @@ dell'associazione compare nel sito e nel codice ed è una scelta deliberata: ved
 
 ## 0. Da dove si riparte
 
-Le due cose che la prima stesura segnalava come rotte **sono state chiuse il 30/09**. Restano due
-azioni, e una sola è urgente.
+Le due cose che la prima stesura segnalava come rotte **sono state chiuse il 30/09**, e lo stesso
+giorno sono stati chiusi anche i due passi che restavano: i secret del keep-alive sono configurati
+e la migration 0009 è eseguita (§0.1, §5.2).
 
-### 0.1 — Il keep-alive di Supabase: difetto corretto, restano due secret da inserire
+### 0.1 — Il keep-alive di Supabase: corretto, configurato e verificato
 
 Il workflow `.github/workflows/supabase-sveglia.yml` esiste perché sul piano gratuito un progetto
 Supabase che per circa una settimana non riceve richieste viene **messo in pausa**. Finché
@@ -46,7 +47,11 @@ found in request`, che è la risposta di un progetto attivo; uno in pausa non ri
 Quindi nessun ripristino da fare. La prima stesura lo dava «verosimilmente già in pausa»: non lo
 era.
 
-**Cosa resta da fare, ed è di chi ha accesso al repository:**
+**Fatto il 30/09 pomeriggio** — i due passi qui sotto sono stati eseguiti. Il run manuale #2 di
+*Supabase sveglia* è verde e il log riporta `Risposta di Supabase: HTTP 200`: è la **prima volta**
+che il keep-alive interroga davvero il database. Da qui in poi gira da solo lunedì e giovedì alle
+06:17 UTC. Il progetto è `dqwxvlwfkvewhfhjdhbk` (Frankfurt). I passi restano descritti perché
+servono di nuovo se si ruota la chiave o si cambia progetto:
 
 1. impostare i due secret in *Settings → Secrets and variables → Actions*:
    - `SUPABASE_URL` → `https://<progetto>.supabase.co`
@@ -56,8 +61,8 @@ era.
 2. lanciare il workflow a mano (*Actions → Supabase sveglia → Run workflow*) e leggere il log: deve
    comparire `Risposta di Supabase: HTTP 200`.
 
-Finché i secret mancano il workflow **fallisce due volte a settimana**, ed è voluto: è il modo in
-cui il progetto chiede di essere finito.
+Se un giorno i secret mancassero o fossero sbagliati, il workflow **fallirebbe due volte a
+settimana**, ed è voluto: un run rosso qui significa che il database rischia la pausa.
 
 ### 0.2 — La deriva fra produzione e `dev`: riallineata
 
@@ -342,7 +347,7 @@ Guida completa: `docs/redazione-cms.md`.
 La CI su GitHub usa **Node 24** (`actions/setup-node@v5`; la v4 gira su Node 20, deprecato da GitHub
 per le action).
 
-### 5.2 Supabase — **[schema al 21/09; progetto verificato vivo il 30/09]**
+### 5.2 Supabase — **[schema al 21/09; progetto vivo e migration 0009 eseguita il 30/09]**
 
 - Progetto in regione **Central EU (Frankfurt)**, cioè nell'UE, come promette la sezione 6
   dell'informativa.
@@ -354,17 +359,18 @@ per le action).
   `last_name`, `created_at`.
 - **2 job `pg_cron`**: `cleanup-unconfirmed-users`, `scadenze-dati-iscritti`.
 - **Nessun utente registrato** (`count(*) from auth.users` = 0 al 21/09).
-- 6 versioni dell'informativa registrate nel database, da `v1-2026-08-20` a `v6-2026-09-21`.
-  **Il sito pubblica la v7**: la riga corrispondente la inserisce la migration 0009, non ancora
-  eseguita. Finché l'iscrizione online è chiusa non cambia niente — nessuno può dichiarare di aver
-  letto una versione — ma è esattamente il motivo per cui la 0009 va eseguita prima di riaprirla.
+- **7 versioni dell'informativa** registrate nel database, da `v1-2026-08-20` a `v7-2026-09-24`
+  [verificato 30/09 con una `select` dopo l'esecuzione della 0009]. La v7 è quella che il sito
+  pubblica (`PRIVACY_POLICY_VERSION` in `src/lib/consent.ts`): server e sito sono allineati.
 
-**Migration**: `supabase/migrations/0001` → `0009`. Le 0001–0008 sono eseguite. **La `0009` NO.**
+**Migration**: `supabase/migrations/0001` → `0009`. **Tutte eseguite**: la 0009 il 30/09,
+dall'editor SQL del pannello, su decisione del committente.
 
-> **`0009_informativa_v7.sql` va eseguita prima di riaprire le registrazioni online.** Registra la
-> versione v7 dell'informativa fra quelle note al server, e il trigger introdotto dalla 0007
-> **rifiuta una versione che non conosce**. Se si riaprono le iscrizioni senza averla eseguita, ogni
-> tentativo di registrazione viene respinto dal database.
+> **La regola da ricordare per la prossima informativa.** Il trigger introdotto dalla 0007
+> **rifiuta una versione che non conosce**. Ogni volta che si pubblica una nuova versione
+> dell'informativa (cambiando `PRIVACY_POLICY_VERSION`), serve una migration che la inserisca in
+> `privacy_versions` — ed eseguirla **prima** che il sito nuovo raccolga consensi, altrimenti ogni
+> registrazione viene respinta dal database.
 
 **Regola operativa**: nessuno script del repository tocca il database remoto. Le migration si
 eseguono **a mano dall'editor SQL del pannello Supabase**. Il 21/09 le ha eseguite il committente,
@@ -454,9 +460,10 @@ Non sono lavori incompleti: sono blocchi deliberati, in attesa di decisioni che 
 > il componente `MembershipSignup.astro` **non esiste più** — è stato rimosso in Fase 4 insieme al
 > modulo di iscrizione, e con lui il checkbox di consenso provvisorio; e `src/pages/privacy.astro`
 > **non contiene più campi `[…]` da compilare**: l'informativa è pubblicata, è alla versione **v7**
-> ed è vera. Quello che manca dei dati dell'ente — sede legale e PEC — sta in
-> `src/lib/associazione.ts` come stringa vuota, e finché è vuota **sul sito non compare niente**,
-> né il dato né una nota che spieghi che manca.
+> ed è vera. La **PEC** (`cognitariatz@pec.it`) è stata aggiunta il 30/09 in
+> `src/lib/associazione.ts` e compare nell'informativa accanto all'email. Manca ancora la **sede
+> legale**: è una stringa vuota, e finché è vuota **sul sito non compare niente**, né il dato né una
+> nota che spieghi che manca.
 
 ### 6.2 Il tesseramento per bonifico — cosa ha cambiato oltre alla home
 
@@ -483,14 +490,14 @@ destinatari), condizioni di pagamento, footer, area riservata.
 
 | | Questione | Di chi è | Blocca |
 |---|---|---|---|
-| 1 | **Secret `SUPABASE_URL` e `SUPABASE_ANON_KEY`** su GitHub, per il keep-alive (§0.1) | tecnico — **subito** | il progetto Supabase rischia la pausa |
+| 1 | ~~Secret `SUPABASE_URL` e `SUPABASE_ANON_KEY` su GitHub, per il keep-alive~~ — **chiusa il 30/09** (§0.1) | — | — |
 | 2 | **Retention matrix**: cosa si cancella, cosa si anonimizza, cosa si conserva | committente + commercialista | cancellazione account |
 | 3 | **Base giuridica art. 9 GDPR**: la forma giuridica e le attività reali dell'ente rientrano nell'eccezione **9(2)(d)**? | legale / compliance | iscrizione online |
 | 4 | **Elenco nominativo delle quote**: per la contabilità bastano gli estratti conto, o serve un elenco nominativo? Se serve, va tenuto **fuori** dal database delle iscrizioni (solo nome, anno, importo) e scritto nella sezione 6.6 dell'informativa | commercialista | sezione 6.6 informativa |
-| 5 | **Sede legale e PEC** dell'ente, se esiste: finché `src/lib/associazione.ts` le ha vuote, non compaiono da nessuna parte | committente | niente: il sito è coerente anche senza |
+| 5 | **Sede legale** dell'ente: finché `src/lib/associazione.ts` la ha vuota, non compare da nessuna parte. La PEC c'è dal 30/09 | committente | niente: il sito è coerente anche senza |
 | 6 | **Provisioning** Stripe, SMTP per i magic link, Turnstile | operativo | iscrizione online, pagamenti |
-| 7 | **Allineamento SPF/DKIM** per il mittente dei magic link (§5.5) | tecnico | accesso degli iscritti |
-| 8 | Eseguire **migration 0009** | tecnico | riapertura registrazioni |
+| 7 | **Allineamento SPF/DKIM** per il mittente dei magic link (§5.5). Dipende dalla 6: i record li fornisce il servizio SMTP scelto, finché non c'è non si può fare | tecnico, dopo la 6 | accesso degli iscritti |
+| 8 | ~~Eseguire migration 0009~~ — **chiusa il 30/09** (§5.2) | — | — |
 | 9 | **Rimborso a 14 giorni** e **12 mesi di conservazione** dopo la scadenza: scritti sul sito come proposta operativa, mai deliberati | direttivo | niente oggi, ma sono promesse pubbliche |
 
 La 2 e la 4 sono la stessa conversazione con il commercialista. La 3 è l'unica che potrebbe imporre
@@ -545,7 +552,7 @@ Le variabili `PUBLIC_*` sono lette **al momento della build**: cambiarle non ha 
 rifà un deploy. Quelle server sono lette a runtime: cambiarle ha effetto sulla richiesta successiva.
 
 **Secret su GitHub Actions** (separati da quelli Cloudflare): `SUPABASE_URL`, `SUPABASE_ANON_KEY`
-per il keep-alive. **Oggi non configurati** — vedi §0.1.
+per il keep-alive. **Configurati il 30/09** e verificati con un run manuale — vedi §0.1.
 
 ---
 
@@ -741,9 +748,16 @@ Per non farlo cercare nei commit:
 - **questo documento** portato nel repository, in `docs/handoff.md`, con il rimando dal README, e
   completato con §15 su come ripartire da zero su un'altra macchina.
 
-E quello che **non** è stato fatto, di proposito: nessun secret inserito (li inserisce chi ha gli
-accessi), nessuna migration eseguita sul database remoto, nessuna decisione presa al posto del
-direttivo.
+Nel pomeriggio, dal thread successivo, su indicazione del committente:
+
+- **secret `SUPABASE_URL` e `SUPABASE_ANON_KEY` inseriti** su GitHub (la chiave l'ha incollata il
+  committente), workflow lanciato a mano: run #2 verde, `HTTP 200`;
+- **migration 0009 eseguita** dall'editor SQL: `privacy_versions` ha 7 righe, fino a
+  `v7-2026-09-24`;
+- **PEC** `cognitariatz@pec.it` aggiunta in `src/lib/associazione.ts`.
+
+E quello che **non** è stato fatto, di proposito: nessuna decisione presa al posto del direttivo.
+SPF/DKIM restano aperti perché dipendono dalla scelta del servizio SMTP (§7, riga 6).
 
 ---
 

@@ -23,13 +23,13 @@ brief che non ho potuto verificare, o che i dati smentiscono, sono fuori dal cop
 
 **Id**: `hero` · **Posizione**: prima schermata · **Stato**: attività attuale
 
-**Occhiello**: Sindacato e osservatorio sul lavoro cognitivo
+**Occhiello**: Sindacato del cognitariato
 
 **Titolo** — aggiornato il 10/09/2026, dal manifesto 01
 > Non farti sostituire da un'AI.
 
 **Corpo**
-> Il lavoro ha una voce. La nostra. La tua.
+> Il sindacato del cognitariato contro l'AI del Big Tech. Non diventare schiavo di un algoritmo, non farti sostituire dall'AI: difendiamoci insieme dall'oligarchia
 >
 > Siamo un sindacato in costruzione e un osservatorio già attivo. Documentiamo cosa succede al
 > lavoro cognitivo e alle infrastrutture che lo reggono — data center, energia, contratti — e

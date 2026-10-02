@@ -18,7 +18,7 @@ interface Props {
 }
 
 const {
-  title = "COG U · Sindacato del lavoro cognitivo",
+  title = "COG U · Sindacato del cognitariato",
   description = "Sindacato del cognitariato: il lavoro cognitivo e le infrastrutture dell'AI — data center, energia, contratti. Documentiamo e mettiamo in comune quello che troviamo.",
   immagine,
   tipo = 'website',
@@ -53,7 +53,7 @@ const robots = noindex || anteprima ? 'noindex, nofollow' : 'index, follow';
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 const immagineAssoluta = immagine && Astro.site ? new URL(immagine, Astro.site).href : immagine;
 
-const ogTitolo = tipo === 'article' ? title : 'COG U · Sindacato del lavoro cognitivo';
+const ogTitolo = tipo === 'article' ? title : 'COG U · Sindacato del cognitariato';
 const ogDescrizione =
   tipo === 'article'
     ? description
@@ -90,7 +90,7 @@ const ogDescrizione =
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "COG U — Cognitive Workers Union",
-    "alternateName": "Sindacato del lavoro cognitivo",
+    "alternateName": "Sindacato del cognitariato",
     "description": "Associazione sindacale del cognitariato, costituita il 12 luglio 2026, che si occupa del lavoro cognitivo e delle infrastrutture dell'intelligenza artificiale: data center, energia, contratti.",
     "foundingDate": associazione.costituitaIl,
     // taxID e' il codice fiscale dell'ente. NON va aggiunto vatID: la partita IVA

@@ -1,4 +1,4 @@
-# COG U — Sindacato del lavoro cognitivo
+# COG U — Sindacato del cognitariato
 
 Sito di **COG U**, associazione sindacale senza fini di lucro, costituita il 12 luglio 2026.
 Online su **[cognitariatzone.org](https://cognitariatzone.org)**.

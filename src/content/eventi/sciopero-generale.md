@@ -2,8 +2,8 @@
 title: SCIOPERO GENERALE!
 bozza: false
 excerpt: COG U, SIAL COBAS & amici danno vita uno spezzone cognitario-bibliotecario
-inizio: 2026-10-31T06:45
-fine: 2026-10-31T09:50
+inizio: 2026-10-30T05:47
+fine: 2026-10-30T23:52
 ricorrenza: ''
 luogo: MILANO
 indirizzo: ''

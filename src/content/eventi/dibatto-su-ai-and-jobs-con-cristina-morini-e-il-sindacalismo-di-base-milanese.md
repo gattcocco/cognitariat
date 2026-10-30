@@ -1,7 +1,7 @@
 ---
-title: Dibatto su AI and Jobs con Cristina Morini e il sindacalismo di base milanese
+title: Dibatto su AI and Jobs con Cristina Morini e il sindacalismo di base
 bozza: false
-excerpt: A Ponte della Ghisolfa h21 un momento di dibattito importante alla vigilia dell'assemblea milanese sull'intelligenza artificiale
+excerpt: A Ponte della Ghisolfa h21 un momento di dibattito importante alla vigilia dell'assemblea milanese sull'intelligenza artificiale promossa da Effimera
 inizio: 2026-11-04T21:21
 fine: ''
 ricorrenza: ''

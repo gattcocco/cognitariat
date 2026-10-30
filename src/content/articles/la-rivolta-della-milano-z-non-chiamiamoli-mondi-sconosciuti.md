@@ -1,5 +1,5 @@
 ---
-title: 'La rivolta della Milano Z: Non chiamiamoli mondi sconosciuti'
+title: 'La rivolta della banlieue milanese: Non chiamiamoli mondi sconosciuti'
 bozza: false
 date: 2026-10-30
 autore: Editoriale

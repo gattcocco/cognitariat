@@ -8,7 +8,7 @@ ricorrenza: Ogni mercoledì · dalle 19
 luogo: ''
 indirizzo: ''
 copertina:
-  file: /images/agenda/assemblea-e-workshop-del-mercoledi.webp
+  file: /images/agenda/Adesivo COG U, skyline milanese al neon.png
   alt: "Illustrazione verticale: quattro giovani con zaini e cuffie camminano in un prato allagato di fiori bianchi attraversato da grossi cavi luminosi, guardando verso l'alto. Alle loro spalle una fila di edifici-server neri e le guglie del Duomo di Milano sotto una luna enorme; nel cielo galleggiano sedie da ufficio e finestre di computer. In basso il titolo «from Milano vs AI overlords and their data centers» e la firma «COG U — Cognitariat Union»."
 linkEsterno: null
 ---

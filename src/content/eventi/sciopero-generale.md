@@ -1,6 +1,6 @@
 ---
 title: SCIOPERO GENERALE!
-bozza: true
+bozza: false
 excerpt: COG U, SIAL COBAS & amici danno vita uno spezzone cognitario-bibliotecario
 inizio: 2026-10-30T05:06
 fine: 2026-10-30T05:07

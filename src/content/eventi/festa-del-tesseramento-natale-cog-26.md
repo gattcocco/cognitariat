@@ -1,6 +1,6 @@
 ---
 title: "FESTA DEL TESSERAMENTO: Natale Cog '26!"
-bozza: true
+bozza: false
 excerpt: 'DJ Vesuvio di Spazio Petardo, Première EUrevolution di Alex Foti, Banchetti Gastronomici e Politici, Giochi e Danze per arrivare a 100 iscritt3: 20 euro e la tessera vale fino al Primo Maggio!'
 inizio: 2026-12-16T19:10
 fine: 2026-12-17T01:10

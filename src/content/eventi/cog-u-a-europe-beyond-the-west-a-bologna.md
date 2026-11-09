@@ -1,6 +1,6 @@
 ---
 title: COG U a Europe Beyond the West a Bologna
-bozza: true
+bozza: false
 excerpt: il segretario e il propagandista di cogu relatori in un workshop su AI, lavoro, clima all'assemblea al TPO con movimenti da tutta Europa
 inizio: 2026-11-14T16:03
 fine: 2026-11-14T18:03

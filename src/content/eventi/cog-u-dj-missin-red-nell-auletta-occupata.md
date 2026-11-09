@@ -3,7 +3,7 @@ title: COG U + DJ Missin Red nell'Auletta Occupata
 bozza: false
 excerpt: Nel secondo chiostro in fondo a destra, da diversi anni i collettivi autonomi ed ecoradicali della Statale occupano un bello spazio sotto il porticato resistendo alle pressioni rettorali
 inizio: 2026-11-26T17:00
-fine: 2026-11-26T08:30
+fine: 2026-11-27T02:05
 ricorrenza: ''
 luogo: ''
 indirizzo: Chiostro Legnaia, Piazza Festa del Perdono (M3 Missori, M4 Sforza)

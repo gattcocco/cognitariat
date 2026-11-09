@@ -5,7 +5,7 @@ excerpt: Nel secondo chiostro in fondo a destra, da diversi anni i collettivi au
 inizio: 2026-11-26T17:00
 fine: 2026-11-27T02:05
 ricorrenza: ''
-luogo: ''
+luogo: Milano
 indirizzo: Chiostro Legnaia, Piazza Festa del Perdono (M3 Missori, M4 Sforza)
 copertina:
   file: /images/agenda/pasted-image-1794203436351.png

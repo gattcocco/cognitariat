@@ -6,7 +6,7 @@ inizio: 2026-12-16T19:10
 fine: 2026-12-17T01:10
 ricorrenza: ''
 luogo: Circolo Ponte della Ghisolfa
-indirizzo: viale Monza 255 (M1 Precotto)
+indirizzo: viale Monza 255 (MM1 Precotto)
 copertina:
   file: /images/agenda/pasted-image-1794201170321.png
   alt: poster

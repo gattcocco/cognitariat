@@ -236,6 +236,36 @@ un lettore di schermo ha già il titolo, la data e il luogo scritti sopra.
 
 ---
 
+## 5.2 La biblioteca
+
+La biblioteca raccoglie paper, rapporti e PDF a licenza libera che per noi sono
+fondamentali. Sta alla pagina `/biblioteca/` e nel CMS è la collezione
+«Biblioteca».
+
+**Non si carica nessun file.** Ogni voce è una scheda con i dati del testo e
+l'indirizzo del PDF sul sito di chi lo pubblica: l'editore, oppure un archivio
+come arXiv o HAL. Il sito non ha uno spazio per file pesanti, e un link non
+crea una copia, quindi le clausole della licenza non entrano in gioco.
+
+Per aggiungere un testo:
+
+1. In «Biblioteca» scegli «Nuovo testo». Nasce come bozza.
+2. Compila titolo, autori, anno, tema e «Perché leggerlo» (due o tre righe
+   scritte da noi, non l'abstract dell'autore).
+3. **Licenza**: copiala dalla pagina dell'editore, non darla per scontata. Tutta
+   la serie «CC BY», anche con «NC» o «ND», va bene, perché linkiamo e basta.
+   «Accesso libero, non CC» è solo per i testi che si scaricano senza
+   abbonamento ma non dichiarano nessuna licenza. Se non è né l'una né l'altra,
+   il testo non entra in biblioteca.
+4. **Indirizzo del PDF**: il link al file, completo e con `https://`. Aprilo
+   prima di salvare: deve scaricarsi o aprirsi senza password.
+5. Spegni «Bozza» per pubblicare.
+
+I temi e le licenze sono menu chiusi, e stanno in `src/lib/biblioteca-voci.ts`:
+per aggiungerne uno basta una riga lì, e CMS, schema e pagina lo prendono da
+soli. Un link che smette di funzionare non si accorge da solo: la voce va
+aggiornata o tolta a mano.
+
 ## 6. Cosa succede dopo che salvi
 
 1. Il CMS fa un commit su `dev` con un messaggio del tipo `Articolo: aggiorna "…"`.

@@ -22,6 +22,7 @@ export const GET: APIRoute = async ({ site }) => {
     { percorso: '/', priorita: '1.0', frequenza: 'weekly' },
     { percorso: '/blog/', priorita: '0.8', frequenza: 'weekly' },
     { percorso: '/agenda/', priorita: '0.8', frequenza: 'weekly' },
+    { percorso: '/biblioteca/', priorita: '0.7', frequenza: 'monthly' },
     { percorso: '/privacy/', priorita: '0.3', frequenza: 'yearly' },
     { percorso: '/condizioni/', priorita: '0.3', frequenza: 'yearly' },
   ];

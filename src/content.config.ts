@@ -4,6 +4,7 @@ import { glob } from 'astro/loaders';
 // La versione e' fissata a quella che usa Astro, perche' lo schema passa
 // attraverso il suo validatore: due major diversi non si parlerebbero.
 import { z } from 'zod';
+import { NOMI_LICENZE, NOMI_TEMI } from './lib/biblioteca-voci';
 
 /**
  * Modello dei contenuti per gli articoli del blog.
@@ -372,4 +373,70 @@ const eventi = defineCollection({
     }),
 });
 
-export const collections = { articles, eventi };
+/**
+ * Biblioteca: paper, rapporti e PDF a licenza libera che consideriamo
+ * fondamentali per capire l'AI e il lavoro.
+ *
+ * NIENTE FILE, SOLO LINK. La biblioteca non ospita nulla: ogni voce e' una
+ * scheda con i dati del testo e l'indirizzo del PDF sul sito di chi lo
+ * pubblica (l'editore, un archivio come arXiv o HAL). Il motivo e' pratico — il
+ * sito non ha uno spazio di hosting per file pesanti, e caricarli nel
+ * repository li metterebbe per sempre nella storia di Git — e anche di
+ * rispetto delle licenze: un link non crea una copia, e le clausole
+ * «non commerciale» e «non opere derivate» non entrano mai in gioco.
+ *
+ * Una voce e' una pagina sola, l'elenco: non c'e' una pagina per ciascun
+ * testo, perche' non ci sarebbe niente da metterci oltre a quello che la scheda
+ * gia' dice. Per lo stesso motivo non c'e' un corpo Markdown.
+ *
+ * La licenza e il tema vengono da elenchi chiusi (src/lib/biblioteca-voci.ts),
+ * gli stessi che il CMS offre come menu a tendina.
+ */
+const biblioteca = defineCollection({
+  loader: glob({ base: './src/content/biblioteca', pattern: '**/*.md' }),
+  schema: z.object({
+    /** Titolo del testo, nella lingua in cui e' stato pubblicato. */
+    title: z.string().trim().min(1, 'Manca il titolo.'),
+
+    /** Chi l'ha scritto, come una riga di testo: «Cognome, Nome; Cognome, Nome» o «Nome Cognome, …». */
+    autori: z.string().trim().min(1, 'Servono gli autori.'),
+
+    /** Anno di pubblicazione. Un numero, non una data: nessuno cita un paper col giorno. */
+    anno: z.coerce.number().int().min(1900).max(2100),
+
+    /** Dove e' uscito: rivista, convegno, archivio. Facoltativo, ma aiuta a citarlo. */
+    pubblicatoIn: daCms(z.string().optional()),
+
+    tema: z.enum(NOMI_TEMI, { error: 'Tema non previsto: scegline uno dall\'elenco.' }),
+
+    /** Perche' e' qui: due o tre righe, scritte da noi, non l'abstract dell'autore. */
+    excerpt: z.string().trim().min(1, 'Scrivi due righe su perche\' vale la pena leggerlo.'),
+
+    licenza: z.enum(NOMI_LICENZE, { error: 'Licenza non prevista: scegline una dall\'elenco.' }),
+
+    /** Indirizzo del PDF, sul sito di chi lo pubblica. Solo https. */
+    urlPdf: z.url('Indirizzo non valido: serve un URL completo, con https://'),
+
+    /** Pagina ufficiale del testo (scheda dell'editore, DOI), se diversa dal PDF. */
+    urlScheda: daCms(z.url('Indirizzo non valido: serve un URL completo, con https://').optional()),
+
+    /** Fuori dalla pagina pubblica e dalla sitemap finche' e' true. */
+    bozza: z.boolean().default(false),
+  })
+    .superRefine((d, ctx) => {
+      // z.url() accetta anche http:// e altri schemi: qui no. Un link in chiaro
+      // da una pagina servita in https e' un avviso del browser per chi legge.
+      for (const campo of ['urlPdf', 'urlScheda'] as const) {
+        const v = d[campo];
+        if (v && !v.startsWith('https://')) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [campo],
+            message: 'L\'indirizzo deve cominciare con https://.',
+          });
+        }
+      }
+    }),
+});
+
+export const collections = { articles, eventi, biblioteca };

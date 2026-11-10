@@ -8,7 +8,7 @@
  * a chi non l'ha causato, mezz'ora dopo, e sembra che il sito sia rotto.
  *
  * Dal 09/09/2026 le collection sono due, articoli e agenda, e il controllo gira
- * su entrambe: era il momento in cui un difetto poteva nascondersi nella seconda
+ * su entrambe (dal 10/11/2026 anche sulla biblioteca): era il momento in cui un difetto poteva nascondersi nella seconda
  * mentre la prima restava a posto.
  *
  * Si controllano anche i campi data. Devono restare senza fuso (`picker_utc:
@@ -68,6 +68,18 @@ const COLLECTION = {
       inizio: { date_format: "'YYYY-MM-DD'", time_format: "'HH:mm'", picker_utc: 'false' },
       fine: { date_format: "'YYYY-MM-DD'", time_format: "'HH:mm'", picker_utc: 'false' },
     },
+  },
+  // La biblioteca non ha copertina ne' date: la voce e' una scheda con un link a
+  // un PDF altrui, e il corpo Markdown non c'e' (niente da raccontare oltre ai
+  // campi). Quello che il controllo tiene fermo qui e' che il CMS e lo schema
+  // abbiano gli stessi campi.
+  biblioteca: {
+    variabile: 'biblioteca',
+    soloNelCms: [],
+    soloNelSito: [],
+    gruppi: {},
+    gruppiObbligatori: [],
+    date: {},
   },
 };
 

@@ -18,6 +18,7 @@
   "exclude": [
     "../src/lib/supabase-browser.ts",
     "../src/lib/articoli.ts",
-    "../src/lib/eventi.ts"
+    "../src/lib/eventi.ts",
+    "../src/lib/biblioteca.ts"
   ]
 }

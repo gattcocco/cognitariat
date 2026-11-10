@@ -1684,3 +1684,87 @@ main[tabindex='-1']:focus-visible {
   /* Il pulsante prende tutta la riga: col pollice si sbaglia meno. */
   .iban-copia { flex-basis: 100%; }
 }
+
+/* =========================================================================
+   Biblioteca
+   Un elenco di schede senza immagini: titolo, citazione, due righe sul perche'
+   e, sotto, il pulsante che porta al PDF. Il pulsante e' l'unico elemento
+   pieno della scheda; la licenza e il sito di destinazione stanno accanto, in
+   piccolo, perche' chi sta per uscire dal sito deve sapere dove va e a quali
+   condizioni.
+   ========================================================================= */
+
+.biblioteca-elenco {
+  list-style: none;
+  padding: 0;
+  margin: 40px 0 0;
+  display: grid;
+  gap: 28px;
+}
+.voce-biblioteca {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--bordo);
+}
+.biblioteca-elenco > li:last-child .voce-biblioteca {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.voce-tema {
+  font-size: 0.8rem;
+  font-weight: var(--peso-forte);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--verde);
+}
+.voce-titolo {
+  font-size: 1.35rem;
+  font-weight: var(--peso-titolo);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+}
+.voce-citazione {
+  font-weight: var(--peso-medio);
+  color: var(--nero-secondario);
+  overflow-wrap: break-word;
+}
+.voce-sommario {
+  max-width: 62ch;
+  color: var(--nero-secondario);
+  overflow-wrap: break-word;
+}
+.voce-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: 6px;
+  font-size: 0.95rem;
+}
+.voce-pdf {
+  display: inline-block;
+  background: var(--nero);
+  color: var(--bianco);
+  font-weight: var(--peso-forte);
+  text-decoration: none;
+  padding: 12px 22px;
+  border-radius: var(--raggio-pill);
+  transition: background 0.2s;
+}
+.voce-pdf:hover {
+  background: var(--verde-hover);
+}
+.voce-licenza {
+  font-weight: var(--peso-forte);
+}
+.voce-licenza a {
+  color: inherit;
+  text-underline-offset: 2px;
+}
+.voce-sito {
+  color: var(--nero-secondario);
+}

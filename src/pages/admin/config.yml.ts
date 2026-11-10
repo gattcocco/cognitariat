@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { LICENZE, TEMI } from '../../lib/biblioteca-voci';
 
 /**
  * Configurazione del CMS, generata al build invece di stare ferma in public/.
@@ -48,6 +49,12 @@ export const GET: APIRoute = ({ site }) => {
    * capirebbe perche' gli articoli non compaiono.
    */
   const ramo = import.meta.env.CMS_BRANCH ?? process.env?.CMS_BRANCH ?? 'dev';
+
+  // Le opzioni dei due menu a tendina vengono da src/lib/biblioteca-voci.ts: la stessa
+  // lista che lo schema usa per rifiutare un valore sconosciuto.
+  const rientro = '          - ';
+  const opzioniTemi = TEMI.map((t) => `${rientro}'${t}'`).join('\n');
+  const opzioniLicenze = LICENZE.map((l) => `${rientro}'${l.nome}'`).join('\n');
 
   const yaml = `# File generato da src/pages/admin/config.yml.ts: non modificarlo a mano,
 # le modifiche verrebbero sovrascritte al prossimo build.
@@ -320,6 +327,106 @@ collections:
             widget: string
             required: true
             hint: Cosa ci si trova, per esempio "L'evento su Mastodon".
+
+  - name: biblioteca
+    label: Biblioteca
+    label_singular: Testo
+    description: >-
+      Paper, rapporti e PDF a licenza libera (Creative Commons o comunque ad
+      accesso libero). Qui non si carica nessun file: si inserisce l'indirizzo
+      del PDF sul sito di chi lo pubblica, l'editore o un archivio come arXiv.
+      Finche' "Bozza" e' attivo la voce non compare sul sito.
+    folder: src/content/biblioteca
+    create: true
+    slug: '{{slug}}'
+    extension: md
+    format: frontmatter
+    sortable_fields: ['anno', 'title']
+    view_filters:
+      - label: Solo bozze
+        field: bozza
+        pattern: true
+      - label: Solo pubblicati
+        field: bozza
+        pattern: false
+    fields:
+      - label: Titolo
+        name: title
+        widget: string
+        hint: Il titolo del testo, nella lingua in cui e' stato pubblicato.
+
+      - label: Bozza
+        name: bozza
+        widget: boolean
+        default: true
+        hint: >-
+          Acceso, la voce non compare nella biblioteca. Spegnerlo e' l'atto con
+          cui si pubblica. Prima di spegnerlo: apri il link del PDF e controlla
+          la licenza sulla pagina dell'editore.
+
+      - label: Autori
+        name: autori
+        widget: string
+        hint: >-
+          Come li scrive il testo, separati da virgole. Per i rapporti con molti
+          autori: i primi tre e "et al.".
+
+      - label: Anno
+        name: anno
+        widget: number
+        value_type: int
+        min: 1900
+        max: 2100
+        hint: L'anno di pubblicazione.
+
+      - label: Pubblicato su
+        name: pubblicatoIn
+        widget: string
+        required: false
+        hint: Facoltativo. Rivista, convegno o archivio, per esempio "ACM FAccT 2021".
+
+      - label: Tema
+        name: tema
+        widget: select
+        options:
+${opzioniTemi}
+        hint: >-
+          Uno solo. L'elenco e' chiuso: per aggiungere un tema va cambiato il
+          codice del sito, e questo evita che "Lavoro" e "lavoro e piattaforme"
+          diventino due temi.
+
+      - label: Perche' leggerlo
+        name: excerpt
+        widget: text
+        hint: >-
+          Due o tre righe scritte da noi: di cosa parla e perche' e' qui. Non
+          ricopiare l'abstract dell'autore.
+
+      - label: Licenza
+        name: licenza
+        widget: select
+        options:
+${opzioniLicenze}
+        hint: >-
+          Quella dichiarata sulla pagina dell'editore, non quella che ci si
+          aspetta. "Accesso libero, non CC" solo se il testo si scarica senza
+          abbonamento ma non dichiara nessuna licenza. Se non e' ne' l'una ne'
+          l'altra, il testo non va in biblioteca.
+
+      - label: Indirizzo del PDF
+        name: urlPdf
+        widget: string
+        pattern: ['^https://', "Deve cominciare con https://"]
+        hint: >-
+          Il link al file sul sito di chi lo pubblica. Non si carica nessun
+          file: se il link smette di funzionare, la voce va aggiornata o tolta.
+
+      - label: Pagina ufficiale
+        name: urlScheda
+        widget: string
+        required: false
+        pattern: ['^https://', "Deve cominciare con https://"]
+        hint: Facoltativo. La pagina del testo sul sito dell'editore, o il suo DOI.
 `;
 
   return new Response(yaml, {

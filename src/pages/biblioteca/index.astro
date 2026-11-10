@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { vociDaCostruire, urlLicenza, sitoDi } from '../../lib/biblioteca';
+import { bozzeVisibili } from '../../lib/articoli';
+
+/**
+ * Biblioteca: i testi fondamentali a licenza libera.
+ *
+ * Una sola pagina, nessuna pagina per voce: ogni scheda rimanda al PDF sul sito
+ * di chi lo pubblica. Non ospitiamo file — vedi la nota in src/content.config.ts.
+ *
+ * `vociDaCostruire` e non `getCollection` diretto: e' il punto in cui una bozza
+ * smette di esistere in una build pubblica.
+ */
+const voci = await vociDaCostruire();
+const bozze = voci.filter((v) => v.data.bozza).length;
+---
+<BaseLayout
+  title="Biblioteca — COG U"
+  description="I testi fondamentali per capire l'AI e il lavoro, a licenza libera: paper e rapporti da leggere e scaricare gratuitamente."
+>
+  <Header />
+  <main id="contenuto" tabindex="-1" class="container pagina-testo">
+    <div class="prosa">
+      <h1 class="section-title">Biblioteca</h1>
+      <p>
+        Paper e rapporti che per noi sono fondamentali, tutti a licenza libera: si leggono e si
+        scaricano senza abbonamento. Non ne teniamo copie. Ogni scheda porta al PDF sul sito di chi
+        lo pubblica, e lì valgono le condizioni della licenza indicata.
+      </p>
+    </div>
+
+    {bozzeVisibili && bozze > 0 && (
+      <p class="nota-metodo" style="margin-top: 28px;">
+        {bozze === 1
+          ? "Questa è un'anteprima locale: una voce è ancora una bozza ed è visibile solo qui."
+          : `Questa è un'anteprima locale: ${bozze} voci sono ancora bozze e sono visibili solo qui.`}
+        {' '}Sul sito costruito le bozze non compaiono da nessuna parte.
+      </p>
+    )}
+
+    {voci.length === 0 ? (
+      <p class="prosa" style="margin-top: 40px;">La biblioteca è ancora vuota.</p>
+    ) : (
+      <ul class="biblioteca-elenco">
+        {voci.map((voce) => {
+          const d = voce.data;
+          const licenzaUrl = urlLicenza(d.licenza);
+          return (
+            <li>
+              <article class="voce-biblioteca">
+                <p class="voce-tema">{d.tema}</p>
+                <h2 class="voce-titolo">{d.title}</h2>
+                <p class="voce-citazione">
+                  {[d.autori, String(d.anno), d.pubblicatoIn].filter(Boolean).join(' · ')}
+                </p>
+                <p class="voce-sommario">{d.excerpt}</p>
+                <p class="voce-azioni">
+                  <a
+                    class="voce-pdf"
+                    href={d.urlPdf}
+                    rel="noopener noreferrer"
+                    aria-label={`Leggi il PDF: ${d.title} (si apre su ${sitoDi(d.urlPdf)})`}
+                  >Leggi il PDF</a>
+                  <span class="voce-licenza">
+                    {licenzaUrl ? (
+                      <a href={licenzaUrl} rel="noopener noreferrer">{d.licenza}</a>
+                    ) : (
+                      d.licenza
+                    )}
+                  </span>
+                  <span class="voce-sito">su {sitoDi(d.urlPdf)}</span>
+                  {d.urlScheda && (
+                    <a class="link" href={d.urlScheda} rel="noopener noreferrer">Pagina ufficiale</a>
+                  )}
+                </p>
+                {d.bozza && <p class="occhiello occhiello--progetto">Bozza — non pubblicata</p>}
+              </article>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </main>
+  <Footer />
+</BaseLayout>

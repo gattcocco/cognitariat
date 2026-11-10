@@ -1,12 +1,13 @@
 ---
 title: Manifesto Cognitario contro l’Oligarchia AI
+bozza: false
 date: 2026-09-06
 autore: Editoriale
-excerpt: "Il testo con cui COG U si presenta: da dove veniamo, contro cosa ci organizziamo e cosa chiediamo — dalla riduzione dell’orario al salario minimo, dai data center al posto delle macchine linguistiche nel lavoro cognitivo."
+excerpt: 'Il testo con cui COG U si presenta: da dove veniamo, contro cosa ci organizziamo e cosa chiediamo — dalla riduzione dell’orario al salario minimo, dai data center al posto delle macchine linguistiche nel lavoro cognitivo.'
 copertina:
-  file: /images/articoli/manifesto-cognitario-contro-oligarchia-ai.webp
-  alt: "Manifesto grafico in nero, rosso e panna. Sei figure in controluce tirano una grossa corda rossa legata a una torre di server che si sta crepando; dietro, lo skyline di Milano con il Duomo. In alto il titolo «COG U — Manifesto cognitario contro l’oligarchia AI»."
-bozza: false
+  file: /images/articoli/WhatsApp Image 2026-11-09 at 7.09.31 AM.jpeg
+  alt: Manifesto grafico in nero, rosso e panna. Sei figure in controluce tirano una grossa corda rossa legata a una torre di server che si sta crepando; dietro, lo skyline di Milano con il Duomo. In alto il titolo «COG U — Manifesto cognitario contro l’oligarchia AI».
+notaRedazione: ''
 ---
 
 Siamo Cognitari.e: lavoriamo nella comunicazione, nella scuola, negli uffici, nelle biblioteche, nella università, nella logistica, nel sociale. Siamo precari.e di ogni genere ed etnia e la nostra sopravvivenza è messa a repentaglio dalle macchine linguistiche in cui investono banche e aziende per sostituirci dopo che ci hanno usato per addestrarle.
@@ -33,7 +34,7 @@ La costruzione di data center per trilioni di dollari accelera la distruzione cl
 
 Noi pensiamo che la risposta della società all’AI, con le contestazioni di studenti e studentesse nei campus universitari e la mobilitazione di intere comunità negli Stati Uniti e altrove, sia strategicamente incompleta senza la costruzione di un’organizzazione sindacale che sia all’altezza dei tempi e della radicalità della sfida che ci attende e che sappia utilizzare le tecnologie a disposizione e i linguaggi della cultura online per negoziare riduzione degli orari (smartworking, settimana 4 giorni) e aumento dei salari (minimo €20/h), sconfiggere precarietà e disoccupazione con il conflitto sociale e un nuovo welfare universalista (UBI, UBC, demogrants ecc.) e arrivare a sabotare il potere del tecnocapitale e dei governi reazionari che lo sostengono.
 
-Iscriviamoci tutt* a COG U – the cognitive syndicalist union: partiamo da Milano e hinterland per costruire questa organizzazione rivoluzionaria ma guardiamo al mondo come orizzionte, da Berlino a Shanghai, da New York e Copenhagen: sole e soli siamo nessuno; insieme saremo tutto.
+Iscriviamoci tutt\* a COG U – the cognitive syndicalist union: partiamo da Milano e hinterland per costruire questa organizzazione rivoluzionaria ma guardiamo al mondo come orizzionte, da Berlino a Shanghai, da New York e Copenhagen: sole e soli siamo nessuno; insieme saremo tutto.
 
 STOP AI: difendi il tuo futuro col sindacato del cognitariato!
 

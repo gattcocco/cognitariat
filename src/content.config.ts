@@ -4,7 +4,7 @@ import { glob } from 'astro/loaders';
 // La versione e' fissata a quella che usa Astro, perche' lo schema passa
 // attraverso il suo validatore: due major diversi non si parlerebbero.
 import { z } from 'zod';
-import { NOMI_LICENZE, NOMI_TEMI } from './lib/biblioteca-voci';
+import { NOMI_LICENZE, NOMI_TEMI, NOMI_TIPI } from './lib/biblioteca-voci';
 
 /**
  * Modello dei contenuti per gli articoli del blog.
@@ -398,6 +398,12 @@ const biblioteca = defineCollection({
     /** Titolo del testo, nella lingua in cui e' stato pubblicato. */
     title: z.string().trim().min(1, 'Manca il titolo.'),
 
+    /**
+     * Paper, rapporto, libro o strumento. Se manca vale «Paper»: le prime voci
+     * della biblioteca erano tutte paper e non portano il campo.
+     */
+    tipo: z.enum(NOMI_TIPI, { error: "Tipo non previsto: scegline uno dall'elenco." }).default('Paper'),
+
     /** Chi l'ha scritto, come una riga di testo: «Cognome, Nome; Cognome, Nome» o «Nome Cognome, …». */
     autori: z.string().trim().min(1, 'Servono gli autori.'),
 
@@ -414,16 +420,28 @@ const biblioteca = defineCollection({
 
     licenza: z.enum(NOMI_LICENZE, { error: 'Licenza non prevista: scegline una dall\'elenco.' }),
 
-    /** Indirizzo del PDF, sul sito di chi lo pubblica. Solo https. */
-    urlPdf: z.url('Indirizzo non valido: serve un URL completo, con https://'),
+    /**
+     * Indirizzo del PDF, sul sito di chi lo pubblica. Solo https. Facoltativo:
+     * un libro a pagamento o un programma non hanno un PDF da linkare, e per
+     * loro basta la pagina ufficiale (vedi sotto, dove si impone che ce ne sia
+     * almeno una delle due).
+     */
+    urlPdf: daCms(z.url('Indirizzo non valido: serve un URL completo, con https://').optional()),
 
-    /** Pagina ufficiale del testo (scheda dell'editore, DOI), se diversa dal PDF. */
+    /** Pagina ufficiale del testo (scheda dell'editore, DOI, sito del programma). */
     urlScheda: daCms(z.url('Indirizzo non valido: serve un URL completo, con https://').optional()),
 
     /** Fuori dalla pagina pubblica e dalla sitemap finche' e' true. */
     bozza: z.boolean().default(false),
   })
     .superRefine((d, ctx) => {
+      if (!d.urlPdf && !d.urlScheda) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['urlPdf'],
+          message: 'Serve almeno un indirizzo: quello del PDF o quello della pagina ufficiale.',
+        });
+      }
       // z.url() accetta anche http:// e altri schemi: qui no. Un link in chiaro
       // da una pagina servita in https e' un avviso del browser per chi legge.
       for (const campo of ['urlPdf', 'urlScheda'] as const) {

@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import { vociDaCostruire, urlLicenza, sitoDi } from '../../lib/biblioteca';
+import { vociDaCostruire, urlLicenza, sitoDi, perTipo, etichettaAzione } from '../../lib/biblioteca';
 import { bozzeVisibili } from '../../lib/articoli';
 
 /**
@@ -16,19 +16,28 @@ import { bozzeVisibili } from '../../lib/articoli';
  */
 const voci = await vociDaCostruire();
 const bozze = voci.filter((v) => v.data.bozza).length;
+const gruppi = perTipo(voci);
+
+/** Il titolo di ogni gruppo, al plurale, e una riga che dice cosa ci si trova. */
+const SEZIONI: Record<string, { titolo: string; nota: string }> = {
+  Paper: { titolo: 'Paper', nota: 'Articoli di ricerca, quasi tutti scaricabili gratis.' },
+  Rapporto: { titolo: 'Rapporti e guide', nota: 'Documenti di sindacati e organizzazioni, pensati per chi negozia e organizza.' },
+  Libro: { titolo: 'Libri', nota: 'Alcuni si leggono gratis online, altri sono a pagamento: la scheda lo dice.' },
+  Strumento: { titolo: 'Strumenti', nota: 'Programmi e standard per costruire e misurare, con la loro licenza.' },
+};
 ---
 <BaseLayout
   title="Biblioteca — COG U"
-  description="I testi fondamentali per capire l'AI e il lavoro, a licenza libera: paper e rapporti da leggere e scaricare gratuitamente."
+  description="I testi per capire l'AI e il lavoro e per costruirne una nostra: paper, rapporti, libri e strumenti, con la licenza di ciascuno."
 >
   <Header />
   <main id="contenuto" tabindex="-1" class="container pagina-testo">
     <div class="prosa">
       <h1 class="section-title">Biblioteca</h1>
       <p>
-        Paper e rapporti che per noi sono fondamentali, tutti a licenza libera: si leggono e si
-        scaricano senza abbonamento. Non ne teniamo copie. Ogni scheda porta al PDF sul sito di chi
-        lo pubblica, e lì valgono le condizioni della licenza indicata.
+        I testi che per noi contano: paper, rapporti, libri e strumenti per capire l'AI e il lavoro, e per
+        costruirne una nostra. Non ne teniamo copie. Ogni scheda porta al sito di chi lo pubblica, e
+        lì valgono le condizioni della licenza indicata: per i libri a pagamento lo diciamo apertamente.
       </p>
     </div>
 
@@ -44,15 +53,20 @@ const bozze = voci.filter((v) => v.data.bozza).length;
     {voci.length === 0 ? (
       <p class="prosa" style="margin-top: 40px;">La biblioteca è ancora vuota.</p>
     ) : (
+      gruppi.map((g) => (
+      <section aria-labelledby={`sezione-${g.tipo}`}>
+      <h2 class="biblioteca-sezione" id={`sezione-${g.tipo}`}>{SEZIONI[g.tipo].titolo}</h2>
+      <p class="biblioteca-sezione-nota">{SEZIONI[g.tipo].nota}</p>
       <ul class="biblioteca-elenco">
-        {voci.map((voce) => {
+        {g.voci.map((voce) => {
           const d = voce.data;
           const licenzaUrl = urlLicenza(d.licenza);
+          const destinazione = (d.urlPdf ?? d.urlScheda) as string;
           return (
             <li>
-              <article class="voce-biblioteca">
+              <article class="voce-biblioteca" id={voce.id}>
                 <p class="voce-tema">{d.tema}</p>
-                <h2 class="voce-titolo">{d.title}</h2>
+                <h3 class="voce-titolo">{d.title}</h3>
                 <p class="voce-citazione">
                   {[d.autori, String(d.anno), d.pubblicatoIn].filter(Boolean).join(' · ')}
                 </p>
@@ -60,10 +74,10 @@ const bozze = voci.filter((v) => v.data.bozza).length;
                 <p class="voce-azioni">
                   <a
                     class="voce-pdf"
-                    href={d.urlPdf}
+                    href={destinazione}
                     rel="noopener noreferrer"
-                    aria-label={`Leggi il PDF: ${d.title} (si apre su ${sitoDi(d.urlPdf)})`}
-                  >Leggi il PDF</a>
+                    aria-label={`${etichettaAzione(d.tipo, !!d.urlPdf)}: ${d.title} (si apre su ${sitoDi(destinazione)})`}
+                  >{etichettaAzione(d.tipo, !!d.urlPdf)}</a>
                   <span class="voce-licenza">
                     {licenzaUrl ? (
                       <a href={licenzaUrl} rel="noopener noreferrer">{d.licenza}</a>
@@ -71,8 +85,8 @@ const bozze = voci.filter((v) => v.data.bozza).length;
                       d.licenza
                     )}
                   </span>
-                  <span class="voce-sito">su {sitoDi(d.urlPdf)}</span>
-                  {d.urlScheda && (
+                  <span class="voce-sito">su {sitoDi(destinazione)}</span>
+                  {d.urlPdf && d.urlScheda && (
                     <a class="link" href={d.urlScheda} rel="noopener noreferrer">Pagina ufficiale</a>
                   )}
                 </p>
@@ -82,6 +96,8 @@ const bozze = voci.filter((v) => v.data.bozza).length;
           );
         })}
       </ul>
+      </section>
+      ))
     )}
   </main>
   <Footer />

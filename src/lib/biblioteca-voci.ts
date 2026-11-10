@@ -33,12 +33,27 @@ export const LICENZE = [
   { nome: 'CC0 1.0', url: 'https://creativecommons.org/publicdomain/zero/1.0/deed.it' },
   { nome: 'Pubblico dominio', url: undefined },
   { nome: 'Accesso libero, non CC', url: undefined },
+  // Le ultime tre non sono licenze di testi ma di libri e programmi: stanno
+  // nella stessa lista perche' la scheda deve dire apertamente a che condizioni
+  // si ha a che fare, anche quando la risposta e' «si paga» o «e' software».
+  { nome: 'Commerciale (a pagamento)', url: undefined },
+  { nome: 'Software libero (MIT)', url: 'https://opensource.org/license/mit' },
+  { nome: 'Licenza propria, non open source', url: undefined },
 ] as const;
 
 export type NomeLicenza = (typeof LICENZE)[number]['nome'];
 
 /** Solo i nomi, nella forma che `z.enum` richiede: almeno uno, e fissi. */
 export const NOMI_LICENZE = LICENZE.map((l) => l.nome) as [NomeLicenza, ...NomeLicenza[]];
+
+/**
+ * Che cosa e' una voce, e quindi come si legge il suo pulsante: un paper o un
+ * rapporto si scarica, un libro si cerca o si compra, uno strumento si installa.
+ * Un elenco chiuso come i temi, per lo stesso motivo.
+ */
+export const TIPI = ['Paper', 'Rapporto', 'Libro', 'Strumento'] as const;
+export type Tipo = (typeof TIPI)[number];
+export const NOMI_TIPI = [...TIPI] as [Tipo, ...Tipo[]];
 
 /**
  * I temi, nell'ordine in cui il CMS li offre. Un elenco chiuso e non un campo
@@ -51,6 +66,8 @@ export const TEMI = [
   'Lavoro e piattaforme',
   'Potere e valori della ricerca',
   'Panorama e fondamenti',
+  'IA locale e autonomia tecnica',
+  'Dati, partecipazione e diritti',
 ] as const;
 
 export type Tema = (typeof TEMI)[number];

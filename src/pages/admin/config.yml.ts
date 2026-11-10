@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { LICENZE, TEMI } from '../../lib/biblioteca-voci';
+import { LICENZE, TEMI, TIPI } from '../../lib/biblioteca-voci';
 
 /**
  * Configurazione del CMS, generata al build invece di stare ferma in public/.
@@ -53,6 +53,7 @@ export const GET: APIRoute = ({ site }) => {
   // Le opzioni dei due menu a tendina vengono da src/lib/biblioteca-voci.ts: la stessa
   // lista che lo schema usa per rifiutare un valore sconosciuto.
   const rientro = '          - ';
+  const opzioniTipi = TIPI.map((t) => `${rientro}'${t}'`).join('\n');
   const opzioniTemi = TEMI.map((t) => `${rientro}'${t}'`).join('\n');
   const opzioniLicenze = LICENZE.map((l) => `${rientro}'${l.nome}'`).join('\n');
 
@@ -332,10 +333,10 @@ collections:
     label: Biblioteca
     label_singular: Testo
     description: >-
-      Paper, rapporti e PDF a licenza libera (Creative Commons o comunque ad
-      accesso libero). Qui non si carica nessun file: si inserisce l'indirizzo
-      del PDF sul sito di chi lo pubblica, l'editore o un archivio come arXiv.
-      Finche' "Bozza" e' attivo la voce non compare sul sito.
+      Paper, rapporti, libri e strumenti. Qui non si carica nessun file: si
+      inserisce l'indirizzo del PDF o della pagina ufficiale, sul sito di chi lo
+      pubblica. I libri a pagamento e i programmi entrano con la loro licenza
+      scritta chiara. Finche' "Bozza" e' attivo la voce non compare sul sito.
     folder: src/content/biblioteca
     create: true
     slug: '{{slug}}'
@@ -363,6 +364,17 @@ collections:
           Acceso, la voce non compare nella biblioteca. Spegnerlo e' l'atto con
           cui si pubblica. Prima di spegnerlo: apri il link del PDF e controlla
           la licenza sulla pagina dell'editore.
+
+      - label: Tipo
+        name: tipo
+        widget: select
+        default: Paper
+        options:
+${opzioniTipi}
+        hint: >-
+          Paper e rapporti si scaricano, i libri si cercano o si comprano, gli
+          strumenti sono programmi o standard. Decide in quale sezione finisce
+          la voce e cosa dice il pulsante.
 
       - label: Autori
         name: autori
@@ -416,17 +428,22 @@ ${opzioniLicenze}
       - label: Indirizzo del PDF
         name: urlPdf
         widget: string
+        required: false
         pattern: ['^https://', "Deve cominciare con https://"]
         hint: >-
-          Il link al file sul sito di chi lo pubblica. Non si carica nessun
-          file: se il link smette di funzionare, la voce va aggiornata o tolta.
+          Facoltativo, ma serve almeno questo o la pagina ufficiale. Il link al
+          file sul sito di chi lo pubblica: non si carica nessun file, e se il
+          link smette di funzionare la voce va aggiornata o tolta.
 
       - label: Pagina ufficiale
         name: urlScheda
         widget: string
         required: false
         pattern: ['^https://', "Deve cominciare con https://"]
-        hint: Facoltativo. La pagina del testo sul sito dell'editore, o il suo DOI.
+        hint: >-
+          Facoltativo se c'e' il PDF; obbligatoria per libri e programmi, che
+          non hanno un PDF. La pagina sul sito dell'editore, il DOI, o il sito
+          del programma.
 `;
 
   return new Response(yaml, {

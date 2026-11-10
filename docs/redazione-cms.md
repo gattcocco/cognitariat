@@ -238,33 +238,39 @@ un lettore di schermo ha già il titolo, la data e il luogo scritti sopra.
 
 ## 5.2 La biblioteca
 
-La biblioteca raccoglie paper, rapporti e PDF a licenza libera che per noi sono
-fondamentali. Sta alla pagina `/biblioteca/` e nel CMS è la collezione
-«Biblioteca».
+La biblioteca raccoglie i testi che per noi contano: paper, rapporti, libri e
+strumenti. Sta alla pagina `/biblioteca/` e nel CMS è la collezione
+«Biblioteca». La pagina li raggruppa per **tipo**.
 
-**Non si carica nessun file.** Ogni voce è una scheda con i dati del testo e
-l'indirizzo del PDF sul sito di chi lo pubblica: l'editore, oppure un archivio
-come arXiv o HAL. Il sito non ha uno spazio per file pesanti, e un link non
-crea una copia, quindi le clausole della licenza non entrano in gioco.
+**Non si carica nessun file.** Ogni voce è una scheda con i dati del testo e un
+indirizzo sul sito di chi lo pubblica: l'editore, un archivio come arXiv o HAL,
+il sito di un programma. Il sito non ha uno spazio per file pesanti, e un link
+non crea una copia, quindi le clausole della licenza non entrano in gioco.
 
-Per aggiungere un testo:
+Per aggiungere una voce:
 
 1. In «Biblioteca» scegli «Nuovo testo». Nasce come bozza.
-2. Compila titolo, autori, anno, tema e «Perché leggerlo» (due o tre righe
+2. **Tipo**: Paper e Rapporto si scaricano, Libro si cerca o si compra,
+   Strumento è un programma o uno standard. Decide la sezione e cosa dice il
+   pulsante.
+3. Compila titolo, autori, anno, tema e «Perché leggerlo» (due o tre righe
    scritte da noi, non l'abstract dell'autore).
-3. **Licenza**: copiala dalla pagina dell'editore, non darla per scontata. Tutta
-   la serie «CC BY», anche con «NC» o «ND», va bene, perché linkiamo e basta.
-   «Accesso libero, non CC» è solo per i testi che si scaricano senza
-   abbonamento ma non dichiarano nessuna licenza. Se non è né l'una né l'altra,
-   il testo non entra in biblioteca.
-4. **Indirizzo del PDF**: il link al file, completo e con `https://`. Aprilo
-   prima di salvare: deve scaricarsi o aprirsi senza password.
-5. Spegni «Bozza» per pubblicare.
+4. **Licenza**: copiala dalla pagina dell'editore, non darla per scontata.
+   Tutta la serie «CC BY», anche con «NC» o «ND», va bene, perché linkiamo e
+   basta. «Accesso libero, non CC» è per i testi che si scaricano senza
+   abbonamento ma non dichiarano nessuna licenza. «Commerciale (a pagamento)» è
+   per i libri che si comprano: la scheda lo dice apertamente. Per i programmi:
+   «Software libero (MIT)» oppure «Licenza propria, non open source» se la
+   licenza ha clausole che un sindacato deve conoscere.
+5. **Indirizzo del PDF** e/o **Pagina ufficiale**: serve almeno uno dei due.
+   Libri e programmi non hanno un PDF, e per loro basta la pagina ufficiale.
+   Apri il link prima di salvare: deve aprirsi senza password.
+6. Spegni «Bozza» per pubblicare.
 
-I temi e le licenze sono menu chiusi, e stanno in `src/lib/biblioteca-voci.ts`:
-per aggiungerne uno basta una riga lì, e CMS, schema e pagina lo prendono da
-soli. Un link che smette di funzionare non si accorge da solo: la voce va
-aggiornata o tolta a mano.
+I temi, i tipi e le licenze sono menu chiusi, e stanno in
+`src/lib/biblioteca-voci.ts`: per aggiungerne uno basta una riga lì, e CMS,
+schema e pagina lo prendono da soli. Un link che smette di funzionare non si
+accorge da solo: la voce va aggiornata o tolta a mano.
 
 ## 6. Cosa succede dopo che salvi
 

@@ -1768,3 +1768,13 @@ main[tabindex='-1']:focus-visible {
 .voce-sito {
   color: var(--nero-secondario);
 }
+
+/* Biblioteca: i gruppi per tipo (Paper, Rapporti, Libri, Strumenti). */
+.biblioteca-sezione {
+  margin: 56px 0 6px;
+  font-size: 1.5rem;
+}
+.biblioteca-sezione-nota {
+  margin: 0 0 8px;
+  color: var(--nero-secondario);
+}

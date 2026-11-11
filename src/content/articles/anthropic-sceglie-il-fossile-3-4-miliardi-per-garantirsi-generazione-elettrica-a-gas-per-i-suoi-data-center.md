@@ -1,6 +1,6 @@
 ---
 title: 'Anthropic sceglie il fossile: 3,4 miliardi per garantirsi generazione elettrica a gas per i suoi data center'
-bozza: false
+bozza: true
 date: 2026-11-09
 autore: Editoriale
 excerpt: Secondo il Financial Times si tratterebbe del più grande acquisto singolo conosciuto di apparecchiature per la produzione elettrica da parte di un’azienda specializzata nell’intelligenza artificiale

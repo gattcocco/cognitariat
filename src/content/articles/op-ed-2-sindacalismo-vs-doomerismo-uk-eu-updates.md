@@ -1,5 +1,5 @@
 ---
-title: 'op-ed #2 Sindacalismo vs Doomerismo: UK+EU Updates'
+title: 'op-ed #3 Sindacalismo vs Doomerismo: UK+EU Updates'
 bozza: false
 date: 2026-11-11
 autore: Editoriale

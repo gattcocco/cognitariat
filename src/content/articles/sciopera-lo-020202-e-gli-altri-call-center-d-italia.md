@@ -3,7 +3,7 @@ title: "op-ed #4 Sciopera lo 020202 e gli altri call center d'Italia"
 bozza: false
 date: 2026-11-12
 autore: Editoriale
-excerpt: il Sial COBAS ha fatto un presidio ad Assago, perché le lavoratrici e i lavoratori di call center e customer sono minacciate dall'AI
+excerpt: il Sial COBAS ha fatto un presidio ad Assago, perché le lavoratrici e i lavoratori di call center e customer care sono minacciate dall'AI
 copertina:
   file: /images/articoli/pasted-image-1794477102947.png
   alt: call

@@ -13,4 +13,6 @@ copertina:
 linkEsterno: null
 ---
 
-Portiamo il nostro cargo sound system: BLOCCHIAMO MILANO!
+Portiamo il nostro cargo sound system: BLOCCHIAMO MILANO! Ci troviamo in Cairoli alle 9 angolo Via Camperio. C U THERE
+
+![poster](/images/agenda/20261112-114226.png "genstrike")

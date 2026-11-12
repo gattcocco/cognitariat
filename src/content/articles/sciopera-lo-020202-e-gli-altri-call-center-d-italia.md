@@ -1,5 +1,5 @@
 ---
-title: Sciopera lo 020202 e gli altri call center d'Italia
+title: "op-ed #4 Sciopera lo 020202 e gli altri call center d'Italia"
 bozza: false
 date: 2026-11-12
 autore: Editoriale

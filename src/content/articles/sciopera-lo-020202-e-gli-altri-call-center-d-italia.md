@@ -5,7 +5,7 @@ date: 2026-11-12
 autore: Editoriale
 excerpt: il Sial COBAS ha fatto un presidio ad Assago, perché le lavoratrici e i lavoratori di call center e customer care sono minacciate dall'AI
 copertina:
-  file: /images/articoli/pasted-image-1794477102947.png
+  file: /images/articoli/pasted-image-1794477766199.png
   alt: call
 notaRedazione: ''
 ---

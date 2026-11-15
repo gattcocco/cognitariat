@@ -1,6 +1,6 @@
 ---
 title: Spezzone Cognitario Autonomo contro Data Center
-bozza: true
+bozza: false
 excerpt: CONTRO LE BIG TECH E I LORO DATA CENTER
 inizio: 2026-11-21T15:30
 fine: 2026-11-21T18:55

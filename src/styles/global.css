@@ -1773,8 +1773,161 @@ main[tabindex='-1']:focus-visible {
 .biblioteca-sezione {
   margin: 56px 0 6px;
   font-size: 1.5rem;
+  /* L'intestazione del sito e' sticky: senza questo margine di scorrimento il
+     sommario porterebbe al punto giusto della pagina ma con il titolo della
+     sezione nascosto sotto l'intestazione, e chi clicca «Libri a scaffale» si
+     ritroverebbe davanti una scheda senza sapere di essere arrivato.
+     Due valori perche' l'intestazione e' alta ~85px da larga e ~170px quando
+     il menu va a capo. */
+  scroll-margin-top: 100px;
+}
+@media (max-width: 800px) {
+  .biblioteca-sezione {
+    scroll-margin-top: 185px;
+  }
 }
 .biblioteca-sezione-nota {
   margin: 0 0 8px;
   color: var(--nero-secondario);
+}
+
+/* =========================================================================
+   BIBLIOTECA — il sommario in cima e il filtro per tema
+
+   La pagina e' lunga e si scorre tutta: senza una mappa in cima, quello che
+   c'e' in fondo non esiste. Due file di etichette, e non sono la stessa cosa:
+   le sezioni sono ancore — link a questa stessa pagina, funzionano senza
+   JavaScript — mentre i temi attraversano tutte le sezioni e quindi non
+   possono essere ancore: sono un filtro, e il markup li tiene `hidden` finche'
+   il programma non li accende.
+
+   I colori vengono dai token: il bordo e' --bordo-campo perche' questi sono
+   controlli e WCAG 1.4.11 chiede 3:1 sul fondo adiacente; il tema scelto e'
+   verde con testo bianco (4,95:1). Non usare il giallo per il testo.
+   ========================================================================= */
+.biblioteca-menu {
+  margin-top: 32px;
+  padding: 20px 22px;
+  border: 1px solid var(--bordo-forte);
+  border-radius: var(--raggio-m);
+}
+.biblioteca-menu-titolo {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  font-weight: var(--peso-forte);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--nero-secondario);
+}
+.biblioteca-tag {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--bordo-campo);
+  border-radius: var(--raggio-pill);
+  background: var(--bianco);
+  color: var(--nero);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: var(--peso-medio);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.tag:hover {
+  background: var(--giallo-tenue);
+}
+.tag-quante {
+  font-size: 0.8rem;
+  font-weight: var(--peso-forte);
+  color: var(--nero-secondario);
+}
+.tag--filtro[aria-pressed='true'] {
+  background: var(--verde);
+  border-color: var(--verde);
+  color: var(--bianco);
+}
+.tag--filtro[aria-pressed='true'] .tag-quante {
+  color: var(--bianco);
+}
+.tag--filtro[aria-pressed='true']:hover {
+  background: var(--verde-hover);
+  border-color: var(--verde-hover);
+}
+.biblioteca-filtro {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--bordo);
+}
+.biblioteca-filtro-stato {
+  /* Lo spazio e' riservato anche quando e' vuoto: il messaggio che compare
+     dopo un clic non deve far saltare in basso tutta la pagina. */
+  min-height: 1.4em;
+  margin: 10px 0 0;
+  color: var(--nero-secondario);
+  font-size: 0.95rem;
+}
+
+/* =========================================================================
+   BIBLIOTECA — lo scaffale
+
+   L'unica sezione con i file nostri, e l'unica con le copertine: l'accento
+   serve a dire che li' le regole sono diverse — si scarica da qui, non si va
+   altrove. Fondo giallo molto diluito con testo nero (il giallo pieno come
+   fondo di testo sta a 14,47:1, questo e' un velo) e un bordo verde a sinistra,
+   lo stesso gesto delle citazioni nel corpo del sito.
+   ========================================================================= */
+.biblioteca-gruppo--scaffale {
+  margin-top: 56px;
+  padding: 4px 24px 28px;
+  border-left: 4px solid var(--verde);
+  border-radius: 0 var(--raggio-m) var(--raggio-m) 0;
+  background: var(--giallo-tenue);
+}
+.biblioteca-gruppo--scaffale .biblioteca-sezione {
+  margin-top: 28px;
+}
+.biblioteca-gruppo--scaffale .biblioteca-elenco {
+  margin-top: 28px;
+}
+.biblioteca-gruppo--scaffale .voce-biblioteca {
+  border-bottom-color: var(--bordo-forte);
+}
+.voce-biblioteca--copertina {
+  flex-direction: row;
+  gap: 24px;
+  align-items: flex-start;
+}
+.voce-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.voce-copertina {
+  flex: 0 0 auto;
+  width: 148px;
+  height: auto;
+  border-radius: var(--raggio-s);
+  box-shadow: 0 6px 18px var(--ombra);
+}
+@media (max-width: 600px) {
+  .voce-biblioteca--copertina {
+    flex-direction: column;
+  }
+  .voce-copertina {
+    width: 120px;
+  }
+  .biblioteca-gruppo--scaffale {
+    padding: 4px 16px 24px;
+  }
 }

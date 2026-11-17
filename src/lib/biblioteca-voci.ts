@@ -50,8 +50,14 @@ export const NOMI_LICENZE = LICENZE.map((l) => l.nome) as [NomeLicenza, ...NomeL
  * Che cosa e' una voce, e quindi come si legge il suo pulsante: un paper o un
  * rapporto si scarica, un libro si cerca o si compra, uno strumento si installa.
  * Un elenco chiuso come i temi, per lo stesso motivo.
+ *
+ * «Libro a scaffale» e' l'unico tipo che possiamo ospitare noi: sono i libri
+ * dell'ecosistema del cognitariato che l'autore stesso distribuisce gratis, con
+ * una licenza che la condivisione la incoraggia. Sta prima di «Libro» perche'
+ * l'ordine di questo elenco e' l'ordine delle sezioni nella pagina: lo scaffale
+ * apre la parte dei libri, e quelli da cercare altrove vengono dopo.
  */
-export const TIPI = ['Paper', 'Rapporto', 'Libro', 'Strumento'] as const;
+export const TIPI = ['Paper', 'Rapporto', 'Libro a scaffale', 'Libro', 'Strumento'] as const;
 export type Tipo = (typeof TIPI)[number];
 export const NOMI_TIPI = [...TIPI] as [Tipo, ...Tipo[]];
 

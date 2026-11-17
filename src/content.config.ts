@@ -385,6 +385,18 @@ const eventi = defineCollection({
  * rispetto delle licenze: un link non crea una copia, e le clausole
  * «non commerciale» e «non opere derivate» non entrano mai in gioco.
  *
+ * L'ECCEZIONE, E I SUOI CONFINI. Il tipo «Libro a scaffale» e' l'unico che
+ * puo' puntare a un file nostro, in /public/libri. Vale a tre condizioni
+ * insieme, e non e' una porta aperta:
+ *   1. la licenza del libro consente esplicitamente la redistribuzione — non
+ *      «l'autore ci ha dato il permesso a voce», ma una licenza scritta nel
+ *      libro, verificabile da chiunque apra il PDF;
+ *   2. il file e' leggero (indicativamente sotto i 5 MB): quello che entra nel
+ *      repository resta per sempre nella storia di Git, anche se lo si cancella;
+ *   3. il libro viene dall'ecosistema del cognitariato — e' uno scaffale, non
+ *      un archivio generale.
+ * Fuori da questi tre punti vale la regola di sopra: si mette il link e basta.
+ *
  * Una voce e' una pagina sola, l'elenco: non c'e' una pagina per ciascun
  * testo, perche' non ci sarebbe niente da metterci oltre a quello che la scheda
  * gia' dice. Per lo stesso motivo non c'e' un corpo Markdown.
@@ -421,12 +433,50 @@ const biblioteca = defineCollection({
     licenza: z.enum(NOMI_LICENZE, { error: 'Licenza non prevista: scegline una dall\'elenco.' }),
 
     /**
-     * Indirizzo del PDF, sul sito di chi lo pubblica. Solo https. Facoltativo:
-     * un libro a pagamento o un programma non hanno un PDF da linkare, e per
-     * loro basta la pagina ufficiale (vedi sotto, dove si impone che ce ne sia
-     * almeno una delle due).
+     * Indirizzo del PDF, sul sito di chi lo pubblica. Facoltativo: un libro a
+     * pagamento o un programma non hanno un PDF da linkare, e per loro basta la
+     * pagina ufficiale (vedi sotto, dove si impone che ce ne sia almeno una
+     * delle due).
+     *
+     * Due forme ammesse, e il controllo vero e' nel superRefine piu' sotto:
+     * `https://...` per il file altrui, oppure un percorso interno che comincia
+     * con `/` per i soli libri a scaffale, l'eccezione descritta in cima.
+     * Non `z.url()`, che rifiuterebbe il percorso interno.
      */
-    urlPdf: daCms(z.url('Indirizzo non valido: serve un URL completo, con https://').optional()),
+    urlPdf: daCms(z.string().trim().min(1, 'Indirizzo vuoto.').optional()),
+
+    /**
+     * Copertina del libro. Solo per lo scaffale: le altre voci sono schede di
+     * testo e restano senza immagine, perche' il logo di un editore o la prima
+     * pagina di un paper non aggiungono niente a chi legge.
+     *
+     * Immagine e testo alternativo insieme, come per articoli ed eventi: una
+     * copertina senza alt e' un buco per chi usa uno screen reader, e tenerli
+     * in un oggetto solo rende impossibile ricordarsene uno e scordare l'altro.
+     */
+    copertina: z.preprocess(
+      (v) => {
+        if (v === null || v === undefined) return undefined;
+        // Un gruppo facoltativo lasciato vuoto nel CMS non arriva come assente:
+        // arriva come oggetto con i campi a stringa vuota. Senza questo, una
+        // voce salvata senza copertina fermerebbe la build con «Manca il file»,
+        // e chi l'ha salvata non ha nessun modo di capire cosa ha sbagliato —
+        // perche' non ha sbagliato niente.
+        if (typeof v === 'object') {
+          const o = v as Record<string, unknown>;
+          const file = String(o.file ?? '').trim();
+          const alt = String(o.alt ?? '').trim();
+          if (!file && !alt) return undefined;
+        }
+        return v;
+      },
+      z
+        .object({
+          file: z.string().trim().min(1, 'Manca il file della copertina.'),
+          alt: z.string().trim().min(1, 'Manca il testo alternativo della copertina.'),
+        })
+        .optional()
+    ),
 
     /** Pagina ufficiale del testo (scheda dell'editore, DOI, sito del programma). */
     urlScheda: daCms(z.url('Indirizzo non valido: serve un URL completo, con https://').optional()),
@@ -442,17 +492,53 @@ const biblioteca = defineCollection({
           message: 'Serve almeno un indirizzo: quello del PDF o quello della pagina ufficiale.',
         });
       }
-      // z.url() accetta anche http:// e altri schemi: qui no. Un link in chiaro
-      // da una pagina servita in https e' un avviso del browser per chi legge.
-      for (const campo of ['urlPdf', 'urlScheda'] as const) {
-        const v = d[campo];
-        if (v && !v.startsWith('https://')) {
+      // Un link in chiaro da una pagina servita in https e' un avviso del
+      // browser per chi legge: niente http://, e niente altri schemi.
+      // La pagina ufficiale e' sempre altrove, quindi e' sempre https://.
+      if (d.urlScheda && !d.urlScheda.startsWith('https://')) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['urlScheda'],
+          message: 'L\'indirizzo deve cominciare con https://.',
+        });
+      }
+
+      // Il PDF ammette anche un percorso interno, ma solo per lo scaffale e
+      // solo dentro /libri/: e' il recinto dell'eccezione descritta in cima.
+      // Senza questo controllo «niente file, solo link» diventerebbe una
+      // raccomandazione, e la prima voce a ignorarla non se ne accorgerebbe.
+      if (d.urlPdf) {
+        const interno = d.urlPdf.startsWith('/');
+        if (interno && d.tipo !== 'Libro a scaffale') {
           ctx.addIssue({
             code: 'custom',
-            path: [campo],
+            path: ['urlPdf'],
+            message:
+              'Solo i libri a scaffale possono puntare a un file nostro: per gli altri serve il link al sito di chi lo pubblica.',
+          });
+        } else if (interno && !d.urlPdf.startsWith('/libri/')) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['urlPdf'],
+            message: 'I file dello scaffale stanno in /libri/: il percorso deve cominciare di li\'.',
+          });
+        } else if (!interno && !d.urlPdf.startsWith('https://')) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['urlPdf'],
             message: 'L\'indirizzo deve cominciare con https://.',
           });
         }
+      }
+
+      // Uno scaffale e' fatto di libri che si possono prendere: una voce senza
+      // il suo PDF, li' dentro, prometterebbe un download che non c'e'.
+      if (d.tipo === 'Libro a scaffale' && !d.urlPdf) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['urlPdf'],
+          message: 'Un libro a scaffale si scarica: serve il PDF. Senza, e\' un libro come gli altri.',
+        });
       }
     }),
 });

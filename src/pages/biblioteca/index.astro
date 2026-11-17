@@ -2,14 +2,24 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import { vociDaCostruire, urlLicenza, sitoDi, perTipo, etichettaAzione } from '../../lib/biblioteca';
+import {
+  vociDaCostruire,
+  urlLicenza,
+  sitoDi,
+  perTipo,
+  etichettaAzione,
+  interno,
+  ancoraTipo,
+} from '../../lib/biblioteca';
+import { TEMI } from '../../lib/biblioteca-voci';
 import { bozzeVisibili } from '../../lib/articoli';
 
 /**
  * Biblioteca: i testi fondamentali a licenza libera.
  *
  * Una sola pagina, nessuna pagina per voce: ogni scheda rimanda al PDF sul sito
- * di chi lo pubblica. Non ospitiamo file — vedi la nota in src/content.config.ts.
+ * di chi lo pubblica. Non ospitiamo file — con l'unica eccezione dei «libri a
+ * scaffale», vedi la nota in src/content.config.ts.
  *
  * `vociDaCostruire` e non `getCollection` diretto: e' il punto in cui una bozza
  * smette di esistere in una build pubblica.
@@ -18,10 +28,28 @@ const voci = await vociDaCostruire();
 const bozze = voci.filter((v) => v.data.bozza).length;
 const gruppi = perTipo(voci);
 
+/**
+ * I temi presenti davvero, nell'ordine dell'elenco chiuso, con quante voci
+ * hanno ciascuno. I temi attraversano le sezioni — «IA locale» sta fra i paper,
+ * fra i rapporti e fra gli strumenti — quindi come ancora non porterebbero da
+ * nessuna parte: diventano un filtro, e il numero dice subito se vale la pena.
+ */
+const temi = TEMI.map((nome) => ({
+  nome,
+  quante: voci.filter((v) => v.data.tema === nome).length,
+})).filter((t) => t.quante > 0);
+
+/** Lo scaffale esiste solo se ha dei libri: senza, l'introduzione non lo promette. */
+const haScaffale = gruppi.some((g) => g.tipo === 'Libro a scaffale');
+
 /** Il titolo di ogni gruppo, al plurale, e una riga che dice cosa ci si trova. */
 const SEZIONI: Record<string, { titolo: string; nota: string }> = {
   Paper: { titolo: 'Paper', nota: 'Articoli di ricerca, quasi tutti scaricabili gratis.' },
   Rapporto: { titolo: 'Rapporti e guide', nota: 'Documenti di sindacati e organizzazioni, pensati per chi negozia e organizza.' },
+  'Libro a scaffale': {
+    titolo: 'Libri a scaffale',
+    nota: "Romanzi e saggi dall'ecosistema del cognitariato, scaricabili gratuitamente. Questi li teniamo noi: li scarichi da qui perché la licenza con cui escono lo permette e lo chiede.",
+  },
   Libro: { titolo: 'Libri', nota: 'Alcuni si leggono gratis online, altri sono a pagamento: la scheda lo dice.' },
   Strumento: { titolo: 'Strumenti', nota: 'Programmi e standard per costruire e misurare, con la loro licenza.' },
 };
@@ -36,8 +64,12 @@ const SEZIONI: Record<string, { titolo: string; nota: string }> = {
       <h1 class="section-title">Biblioteca</h1>
       <p>
         I testi che per noi contano: paper, rapporti, libri e strumenti per capire l'AI e il lavoro, e per
-        costruirne una nostra. Non ne teniamo copie. Ogni scheda porta al sito di chi lo pubblica, e
-        lì valgono le condizioni della licenza indicata: per i libri a pagamento lo diciamo apertamente.
+        costruirne una nostra. Di quasi tutti non teniamo copia: ogni scheda porta al sito di chi li
+        pubblica, e lì valgono le condizioni della licenza indicata: per i libri a pagamento lo diciamo
+        apertamente.{haScaffale && (
+          <> L'eccezione sono i <a class="link" href="#sezione-libro-a-scaffale">libri a scaffale</a>, che
+          scarichi direttamente da qui.</>
+        )}
       </p>
     </div>
 
@@ -53,52 +85,179 @@ const SEZIONI: Record<string, { titolo: string; nota: string }> = {
     {voci.length === 0 ? (
       <p class="prosa" style="margin-top: 40px;">La biblioteca è ancora vuota.</p>
     ) : (
-      gruppi.map((g) => (
-      <section aria-labelledby={`sezione-${g.tipo}`}>
-      <h2 class="biblioteca-sezione" id={`sezione-${g.tipo}`}>{SEZIONI[g.tipo].titolo}</h2>
+      <>
+      {/*
+        Il sommario. Le sezioni sono ancore e funzionano senza JavaScript: sono
+        link a parti di questa stessa pagina. I temi no — sono un filtro, e un
+        filtro senza JavaScript non esiste: per questo l'elenco nasce `hidden` e
+        lo scopre il programma. Chi non ha JavaScript non vede un comando che
+        non funziona, e la pagina resta intera.
+      */}
+      <nav class="biblioteca-menu" aria-label="Sommario della biblioteca">
+        <p class="biblioteca-menu-titolo" id="menu-sezioni">Vai a</p>
+        <ul class="biblioteca-tag" aria-labelledby="menu-sezioni">
+          {gruppi.map((g) => (
+            <li data-tag-sezione={ancoraTipo(g.tipo)}>
+              <a class="tag" href={`#${ancoraTipo(g.tipo)}`}>
+                {SEZIONI[g.tipo].titolo}{' '}<span class="tag-quante">{g.voci.length}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <div class="biblioteca-filtro" data-filtro hidden>
+          <p class="biblioteca-menu-titolo" id="menu-temi">Per tema</p>
+          <ul class="biblioteca-tag" aria-labelledby="menu-temi">
+            <li>
+              <button type="button" class="tag tag--filtro" data-tema="" aria-pressed="true">
+                Tutti{' '}<span class="tag-quante">{voci.length}</span>
+              </button>
+            </li>
+            {temi.map((t) => (
+              <li>
+                <button type="button" class="tag tag--filtro" data-tema={t.nome} aria-pressed="false">
+                  {t.nome}{' '}<span class="tag-quante">{t.quante}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p class="biblioteca-filtro-stato" data-stato role="status" aria-live="polite"></p>
+        </div>
+      </nav>
+
+      {gruppi.map((g) => (
+      <section
+        aria-labelledby={ancoraTipo(g.tipo)}
+        data-sezione
+        class={g.tipo === 'Libro a scaffale' ? 'biblioteca-gruppo biblioteca-gruppo--scaffale' : 'biblioteca-gruppo'}
+      >
+      <h2 class="biblioteca-sezione" id={ancoraTipo(g.tipo)}>{SEZIONI[g.tipo].titolo}</h2>
       <p class="biblioteca-sezione-nota">{SEZIONI[g.tipo].nota}</p>
       <ul class="biblioteca-elenco">
         {g.voci.map((voce) => {
           const d = voce.data;
           const licenzaUrl = urlLicenza(d.licenza);
           const destinazione = (d.urlPdf ?? d.urlScheda) as string;
+          const nostro = interno(destinazione);
+          const etichetta = etichettaAzione(d.tipo, !!d.urlPdf);
           return (
-            <li>
-              <article class="voce-biblioteca" id={voce.id}>
-                <p class="voce-tema">{d.tema}</p>
-                <h3 class="voce-titolo">{d.title}</h3>
-                <p class="voce-citazione">
-                  {[d.autori, String(d.anno), d.pubblicatoIn].filter(Boolean).join(' · ')}
-                </p>
-                <p class="voce-sommario">{d.excerpt}</p>
-                <p class="voce-azioni">
-                  <a
-                    class="voce-pdf"
-                    href={destinazione}
-                    rel="noopener noreferrer"
-                    aria-label={`${etichettaAzione(d.tipo, !!d.urlPdf)}: ${d.title} (si apre su ${sitoDi(destinazione)})`}
-                  >{etichettaAzione(d.tipo, !!d.urlPdf)}</a>
-                  <span class="voce-licenza">
-                    {licenzaUrl ? (
-                      <a href={licenzaUrl} rel="noopener noreferrer">{d.licenza}</a>
-                    ) : (
-                      d.licenza
+            <li data-tema={d.tema}>
+              <article class={d.copertina ? 'voce-biblioteca voce-biblioteca--copertina' : 'voce-biblioteca'} id={voce.id}>
+                {d.copertina && (
+                  <img
+                    class="voce-copertina"
+                    src={d.copertina.file}
+                    alt={d.copertina.alt}
+                    width="520"
+                    height="722"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                <div class="voce-corpo">
+                  <p class="voce-tema">{d.tema}</p>
+                  <h3 class="voce-titolo">{d.title}</h3>
+                  <p class="voce-citazione">
+                    {[d.autori, String(d.anno), d.pubblicatoIn].filter(Boolean).join(' · ')}
+                  </p>
+                  <p class="voce-sommario">{d.excerpt}</p>
+                  <p class="voce-azioni">
+                    <a
+                      class="voce-pdf"
+                      href={destinazione}
+                      rel="noopener noreferrer"
+                      download={nostro ? '' : undefined}
+                      aria-label={nostro
+                        ? `${etichetta}: ${d.title} (PDF)`
+                        : `${etichetta}: ${d.title} (si apre su ${sitoDi(destinazione)})`}
+                    >{etichetta}</a>
+                    <span class="voce-licenza">
+                      {licenzaUrl ? (
+                        <a href={licenzaUrl} rel="noopener noreferrer">{d.licenza}</a>
+                      ) : (
+                        d.licenza
+                      )}
+                    </span>
+                    <span class="voce-sito">{nostro ? 'PDF, da questo sito' : `su ${sitoDi(destinazione)}`}</span>
+                    {d.urlPdf && d.urlScheda && (
+                      <a class="link" href={d.urlScheda} rel="noopener noreferrer">Pagina ufficiale</a>
                     )}
-                  </span>
-                  <span class="voce-sito">su {sitoDi(destinazione)}</span>
-                  {d.urlPdf && d.urlScheda && (
-                    <a class="link" href={d.urlScheda} rel="noopener noreferrer">Pagina ufficiale</a>
-                  )}
-                </p>
-                {d.bozza && <p class="occhiello occhiello--progetto">Bozza — non pubblicata</p>}
+                  </p>
+                  {d.bozza && <p class="occhiello occhiello--progetto">Bozza — non pubblicata</p>}
+                </div>
               </article>
             </li>
           );
         })}
       </ul>
       </section>
-      ))
+      ))}
+      </>
     )}
   </main>
   <Footer />
 </BaseLayout>
+
+<script>
+  /*
+    Filtro per tema. Nasce spento: l'elenco dei temi e' `hidden` nel markup e lo
+    scopre questo programma, cosi' chi non ha JavaScript non vede dei pulsanti
+    che non farebbero niente.
+    Nasconde le voci di un tema diverso e, con loro, le sezioni che restano
+    senza voci: una sezione con il titolo e il vuoto sotto sembra un guasto.
+    Niente URL e niente cronologia: e' un filtro di lettura, non una pagina.
+  */
+  const filtro = document.querySelector<HTMLElement>('[data-filtro]');
+  if (filtro) {
+    filtro.hidden = false;
+
+    const pulsanti = Array.from(filtro.querySelectorAll<HTMLButtonElement>('button[data-tema]'));
+    const stato = filtro.querySelector<HTMLElement>('[data-stato]');
+    const voci = Array.from(document.querySelectorAll<HTMLLIElement>('.biblioteca-elenco > li'));
+    const sezioni = Array.from(document.querySelectorAll<HTMLElement>('[data-sezione]'));
+
+    filtro.addEventListener('click', (evento) => {
+      const premuto = (evento.target as HTMLElement).closest<HTMLButtonElement>('button[data-tema]');
+      if (!premuto) return;
+
+      const tema = premuto.dataset.tema ?? '';
+      let mostrate = 0;
+
+      for (const voce of voci) {
+        const suo = !tema || voce.dataset.tema === tema;
+        voce.hidden = !suo;
+        if (suo) mostrate++;
+      }
+
+      for (const sezione of sezioni) {
+        const quante = Array.from(
+          sezione.querySelectorAll<HTMLLIElement>('.biblioteca-elenco > li')
+        ).filter((v) => !v.hidden).length;
+        sezione.hidden = quante === 0;
+
+        /*
+          Il sommario segue il filtro. Senza questo, «Vai a» resterebbe pieno di
+          scorciatoie verso sezioni che il filtro ha appena svuotato: si clicca
+          e non succede niente, che e' il modo peggiore di rompersi — nessun
+          errore, solo un link che non fa quello che dice.
+        */
+        const scorciatoia = document.querySelector<HTMLLIElement>(
+          `[data-tag-sezione="${sezione.querySelector('h2')?.id ?? ''}"]`
+        );
+        if (scorciatoia) {
+          scorciatoia.hidden = quante === 0;
+          const numero = scorciatoia.querySelector<HTMLElement>('.tag-quante');
+          if (numero) numero.textContent = String(quante);
+        }
+      }
+
+      for (const p of pulsanti) p.setAttribute('aria-pressed', String(p === premuto));
+
+      if (stato) {
+        stato.textContent = tema
+          ? `${mostrate} ${mostrate === 1 ? 'voce' : 'voci'} sul tema «${tema}».`
+          : '';
+      }
+    });
+  }
+</script>

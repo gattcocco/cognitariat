@@ -333,15 +333,21 @@ collections:
     label: Biblioteca
     label_singular: Testo
     description: >-
-      Paper, rapporti, libri e strumenti. Qui non si carica nessun file: si
-      inserisce l'indirizzo del PDF o della pagina ufficiale, sul sito di chi lo
-      pubblica. I libri a pagamento e i programmi entrano con la loro licenza
-      scritta chiara. Finche' "Bozza" e' attivo la voce non compare sul sito.
+      Paper, rapporti, libri e strumenti. Di regola qui non si carica nessun
+      file: si inserisce l'indirizzo del PDF o della pagina ufficiale, sul sito
+      di chi lo pubblica. L'unica eccezione e' "Libro a scaffale", per i libri
+      dell'ecosistema del cognitariato che l'autore distribuisce gratis: quelli
+      li ospitiamo noi, e la licenza del libro deve dirlo per iscritto. I libri
+      a pagamento e i programmi entrano con la loro licenza scritta chiara.
+      Finche' "Bozza" e' attivo la voce non compare sul sito.
     folder: src/content/biblioteca
     create: true
     slug: '{{slug}}'
     extension: md
     format: frontmatter
+    # Le copertine dello scaffale: l'unica immagine della biblioteca.
+    media_folder: /public/images/biblioteca
+    public_folder: /images/biblioteca
     sortable_fields: ['anno', 'title']
     view_filters:
       - label: Solo bozze
@@ -373,8 +379,10 @@ collections:
 ${opzioniTipi}
         hint: >-
           Paper e rapporti si scaricano, i libri si cercano o si comprano, gli
-          strumenti sono programmi o standard. Decide in quale sezione finisce
-          la voce e cosa dice il pulsante.
+          strumenti sono programmi o standard. "Libro a scaffale" e' il libro
+          che ospitiamo noi e che si scarica da qui: usalo solo se la licenza
+          del libro consente la redistribuzione. Decide in quale sezione
+          finisce la voce e cosa dice il pulsante.
 
       - label: Autori
         name: autori
@@ -425,15 +433,45 @@ ${opzioniLicenze}
           abbonamento ma non dichiara nessuna licenza. Se non e' ne' l'una ne'
           l'altra, il testo non va in biblioteca.
 
+      - label: Copertina
+        name: copertina
+        widget: object
+        required: false
+        collapsed: false
+        hint: >-
+          Solo per i libri a scaffale: le altre voci sono schede di testo e
+          restano senza immagine. Se la carichi, il testo alternativo non e'
+          facoltativo.
+        # Il gruppo e' facoltativo (required: false qui sopra), le sue parti no:
+        # se la copertina c'e', servono tutte e due. E' la stessa regola di
+        # articoli ed eventi, ed e' quella che verifica-cms.mjs tiene ferma —
+        # un'immagine senza testo alternativo fermerebbe la build dopo un
+        # salvataggio che il CMS ha dato per riuscito.
+        fields:
+          - label: Immagine
+            name: file
+            widget: image
+            required: true
+            hint: La copertina del libro, fronte. Meglio sotto i 400 kB.
+          - label: Testo alternativo
+            name: alt
+            widget: string
+            required: true
+            hint: >-
+              Che cosa si vede, per chi non la vede: "Copertina di
+              EUrevolution: una folla in corteo davanti al Duomo".
+
       - label: Indirizzo del PDF
         name: urlPdf
         widget: string
         required: false
-        pattern: ['^https://', "Deve cominciare con https://"]
+        pattern: ['^(https://|/libri/)', "Deve cominciare con https:// — oppure con /libri/ per un libro a scaffale"]
         hint: >-
-          Facoltativo, ma serve almeno questo o la pagina ufficiale. Il link al
-          file sul sito di chi lo pubblica: non si carica nessun file, e se il
-          link smette di funzionare la voce va aggiornata o tolta.
+          Facoltativo, ma serve almeno questo o la pagina ufficiale. Di norma e'
+          il link al file sul sito di chi lo pubblica: non si carica nessun
+          file, e se il link smette di funzionare la voce va aggiornata o tolta.
+          Per i libri a scaffale, e solo per quelli, e' il percorso del file
+          nostro: /libri/nome-del-file.pdf.
 
       - label: Pagina ufficiale
         name: urlScheda

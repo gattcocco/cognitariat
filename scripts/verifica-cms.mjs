@@ -69,15 +69,18 @@ const COLLECTION = {
       fine: { date_format: "'YYYY-MM-DD'", time_format: "'HH:mm'", picker_utc: 'false' },
     },
   },
-  // La biblioteca non ha copertina ne' date: la voce e' una scheda con un link a
-  // un PDF altrui, e il corpo Markdown non c'e' (niente da raccontare oltre ai
-  // campi). Quello che il controllo tiene fermo qui e' che il CMS e lo schema
-  // abbiano gli stessi campi.
+  // La biblioteca non ha date, e il corpo Markdown non c'e' (niente da
+  // raccontare oltre ai campi). La copertina c'e' dal 17/11/2026, ma solo per i
+  // libri a scaffale: e' l'unico tipo che ospitiamo noi, ed e' l'unico che si
+  // presenta con un'immagine. Per questo NON sta fra i gruppi obbligatori —
+  // a differenza di articoli ed eventi, dove una voce senza copertina non si
+  // costruisce. Quello che il controllo tiene fermo qui e' che il CMS e lo
+  // schema abbiano gli stessi campi.
   biblioteca: {
     variabile: 'biblioteca',
     soloNelCms: [],
     soloNelSito: [],
-    gruppi: {},
+    gruppi: { copertina: ['file', 'alt'] },
     gruppiObbligatori: [],
     date: {},
   },

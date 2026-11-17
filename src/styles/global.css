@@ -1708,6 +1708,16 @@ main[tabindex='-1']:focus-visible {
   min-width: 0;
   padding-bottom: 28px;
   border-bottom: 1px solid var(--bordo);
+  /* Ogni scheda ha un id, e gli articoli ci linkano la singola voce
+     (/biblioteca/#nome-della-voce). Senza margine di scorrimento la scheda
+     arriva sotto l'intestazione sticky: si atterra sulla voce sbagliata, o su
+     niente. Stessi valori dei titoli di sezione, piu' sotto. */
+  scroll-margin-top: 100px;
+}
+@media (max-width: 800px) {
+  .voce-biblioteca {
+    scroll-margin-top: 185px;
+  }
 }
 .biblioteca-elenco > li:last-child .voce-biblioteca {
   border-bottom: 0;

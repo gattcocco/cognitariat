@@ -14,3 +14,5 @@ linkEsterno: null
 ---
 
 vieni e porta amici, amiche, amanti, figli.e, parenti: sostieni il primo vero sindacato a Milano (registrato - dà assistenza sindacale, legale e patronale a iscritt3) delle lavoratrici e dei lavoratori della comunicazione, educazione, informazione, conoscenza: KNOWLEDGE+TECH WORKERS VS AI OLIGARCHY!
+
+La première della serata è EUrevolution, il nuovo libro di Alex Foti: puoi leggerlo prima di venire, si scarica gratis [dalla nostra biblioteca](/biblioteca/#eurevolution-prendersi-l-europa-per-salvarla).

@@ -4,6 +4,30 @@
   box-sizing: border-box;
 }
 
+/*
+  L'intestazione del sito e' sticky: senza questo, ogni collegamento a un punto
+  della pagina — il sommario della biblioteca, i rimandi dagli articoli a una
+  scheda (/biblioteca/#nome-della-voce), «Salta al contenuto» — porta il
+  bersaglio esattamente sotto l'intestazione, cioe' lo nasconde. Non da' errore:
+  la pagina si apre e mostra il punto sbagliato, che e' il modo peggiore di
+  rompersi.
+
+  Il valore vero lo misura BaseLayout, perche' l'altezza dell'intestazione
+  cambia con la larghezza: ~95px da larga, ~170px sul telefono, molto di piu'
+  alle larghezze in cui il menu va a capo su tre o quattro righe. Un numero
+  fisso sarebbe giusto a una larghezza e sbagliato alle altre — e lo era: a
+  ~400px si atterrava su una voce completamente diversa.
+  I due valori qui sotto sono solo il ripiego per quando il programma non parte.
+*/
+html {
+  scroll-padding-top: var(--altezza-header, 110px);
+}
+@media (max-width: 800px) {
+  html {
+    scroll-padding-top: var(--altezza-header, 190px);
+  }
+}
+
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--fondo);
@@ -1708,16 +1732,6 @@ main[tabindex='-1']:focus-visible {
   min-width: 0;
   padding-bottom: 28px;
   border-bottom: 1px solid var(--bordo);
-  /* Ogni scheda ha un id, e gli articoli ci linkano la singola voce
-     (/biblioteca/#nome-della-voce). Senza margine di scorrimento la scheda
-     arriva sotto l'intestazione sticky: si atterra sulla voce sbagliata, o su
-     niente. Stessi valori dei titoli di sezione, piu' sotto. */
-  scroll-margin-top: 100px;
-}
-@media (max-width: 800px) {
-  .voce-biblioteca {
-    scroll-margin-top: 185px;
-  }
 }
 .biblioteca-elenco > li:last-child .voce-biblioteca {
   border-bottom: 0;
@@ -1783,18 +1797,6 @@ main[tabindex='-1']:focus-visible {
 .biblioteca-sezione {
   margin: 56px 0 6px;
   font-size: 1.5rem;
-  /* L'intestazione del sito e' sticky: senza questo margine di scorrimento il
-     sommario porterebbe al punto giusto della pagina ma con il titolo della
-     sezione nascosto sotto l'intestazione, e chi clicca «Libri a scaffale» si
-     ritroverebbe davanti una scheda senza sapere di essere arrivato.
-     Due valori perche' l'intestazione e' alta ~85px da larga e ~170px quando
-     il menu va a capo. */
-  scroll-margin-top: 100px;
-}
-@media (max-width: 800px) {
-  .biblioteca-sezione {
-    scroll-margin-top: 185px;
-  }
 }
 .biblioteca-sezione-nota {
   margin: 0 0 8px;

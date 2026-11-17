@@ -6,7 +6,7 @@ autori: "Alex Foti"
 anno: 2026
 pubblicatoIn: "Edizione autoprodotta, prefazione di Peppe Allegri"
 tema: "Lavoro e piattaforme"
-excerpt: "Il libro in cui il cognitariato europeo si guarda allo specchio: dalle piazze in rivolta alla proposta di una repubblica europea, con un capitolo intero sull'autorganizzazione del lavoro cognitivo contro l'AI Oligarchy. Foti è fra i fondatori di COG U, e il suo libro esce con una licenza che chiede di essere condivisa: «Leggilo, fotocopialo, condividilo»."
+excerpt: "“L’Europa è il continente rivoluzionario per eccellenza”. Come sarà veramente la prossima rivoluzione? Per Foti, fra i fondatori di COG U, richiederà un’alleanza fra il proletariato precario delle banlieues e i/le cognitari/e che lavorano col computer, fra femministe radicali nelle università e giovani arabi di periferia, fra classe lavoratrice nell’industria e nei servizi e i climattivisti del movimento ecologista."
 licenza: "CC BY-NC-SA 4.0"
 urlPdf: /libri/eurevolution-alex-foti.pdf
 copertina:

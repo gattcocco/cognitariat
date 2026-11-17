@@ -160,6 +160,38 @@ const ogDescrizione =
   <a class="salta-al-contenuto" href="#contenuto">Salta al contenuto</a>
   <slot />
 
+  <script is:inline>
+    /*
+      Misura l'intestazione sticky e la scrive in --altezza-header, che
+      global.css usa come scroll-padding dell'intera pagina: senza, ogni
+      collegamento a un punto della pagina atterra con il bersaglio nascosto
+      sotto l'intestazione.
+
+      Misurata e non scritta a mano perche' quell'altezza cambia molto con la
+      larghezza — il menu va a capo — e un numero fisso e' giusto a una
+      larghezza sola. ResizeObserver e non un listener su resize: l'altezza
+      cambia anche quando il menu va a capo per motivi suoi, senza che la
+      finestra si muova.
+
+      is:inline e in fondo al body: deve girare su ogni pagina, non ha bisogno
+      di essere raggruppato, e qui l'intestazione esiste gia'.
+    */
+    (function () {
+      try {
+        var intestazione = document.querySelector('.site-header');
+        if (!intestazione) return;
+        var aggiorna = function () {
+          var alta = Math.round(intestazione.getBoundingClientRect().height);
+          // Un filo di respiro, cosi' il bersaglio non tocca il bordo inferiore.
+          document.documentElement.style.setProperty('--altezza-header', alta + 12 + 'px');
+        };
+        aggiorna();
+        if (window.ResizeObserver) new ResizeObserver(aggiorna).observe(intestazione);
+        else window.addEventListener('resize', aggiorna);
+      } catch (e) {}
+    })();
+  </script>
+
   <script>
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
       anchor.addEventListener('click', function (this: HTMLAnchorElement, e: Event) {

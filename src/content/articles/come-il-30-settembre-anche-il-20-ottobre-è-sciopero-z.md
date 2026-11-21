@@ -1,5 +1,5 @@
 ---
-title: Come il 30 settembre, Anche il 20 ottobre è SCIOPERO Z
+title: Come il 30 ottobre, Anche il 20 novembre è SCIOPERO Z
 bozza: false
 date: 2026-11-21
 autore: Editoriale

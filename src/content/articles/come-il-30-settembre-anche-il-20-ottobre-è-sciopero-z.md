@@ -18,9 +18,20 @@ Diciamo subito che la partecipazione è stata inferiore a quella del 30 ottobre 
 
 Il sindacalismo di base come confederale non risponde alle aspettative e ai bisogni delle giovani generazioni. Per vent'anni non ha saputo dare risposte a una precarietà che si estendeva come un cancro nella società italiana, minando possibilità di vita e di realizzazione delle giovani generazioni, costringendole a non far figli ed emigrare, forzandole a vivere in monolocali o appartamenti condivisi cui vanno i 3/4 dei loro magri redditi, sì perché grazie all'assenza di un salario minimo legale, la gente che già lavora part-time è pagata 6-8 euro l'ora, una vergogna, soprattutto in una città come Milano, dove solo 15 euro garantiscono la sopravvivenza e - come propone COG U - solo 20€ l'ora assicurano la dignità e l'indipendenza della Gen Z.
 
+![](/images/articoli/20261121-091440.png "carg")
+
 Oggi in Francia, Italia, Spagna, Germania, Belgio la nuova generazione prende in mano il proprio destino, per dare un futuro a sé e all'intero Continente. L'esempio di Tirana insurrezionale e la grande vittoria elettorale  a Belgrado della rivoluzione studentesca serba ci mostrano cosa si può fare se ci si propone, con metodo e organizzazione, di dare l'assalto al cielo e ai soffitti di cristallo.
 
+La giornata di sciopero di ieri si è conclusa con una magnifica e fantasmagorica street parade promossa dal Lambretta da Piazza Leonardo che si è conclusa nella notte con l'occupazione degli ex Macelli su Viale Molise, dove è in corso un grande progetto di sedicente riqualificazione.
+
+
+![](/images/articoli/907484007_1145445324743351_5787214508550642303_n.jpg "vener")
+
+[https://fb.watch/L12NGdQoj7/](https://fb.watch/L12NGdQoj7/)
+
 Noi siamo un neonato (questo 14 luglio, l'ispirazione sanculotta ha portato bene;) sindacato che sta nel movimento (contro i data center e il duopolio AI e assieme a scuole e banlieues per un'europa libera, uguale, solidale) e che ambisce a essere intersezionale e multigenerazionale. Abbiamo attivist3 delle Gen X, Y, Z (la media per ora è 40, ma sta scendendo:) siamo debitori nei confronti del femminismo e dell'ecologismo radicali, ci battiamo per un'europa sociale e confederale fondata sul municipalismo autonomo e libertario di tutte le città da Lisbona a Bucharest, passando per Milano, Torino, Roma, Bologna.
+
+![TODAY IS THE DAY‼️ FIGHT FOR OUR FUTURE NOT THEIR WARS 🗓️ 50+ youth organisations +25 countries all around Europe and MORE! TODAY, 20 NOVEMBER , strike with us all around Europe, all around the worl](/images/articoli/20261121-091606.png)
 
 Vi aspettiamo alla nostra Festa di Natale COG XMAS '26 (Merc 16.12, h19-24) con presentazione di un libro sull'eurorivoluzione in corso, spritz a 5 euro e birra a 4 e il leggendario dj set dei Bellimbooster che sono reucci del trash italiano dopo la lunga militanza nel pionieristico e popolarissimo Spazio Petardo.
 

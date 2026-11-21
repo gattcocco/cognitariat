@@ -26,7 +26,7 @@ COG U dopo l'azione di palestro ha raggiunto i fratelli e le sorelle della Forna
 
 ![](/images/articoli/20261121-201618.png)
 
-Rho si conferma la punta di diamante del movimento italiano contro le big tech americane ed europee. Siamo certi che la nostra collaborazione intellettuale, solidale, sindacale con gli attivisti e le attiviste della Fornace porterà a cose sempre più grandi e a una maggiore presa di coscienza nella società transmilanese della posta in gioco sull'AI: il nostro lavoro e la nostra mente sono in gioco - è questa la nuova lotta di classe!
+Rho si conferma la punta di diamante del movimento italiano contro le big tech americane ed europee. Siamo certi che la nostra collaborazione intellettuale, solidale, sindacale con gli attivisti e le attiviste della Fornace porterà a cose sempre più grandi e a una maggiore presa di coscienza nella società transmilanese della posta in gioco sull'AI: il nostro lavoro e la nostra mente sono quello che vuole il duopolio e tutt3 insieme dobbiamo r/esistere - è questa la nuova lotta di classe!
 
 ![](/images/articoli/20261121-201706.png)
 

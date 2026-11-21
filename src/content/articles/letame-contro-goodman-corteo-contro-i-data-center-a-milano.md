@@ -24,7 +24,11 @@ E il tutto il giorno dopo lo sciopero generale e la street parade del Lambretta 
 
 COG U dopo l'azione di palestro ha raggiunto i fratelli e le sorelle della Fornace nello spezzone autonomo cognitario contro le big tech insieme a Terra Trema e altre realtà milanesi e non. Abbiamo srotolato lo striscione e parlato un po' con tutt3. Fra i presenti Ilaria Salis e Dave del comitato Carlotta Cossutta alle primarie. C'erano anche dei compagni venuti da Monfalcone!
 
+![](/images/articoli/20261121-201618.png)
+
 Rho si conferma la punta di diamante del movimento italiano contro le big tech americane ed europee. Siamo certi che la nostra collaborazione intellettuale, solidale, sindacale con gli attivisti e le attiviste della Fornace porterà a cose sempre più grandi e a una maggiore presa di coscienza nella società transmilanese della posta in gioco sull'AI: il nostro lavoro e la nostra mente sono in gioco - è questa la nuova lotta di classe!
+
+![](/images/articoli/20261121-201706.png)
 
 Prossimo appuntamento in statale giovedì sera con l'aperitivo di COG U con Missin Red alla consolle nell'Auletta Occupata dei collettivi universitari - discuteremo con loro quale dev'essere l'azione sindacale nell'era della rivoluzione Z contro il capitale algoritmico che si sta spartendo il pianeta.
 

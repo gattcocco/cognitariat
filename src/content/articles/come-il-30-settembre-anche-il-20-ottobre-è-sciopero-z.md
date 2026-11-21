@@ -22,8 +22,7 @@ Il sindacalismo di base come confederale non risponde alle aspettative e ai biso
 
 Oggi in Francia, Italia, Spagna, Germania, Belgio la nuova generazione prende in mano il proprio destino, per dare un futuro a sé e all'intero Continente. L'esempio di Tirana insurrezionale e la grande vittoria elettorale  a Belgrado della rivoluzione studentesca serba ci mostrano cosa si può fare se ci si propone, con metodo e organizzazione, di dare l'assalto al cielo e ai soffitti di cristallo.
 
-La giornata di sciopero di ieri si è conclusa con una magnifica e fantasmagorica street parade promossa dal Lambretta da Piazza Leonardo che si è conclusa nella notte con l'occupazione degli ex Macelli su Viale Molise, dove è in corso un grande progetto di sedicente riqualificazione.
-
+La giornata di sciopero di ieri si è conclusa con una magnifica e fantasmagorica street parade con Venerus e Cosmo promossa dal Lambretta che da Piazza Leonardo che si è conclusa nella notte con l'occupazione degli ex Macelli su Viale Molise, dove è in corso un grande progetto di sedicente riqualificazione e una volta c'era Macao.
 
 ![](/images/articoli/907484007_1145445324743351_5787214508550642303_n.jpg "vener")
 

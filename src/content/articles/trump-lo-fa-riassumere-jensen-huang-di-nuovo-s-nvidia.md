@@ -3,7 +3,7 @@ title: "Trump lo fa riassumere: Jensen Huang di nuovo s'Nvidia"
 bozza: false
 date: 2026-11-24
 autore: Editoriale
-excerpt: Era stato fatto fuori per una storia di corna dai risvolti per la sicurezza nazionale. Ma visto che il mercato azionario è crollato, Trump gli ha ridato la poltrona, ovviamente facendo milioni per sé e la sua famiglia speculando in anticipo sulla notizia inaspetata che ha creato
+excerpt: Era stato fatto fuori per una storia di corna dai risvolti per la sicurezza nazionale. Ma visto che il mercato azionario è crollato, Trump gli ha ridato la poltrona, ovviamente facendo milioni per sé e la sua famiglia speculando in anticipo sulla notizia inaspettata che ha creato
 copertina:
   file: /images/articoli/pasted-image-1795496752272.png
   alt: img

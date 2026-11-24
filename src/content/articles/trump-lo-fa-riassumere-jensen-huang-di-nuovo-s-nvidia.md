@@ -17,3 +17,5 @@ Dopo il crollo del comparto big tech che ormai domina Wall Street, trascinato da
 La cleptocrazia trumpiana sale così di un altro livello, con l'uso più massiccio di insider trading che la storia ricordi. Il titolo Nvidia è rimbalzato del 30% assicurando grandi fortune a chi ha previsto l'imprevisto, come colui che lo ha causato.
 
 Troppo importante era Huang per l'economia circolare che lega Silicon Valley e Wall Street nel finanziamento dei megalitici data center necessari all'intelligenza artificiale oligopolistica. Anthropic è riuscita a collocarsi in borsa malgrado la turbolenza, ma essa e tutto il settore AI rischiava di esser travolto dalla caduta di Huang che presta sia ad Amodei sia ad Altman per tenere in piedi la baracca dell'intelligenza generativa e alimentare il ciclo dell'hypercapex.
+
+![](/images/articoli/20261124-110647.png)

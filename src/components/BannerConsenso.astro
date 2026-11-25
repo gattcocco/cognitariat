@@ -1,0 +1,165 @@
+---
+import { CONTENITORE_GTM, CHIAVE_CONSENSO, VERSIONE_CONSENSO } from '../lib/statistiche';
+
+/**
+ * Il riquadro che chiede il consenso alle statistiche di navigazione.
+ *
+ * PERCHE' NON BASTA DICHIARARLO. Google Analytics scrive identificatori nel
+ * browser di chi legge. Un avviso che informa e basta andrebbe bene per uno
+ * strumento che non scrive niente; per questo serve una scelta, e serve prima.
+ * Quindi: il contenitore GTM non viene caricato finche' qualcuno non preme
+ * «Accetto». Se rifiuta, o se chiude la pagina senza rispondere, non parte
+ * nessuna richiesta verso Google.
+ *
+ * COME E' FATTO, e perche' cosi'.
+ *
+ * - `is:inline` e non un modulo: lo script deve girare subito. Un modulo e'
+ *   differito, e per chi ha gia' accettato le statistiche partirebbero dopo il
+ *   primo disegno della pagina — meno preciso, e con un lampo di riquadro che
+ *   non serviva mostrare.
+ * - Il riquadro nasce `hidden` e lo scopre lo script. Il contrario — nasce
+ *   visibile e lo script lo nasconde — farebbe lampeggiare la richiesta a ogni
+ *   pagina a chi ha gia' risposto.
+ * - `localStorage` e non un cookie: la scelta serve solo a questo browser, e un
+ *   cookie viaggerebbe a ogni richiesta senza motivo. E' comunque una scrittura
+ *   nella memoria del browser, ed e' dichiarata nella sezione 2
+ *   dell'informativa: era l'unica frase che prima diceva «non scriviamo niente».
+ * - Le due risposte hanno la stessa identica forma. Un «Accetto» in evidenza e
+ *   un «Rifiuto» in grigio chiaro sono il modo piu' comune di rendere il
+ *   consenso una formalita'; qui costano lo stesso clic.
+ *
+ * TORNARE INDIETRO. Ritirare il consenso deve essere facile quanto darlo:
+ * `window.__coguRiapriConsenso()` rimette la domanda, e la pagina /privacy ha
+ * un pulsante che la chiama. Se la risposta passa da «si'» a «no» con il
+ * contenitore gia' caricato, la pagina si ricarica — GTM, una volta partito, non
+ * si spegne — e i cookie che ha scritto vengono cancellati.
+ */
+---
+<section
+  class="consenso"
+  id="banner-consenso"
+  role="region"
+  aria-labelledby="consenso-titolo"
+  hidden
+>
+  <div class="consenso-testo">
+    <p id="consenso-titolo">
+      <strong>Possiamo raccogliere statistiche su cosa viene letto?</strong>{' '}
+      Usiamo Google Analytics, che scrive un identificativo nel tuo browser. Non parte finché non
+      rispondi, e puoi cambiare idea quando vuoi. Cosa raccoglie, e per quanto, sta
+      nell'<a href="/privacy#statistiche">informativa</a>.
+    </p>
+  </div>
+  <div class="consenso-azioni">
+    <button type="button" data-consenso="si">Accetto</button>
+    <button type="button" data-consenso="no">Rifiuto</button>
+  </div>
+</section>
+
+<script
+  is:inline
+  define:vars={{ CONTENITORE_GTM, CHIAVE_CONSENSO, VERSIONE_CONSENSO }}
+>
+  (function () {
+    try {
+      var riquadro = document.getElementById('banner-consenso');
+
+      function leggiScelta() {
+        try { return window.localStorage.getItem(CHIAVE_CONSENSO); } catch (e) { return null; }
+      }
+      function scriviScelta(valore) {
+        try { window.localStorage.setItem(CHIAVE_CONSENSO, valore); } catch (e) {}
+      }
+      function dimenticaScelta() {
+        try { window.localStorage.removeItem(CHIAVE_CONSENSO); } catch (e) {}
+      }
+
+      /* Il contenitore GTM, caricato una volta sola e solo su richiesta. */
+      function caricaStatistiche() {
+        if (window.__coguStatisticheAttive) return;
+        window.__coguStatisticheAttive = true;
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtm.js?id=' + CONTENITORE_GTM;
+        document.head.appendChild(s);
+      }
+
+      /* Ritirare il consenso deve togliere anche quello che e' stato scritto,
+         altrimenti e' un ritiro a parole: i cookie di Analytics restano al loro
+         posto e continuano a identificare lo stesso browser. */
+      function cancellaCookieStatistiche() {
+        try {
+          document.cookie.split(';').forEach(function (pezzo) {
+            var nome = pezzo.split('=')[0].trim();
+            if (!nome) return;
+            if (nome.indexOf('_ga') !== 0 && nome !== '_gid') return;
+            document.cookie = nome + '=; Max-Age=0; path=/';
+            document.cookie = nome + '=; Max-Age=0; path=/; domain=' + location.hostname;
+            document.cookie = nome + '=; Max-Age=0; path=/; domain=.' + location.hostname;
+          });
+        } catch (e) {}
+      }
+
+      var scelta = leggiScelta();
+      var pezzi = scelta ? scelta.split(':') : [];
+      // Vale solo una risposta data alla domanda di oggi: se la versione non
+      // coincide, l'oggetto del consenso e' cambiato e si ricomincia.
+      var rispostaValida = pezzi.length === 2 && pezzi[1] === VERSIONE_CONSENSO;
+
+      if (rispostaValida && pezzi[0] === 'si') {
+        caricaStatistiche();
+      } else {
+        /* Niente consenso valido: qui, e non al momento del rifiuto, e' il
+           punto giusto per ripulire i cookie di Analytics.
+
+           PERCHE' NON BASTA CANCELLARLI QUANDO SI RIFIUTA (misurato, non
+           temuto): se il contenitore e' gia' partito, Analytics e' vivo e
+           riscrive il proprio cookie di sessione nell'istante fra la
+           cancellazione e il ricaricamento della pagina. Spariva `_ga` e
+           restava `_ga_<id>`, con il contatore aggiornato — cioe' un ritiro
+           del consenso che lasciava in piedi proprio l'identificativo.
+           In questo ramo il contenitore non e' stato caricato: non c'e'
+           nessuno che possa riscriverli. */
+        cancellaCookieStatistiche();
+        if (!rispostaValida && riquadro) riquadro.hidden = false;
+      }
+
+      if (riquadro) {
+        riquadro.addEventListener('click', function (e) {
+          var bersaglio = e.target;
+          if (!(bersaglio instanceof Element)) return;
+          var pulsante = bersaglio.closest('[data-consenso]');
+          if (!pulsante) return;
+
+          var risposta = pulsante.getAttribute('data-consenso');
+          scriviScelta(risposta + ':' + VERSIONE_CONSENSO);
+          riquadro.hidden = true;
+
+          if (risposta === 'si') {
+            caricaStatistiche();
+            return;
+          }
+
+          cancellaCookieStatistiche();
+          // Se il contenitore era gia' partito in questa pagina, spegnerlo non
+          // si puo': si riparte da una pagina in cui non e' mai stato caricato.
+          if (window.__coguStatisticheAttive) location.reload();
+        });
+      }
+
+      /* Usata dal pulsante in fondo alla sezione 2 di /privacy. */
+      window.__coguRiapriConsenso = function () {
+        dimenticaScelta();
+        if (!riquadro) return;
+        riquadro.hidden = false;
+        var primo = riquadro.querySelector('[data-consenso]');
+        if (primo && primo.focus) primo.focus();
+      };
+    } catch (e) {
+      // Se qualcosa qui si rompe, l'esito deve essere «niente statistiche»,
+      // non «statistiche senza riquadro».
+    }
+  })();
+</script>

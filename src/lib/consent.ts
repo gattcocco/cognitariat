@@ -56,4 +56,14 @@
 // formula: arrivano nome, cognome, email e la contabile del bonifico, con la
 // banca come nuovo destinatario. L'iscrizione online resta chiusa e la sezione
 // 6 tiene separate le due cose. Registrata nella migration 0009.
-export const PRIVACY_POLICY_VERSION = 'v7-2026-09-24';
+//
+// v8: il sito raccoglie statistiche di navigazione (Google Analytics via Tag
+// Manager), e lo fa solo dopo un consenso esplicito e revocabile. Non e' una
+// riga in piu' nell'elenco dei destinatari: e' il primo trattamento del sito
+// pubblico fondato sul consenso invece che sul legittimo interesse, ed e' la
+// fine della frase «il sito pubblico non contatta nessuna terza parte», che la
+// v4 aveva guadagnato togliendo i video incorporati. Cade anche «non scriviamo
+// niente nella memoria del tuo browser»: la scelta di chi legge si conserva in
+// localStorage, ed e' la prima cosa che il sito scrive. Registrata nella
+// migration 0010.
+export const PRIVACY_POLICY_VERSION = 'v8-2026-11-25';

@@ -658,6 +658,106 @@ section {
   text-decoration-thickness: 3px;
 }
 
+/* ===== Riquadro del consenso alle statistiche =====
+   Dal 25/11/2026 il sito carica Google Analytics, ma solo dopo un «Accetto».
+   Il riquadro e' l'unica cosa che sta davanti al contenuto, quindi: fondo nero
+   pieno (non una velatura, che renderebbe illeggibili tutte e due le cose), e
+   niente schermo scuro sul resto della pagina — non e' una finestra modale, chi
+   vuole leggere e rispondere dopo deve poterlo fare.
+
+   LE DUE RISPOSTE HANNO LA STESSA FORMA, di proposito: stesso riempimento,
+   stesso bordo, stesso peso. «Accetto» in evidenza e «Rifiuto» scolorito e' il
+   modo piu' diffuso di raccogliere consensi che nessuno ha davvero dato.
+
+   `display: flex` e `[hidden]` litigano: l'attributo porta con se'
+   `display: none` dal foglio del browser, ma una regola di classe lo batte, e
+   il riquadro resterebbe visibile anche nascosto. Da qui la riga esplicita. */
+.consenso {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 28px;
+  padding: 16px 24px;
+  background: var(--nero);
+  color: var(--bianco);
+  border-top: 3px solid var(--rosa);
+}
+.consenso[hidden] {
+  display: none;
+}
+.consenso-testo {
+  max-width: 62ch;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+/* Giallo su nero: il rosa del sito su fondo nero non arriva al contrasto che
+   serve a un testo di questa dimensione. */
+.consenso-testo a {
+  color: var(--giallo);
+  font-weight: var(--peso-forte);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.consenso-testo a:hover {
+  color: var(--bianco);
+}
+.consenso-azioni {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.consenso-azioni button {
+  font: inherit;
+  font-weight: var(--peso-forte);
+  padding: 10px 24px;
+  border-radius: 40px;
+  border: 2px solid var(--bianco);
+  background: var(--bianco);
+  color: var(--nero);
+  cursor: pointer;
+}
+.consenso-azioni button:hover {
+  background: var(--rosa);
+  border-color: var(--rosa);
+}
+@media (max-width: 800px) {
+  .consenso {
+    padding: 14px 18px;
+    gap: 12px;
+  }
+  .consenso-azioni {
+    width: 100%;
+  }
+  /* Sul telefono i due pulsanti si dividono la riga in parti uguali: la
+     parita' fra le risposte non e' solo una questione di colore. */
+  .consenso-azioni button {
+    flex: 1;
+    padding: 12px 10px;
+  }
+}
+
+/* Il pulsante per rimettere in discussione la scelta, in fondo alla sezione 2
+   di /privacy. Ritirare il consenso deve costare quanto darlo. */
+.consenso-ripensamento {
+  font: inherit;
+  font-weight: var(--peso-forte);
+  padding: 10px 24px;
+  border-radius: 40px;
+  border: 2px solid var(--nero);
+  background: var(--bianco);
+  color: var(--nero);
+  cursor: pointer;
+}
+.consenso-ripensamento:hover {
+  background: var(--rosa);
+}
+
 /* Slideshow immaginario collettivo */
 .imaginarium {
   background: var(--nero);

@@ -9,6 +9,20 @@ import { associazione, haSede, haPec } from '../lib/associazione';
  * Informativa ai sensi dell'art. 13 GDPR, scritta sui trattamenti che il sito
  * fa davvero adesso.
  *
+ * v8 (25/11/2026): il sito raccoglie statistiche di navigazione con Google
+ * Analytics, caricato tramite Google Tag Manager. E' il cambiamento piu' grosso
+ * da quando questa pagina esiste, e non per la quantita' di testo: e' il primo
+ * trattamento del sito pubblico che poggia sul CONSENSO invece che sul
+ * legittimo interesse, ed e' la fine di due frasi che la pagina si era
+ * guadagnata — «il sito pubblico non contatta nessuna terza parte» (v4, tolti i
+ * video incorporati) e «non scriviamo niente nella memoria del tuo browser».
+ * Nessuna delle due e' stata lasciata li' a dire il falso.
+ *
+ * Il consenso e' vero, non una formalita': il contenitore GTM non viene
+ * caricato finche' non si preme «Accetto», le due risposte hanno la stessa
+ * forma, e ritirarlo cancella i cookie gia' scritti. Il come e il perche'
+ * stanno in src/components/BannerConsenso.astro.
+ *
  * v7 (24/09/2026): il tesseramento e' aperto per bonifico, quindi arrivano
  * dati veri — nome sulla contabile, causale, messaggio di chi si iscrive — e la
  * sezione 6 lo dice al posto di dire che non si raccoglie niente. L'iscrizione
@@ -22,11 +36,17 @@ import { associazione, haSede, haPec } from '../lib/associazione';
  * qualcuno. Se si cambia una scadenza qui, si cambia anche la', e viceversa.
  *
  * Quello che c'è scritto è stato verificato sul sito costruito e sul sito
- * online, non dedotto dal codice: nessun cookie impostato da noi, niente scritto
- * in localStorage o sessionStorage e — da questa versione — nessun host di terze
- * parti contattato. I video di YouTube erano l'ultimo rimasto: erano incorporati
- * in modalità nocookie e caricati in differita, ma arrivare in fondo alla pagina
- * bastava a mandare a Google l'indirizzo IP di chi legge. Ora sono link.
+ * online, non dedotto dal codice. Fino alla v7 la verifica diceva: nessun
+ * cookie, niente scritto in localStorage o sessionStorage, nessun host di terze
+ * parti contattato. Dalla v8 quella frase vale per chi non ha accettato le
+ * statistiche, ed è così che la sezione 2 è ordinata: prima lo stato di
+ * partenza, che è rimasto quello, poi l'unica cosa che può cambiarlo e che
+ * decide chi legge.
+ *
+ * I video di YouTube restano link e non riquadri: quella scelta non è stata
+ * riaperta. Google rientra fra i destinatari per le statistiche, non per i
+ * video, e la pagina tiene distinte le due cose invece di cavarsela con «c'è
+ * Google».
  *
  * «Nessuna terza parte» non vuol dire «nessun altro host»: le risposte portano le
  * intestazioni NEL/Report-To della piattaforma, che chiedono al browser di
@@ -88,11 +108,16 @@ const versione = PRIVACY_POLICY_VERSION;
       <h2>2. Quando visiti il sito</h2>
       <p>
         Il sito è statico: pagine, caratteri tipografici e icone arrivano dal nostro dominio, senza
-        passare da servizi di terzi. <strong>Non usiamo strumenti di statistica, non profiliamo chi
-        legge, non impostiamo cookie e non scriviamo niente nella memoria del tuo browser</strong>
-        — è stato verificato sul sito online, non solo nel codice. L'unica eccezione, quando
-        l'iscrizione online sarà aperta, riguarderà chi entra nell'area riservata: è descritta
-        nella sezione 6.
+        passare da servizi di terzi. <strong>Se non scegli diversamente tu, resta così</strong>:
+        nessun cookie impostato da noi, nessun profilo di chi legge, nessuna richiesta verso
+        qualcun altro — è stato verificato sul sito online, non solo nel codice.
+      </p>
+      <p>
+        Dal <strong>25 novembre 2026</strong> c'è una cosa che può cambiarlo, e la decidi tu: le{' '}
+        <a class="link" href="#statistiche">statistiche di navigazione</a>, descritte in fondo a
+        questa sezione. Se rifiuti, o se non rispondi, non cambia niente di quello che hai appena
+        letto. L'altra eccezione, quando l'iscrizione online sarà aperta, riguarderà chi entra
+        nell'area riservata: è descritta nella sezione 6.
       </p>
       <p>
         Resta quello che fa qualunque server quando gli chiedi una pagina: il nostro hosting,{' '}
@@ -116,9 +141,8 @@ const versione = PRIVACY_POLICY_VERSION;
           sicuro il proprio sito (art. 6.1.f).
         </li>
         <li>
-          <strong>Conservazione presso di noi: nessuna.</strong> Non teniamo un archivio delle
-          visite, non usiamo strumenti di statistica, non abbiamo attivato l'analitica di Cloudflare
-          e non esportiamo i log. Non è una scelta di facciata: l'esportazione dei log delle
+          <strong>Conservazione presso di noi: nessuna.</strong> Di questi log non teniamo un
+          archivio: non abbiamo attivato l'analitica di Cloudflare e non li esportiamo. Non è una scelta di facciata: l'esportazione dei log delle
           richieste è una funzione riservata ai piani Enterprise e disattivata per impostazione
           predefinita, quindi con il piano che usiamo <strong>non possiamo</strong> né consultarli
           né conservarli.
@@ -134,11 +158,64 @@ const versione = PRIVACY_POLICY_VERSION;
         </li>
       </ul>
 
+      <h3 id="statistiche">Le statistiche di navigazione, se le accetti</h3>
+      <p>
+        Dal <strong>25 novembre 2026</strong> il sito può raccogliere statistiche su quali pagine
+        vengono aperte, con <strong>Google Analytics</strong>, caricato attraverso{' '}
+        <strong>Google Tag Manager</strong>. <strong>Non parte da solo.</strong> Il riquadro in
+        fondo allo schermo ti chiede una risposta, e finché non premi «Accetto» verso Google non
+        viene inviato niente: né quando apri la pagina, né mentre la leggi. Se premi «Rifiuto», o
+        se te ne vai senza rispondere, vale quello che c'è scritto all'inizio di questa sezione.
+      </p>
+      <ul class="elenco-progetto">
+        <li>
+          <strong>Che cosa</strong>: quali pagine di questo sito apri e quando, il tipo di
+          dispositivo e di browser, e — se ci sei arrivato da un link — da quale sito. Google
+          scrive nel tuo browser un identificativo (i cookie <code>_ga</code>) che serve a capire
+          se due pagine sono state aperte dallo stesso browser. Non sappiamo chi sei, e non
+          incrociamo queste statistiche con nessun altro dato che ti riguardi.
+        </li>
+        <li>
+          <strong>Finalità</strong>: capire che cosa viene letto, per decidere che cosa scrivere.
+          Nient'altro: non facciamo pubblicità, non vendiamo spazi e non costruiamo profili.
+        </li>
+        <li>
+          <strong>Base giuridica</strong>: il tuo <strong>consenso</strong> (art. 6.1.a). Finché
+          non lo dai, questo trattamento non esiste; quando lo dai, puoi ritirarlo in qualunque
+          momento, qui sotto, con lo stesso singolo clic che è servito a darlo.
+        </li>
+        <li>
+          <strong>Chi li tratta</strong>: <strong>Google Ireland Limited</strong>, come
+          responsabile per nostro conto, con possibile trasferimento al gruppo negli Stati Uniti —
+          valgono le garanzie richiamate nella sezione 7.
+        </li>
+        <li>
+          <strong>Conservazione</strong>: i cookie restano nel tuo browser fino alla loro scadenza
+          o finché non li cancelli; se ritiri il consenso qui sotto li cancelliamo noi. Per quanto
+          tempo Google conservi le statistiche lo imposta l'associazione nel pannello dello
+          strumento: finché quel valore non viene ridotto, vale il periodo predefinito di Google.
+        </li>
+      </ul>
+      <p>
+        <strong>La tua scelta.</strong> La risposta che hai dato resta in questo browser, in{' '}
+        <code>localStorage</code>, sotto la voce <code>cogu-statistiche</code>: non la inviamo a
+        nessuno e serve solo a non richiederti la stessa cosa a ogni pagina. È l'unica cosa che
+        scriviamo <strong>noi</strong> nella memoria del tuo browser — i cookie di Analytics, se
+        accetti, li scrive Google.
+      </p>
+      <p>
+        <button type="button" class="consenso-ripensamento" data-riapri-consenso hidden>
+          Cambia la tua scelta
+        </button>
+      </p>
+
       <h2>3. I video</h2>
       <p>
         Nella sezione «Video &amp; Interviste» <strong>non ci sono riquadri di YouTube</strong>:
         ci sono dei link. Finché non ne clicchi uno, da questo sito non parte nessuna richiesta
-        verso Google — né quando apri la pagina, né quando scorri fino a quel punto.
+        verso YouTube — né quando apri la pagina, né quando scorri fino a quel punto. Le
+        statistiche non hanno cambiato questo: se le hai accettate, Google sa della visita per
+        quell'altra via, che è un trattamento diverso e sta nella sezione 2.
       </p>
       <p>
         Prima erano incorporati, in modalità <em>nocookie</em> e caricati in differita. Anche così,
@@ -415,6 +492,10 @@ const versione = PRIVACY_POLICY_VERSION;
           <strong>GitHub</strong> (Stati Uniti) — solo per chi fa parte della redazione, per
           l'accesso all'area di pubblicazione.
         </li>
+        <li>
+          <strong>Google Ireland Limited</strong> — Google Analytics e Google Tag Manager, cioè le
+          statistiche di navigazione, <strong>solo per chi le ha accettate</strong> (sezione 2).
+        </li>
       </ul>
       <p>Per chi si tessera con un bonifico:</p>
       <ul class="elenco-progetto">
@@ -444,9 +525,11 @@ const versione = PRIVACY_POLICY_VERSION;
         fornitore dichiara nella propria documentazione.
       </p>
       <p>
-        <strong>Google non è più in questo elenco.</strong> Finché i video erano incorporati lo
-        era, per chi arrivava in fondo alla pagina. Adesso sono link: se ne apri uno vai su
-        YouTube di tua iniziativa, e non è un trattamento che facciamo noi.
+        <strong>Google è tornato in questo elenco, e per un motivo diverso da prima.</strong> Ne
+        era uscito quando i video incorporati sono diventati link, e i video sono rimasti link. Ci
+        rientra dal 25 novembre 2026 come fornitore delle statistiche di navigazione — ma solo per
+        chi ha premuto «Accetto». Per chi ha rifiutato, e per chi non ha risposto, verso Google da
+        questo sito non parte niente.
       </p>
       <p>
         Non vendiamo, non cediamo e non scambiamo dati con nessun altro, e non li usiamo per
@@ -480,4 +563,25 @@ const versione = PRIVACY_POLICY_VERSION;
     </div>
   </main>
   <Footer />
+
+  <script is:inline>
+    /*
+      Il pulsante «Cambia la tua scelta» nasce nascosto e lo scopre questo
+      script: senza programma non potrebbe funzionare, e un pulsante morto in
+      una pagina che parla di diritti e' peggio di nessun pulsante.
+
+      __coguRiapriConsenso la definisce src/components/BannerConsenso.astro, che
+      BaseLayout mette prima del contenuto: quando si arriva qui esiste gia'.
+    */
+    (function () {
+      try {
+        var pulsante = document.querySelector('[data-riapri-consenso]');
+        if (!pulsante || typeof window.__coguRiapriConsenso !== 'function') return;
+        pulsante.hidden = false;
+        pulsante.addEventListener('click', function () {
+          window.__coguRiapriConsenso();
+        });
+      } catch (e) {}
+    })();
+  </script>
 </BaseLayout>

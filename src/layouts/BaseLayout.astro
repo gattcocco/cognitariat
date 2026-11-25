@@ -1,5 +1,6 @@
 ---
 import { associazione, haSede } from '../lib/associazione';
+import BannerConsenso from '../components/BannerConsenso.astro';
 import '../styles/font.css';
 import '../styles/tokens.css';
 import '../styles/global.css';
@@ -157,6 +158,14 @@ const ogDescrizione =
 </head>
 <body>
   <a class="salta-al-contenuto" href="#contenuto">Salta al contenuto</a>
+  <!--
+    Il riquadro del consenso sta qui e non dentro le pagine: riguarda ogni
+    pagina del sito, /privacy e la pagina di errore comprese. Sta in cima al
+    documento e non in fondo perche' chi naviga con la tastiera o con un lettore
+    di schermo deve incontrarlo subito, anche se sullo schermo e' in basso: e'
+    una domanda, non una nota a pie' di pagina.
+  -->
+  <BannerConsenso />
   <slot />
 
   <script is:inline>

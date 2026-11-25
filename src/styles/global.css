@@ -207,10 +207,36 @@ select:focus-visible,
      gia' da solo il raggio dell'elemento. */
 }
 
+/* ===== L'agenda apre la home (25/11/2026) =====
+   Sopra questa sezione non c'e' un'altra sezione ma l'intestazione del sito:
+   i 70px di respiro di `section` erano tarati su un vicino che qui non c'e',
+   e spingevano le locandine sotto la piega. Il titolo cresce invece di
+   restare un titolo di sezione fra tanti: e' la prima cosa che si legge.
+
+   Vale per la sola home, dove questa sezione esiste. La pagina /agenda/ ha il
+   proprio titolo e non usa #agenda. */
+#agenda {
+  padding-top: 40px;
+}
+#agenda > .container > .section-title {
+  font-size: clamp(2rem, 1.25rem + 2.6vw, 2.9rem);
+  line-height: 1.1;
+}
+@media (max-width: 800px) {
+  #agenda {
+    padding-top: 28px;
+  }
+}
+
 /* hero */
 .hero {
   padding: 60px 0 50px;
   background: var(--fondo);
+  /* Da quando l'hero sta fra l'agenda e "Cosa succede" gli serve la riga di
+     chiusura che hanno le sezioni: senza, si fonderebbe con la sezione
+     successiva. Quando era la prima cosa in pagina non c'era niente da
+     separare. */
+  border-bottom: 1px solid var(--bordo);
 }
 .hero-grid {
   display: flex;
@@ -609,23 +635,6 @@ section {
   white-space: nowrap; border: 0;
 }
 
-/* Banner verso il dossier Resistenze AI */
-.resistenze-banner {
-  background: var(--nero);
-  color: var(--bianco);
-  text-align: center;
-  padding: 10px 20px;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-.resistenze-banner a {
-  color: var(--giallo);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-.resistenze-banner a:hover { color: var(--bianco); }
-
 /* Banner Scrivici — fondo rosa, testo NERO.
    Il bianco su rosa da' 4,13 e questo e' testo a 0,9rem, cioe' testo normale:
    servono 4,5. Il nero su rosa da' 5,09. Per lo stesso motivo il link non puo'
@@ -783,12 +792,23 @@ section {
 /* Elenco allineato agli elementi che l'hero contiene davvero dopo la
    riscrittura dei testi: statistiche, riquadro "Cognitariato vs AI" e fascia
    citazione non esistono piu'. Se si aggiunge un elemento all'hero e lo si
-   anima, va aggiunto anche qui, altrimenti compare prima della cascata. */
+   anima, va aggiunto anche qui, altrimenti compare prima della cascata.
+
+   Dal 25/11/2026 la prima schermata e' l'agenda, e qui sono spente ENTRAMBE:
+   quale delle due venga animata si sa solo a pagina costruita (l'agenda non
+   c'e' quando non ci sono appuntamenti), e il CSS non puo' saperlo. Spegnerle
+   tutte e due costa niente — il gate dura quanto l'intro e viene rimosso in
+   un colpo, e lo script riaccende comunque entrambe — mentre spegnere solo
+   l'hero lascerebbe l'agenda comparire prima del pannello nero. */
 html.cogu-intro .hero-badge,
 html.cogu-intro .hero-content h1,
 html.cogu-intro .hero-lead,
 html.cogu-intro .hero-desc,
-html.cogu-intro .hero-content > .btn-primary {
+html.cogu-intro .hero-content > .btn-primary,
+html.cogu-intro #agenda .section-title,
+html.cogu-intro #agenda .section-sub,
+html.cogu-intro #agenda .agenda-carosello,
+html.cogu-intro #agenda .agenda-home-azioni {
   opacity: 0;
 }
 @media (prefers-reduced-motion: reduce) {

@@ -26,9 +26,8 @@ const bozze = articoli.filter((a) => a.data.bozza).length;
     <div class="prosa">
       <h1 class="section-title">Blog</h1>
       <p>
-        Quello che scriviamo: analisi, posizioni, casi documentati. I dossier con le mappe e le
-        fonti stanno invece su{' '}
-        <a class="link" href="https://gattcocco.github.io/mappa-e-contenuti/" rel="noopener">Resistenze AI</a>.
+        Quello che scriviamo: analisi, posizioni, casi documentati, con le fonti in fondo a ogni
+        pezzo.
       </p>
     </div>
 
@@ -43,7 +42,8 @@ const bozze = articoli.filter((a) => a.data.bozza).length;
 
     {articoli.length === 0 ? (
       <p class="prosa" style="margin-top: 40px;">
-        Non abbiamo ancora pubblicato niente qui. Nel frattempo ci sono i dossier di Resistenze AI.
+        Non abbiamo ancora pubblicato niente qui. Nel frattempo ci si può incontrare: gli
+        appuntamenti sono in <a class="link" href="/agenda/">agenda</a>.
       </p>
     ) : (
       <div class="griglia-articoli">

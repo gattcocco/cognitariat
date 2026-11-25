@@ -33,15 +33,28 @@ import Footer from '../components/Footer.astro';
       precedente reggeva sull'acronimo MANGOS, questa su due decisioni gia' prese
       e un dato gia' misurato. Resta piu' corta delle alternative, di proposito.
     -->
-    <Hero />
     <!--
-      L'agenda sta subito sotto la prima schermata, e non piu' a meta' pagina.
-      Un appuntamento ha una scadenza: se di questa home si legge solo la prima
-      schermata, quello che deve restare e' dove ci si puo' incontrare, non un
-      testo che spiega. La sezione sparisce da sola quando non c'e' niente in
-      calendario, quindi qui in alto non lascia un buco.
+      L'AGENDA APRE LA PAGINA (richiesta del committente, 25/11/2026).
+      La prima schermata non e' piu' un testo che spiega: sono le locandine dei
+      prossimi appuntamenti. Un appuntamento ha una scadenza, e se di questa home
+      si legge solo la prima schermata quello che deve restare e' dove ci si puo'
+      incontrare.
+      Tre conseguenze, tutte gia' gestite:
+      - la sezione non esiste quando non c'e' niente in calendario (e il suo
+        script la nasconde se gli ultimi appuntamenti scadono dopo la build):
+        in quel caso la prima schermata torna a essere l'hero, qui sotto, senza
+        lasciare un buco;
+      - l'intro d'ingresso anima il blocco che si vede davvero. Lo script in
+        fondo a questo file sceglie a tempo di esecuzione fra agenda e hero;
+      - il titolo della pagina (h1) resta quello del manifesto, nell'hero: a
+        cambiare e' la posizione in pagina, non la gerarchia dei contenuti.
     -->
     <Agenda />
+    <!--
+      L'hero scende sotto l'agenda: resta la presentazione del sindacato — chi
+      siamo e perche' — ma non e' piu' la prima cosa che si vede.
+    -->
+    <Hero />
     <CosaSucceded />
     <PercheCiPreoccupa />
     <Lavoro />
@@ -101,10 +114,47 @@ import Footer from '../components/Footer.astro';
         '</div>';
       document.body.appendChild(overlay);
 
-      const h1 = document.querySelector('.hero-content h1');
+      const elementi = (sel: string) =>
+        Array.from(document.querySelectorAll<HTMLElement>(sel));
+
+      /**
+       * QUALE BLOCCO APRE LA PAGINA.
+       *
+       * Da quando l'agenda sta in cima, la cascata d'ingresso deve animare
+       * l'agenda: animare l'hero vorrebbe dire far entrare in scena qualcosa
+       * che in quel momento sta sotto la piega, e lasciare immobile la sola
+       * cosa che si vede.
+       *
+       * L'agenda pero' puo' non esserci: la sezione non viene costruita quando
+       * non c'e' nessun appuntamento, e il suo script la nasconde quando gli
+       * ultimi sono scaduti dopo la build. In quel caso la prima schermata
+       * torna a essere l'hero, e l'intro con lei. La scelta si fa qui, a tempo
+       * di esecuzione, perche' solo qui si sa com'e' fatta la pagina davvero.
+       */
+      const agenda = document.getElementById('agenda');
+      const apreAgenda = !!agenda && !agenda.hasAttribute('hidden');
+
+      // Gli elementi dell'agenda in ordine di lettura: titolo, sommario, nastro
+      // delle locandine, pulsante verso tutta l'agenda. Ognuno e' un elenco e
+      // non un selettore, cosi' le tappe di una pagina fatta diversamente da
+      // quella attesa si saltano invece di far fallire la timeline.
+      const bersagliAgenda = apreAgenda
+        ? [
+            elementi('#agenda .section-title'),
+            elementi('#agenda .section-sub'),
+            elementi('#agenda .agenda-carosello'),
+            elementi('#agenda .agenda-home-azioni'),
+          ]
+        : [];
+
+      const h1 = apreAgenda ? null : document.querySelector('.hero-content h1');
       // Ogni parola del titolo finisce in uno span, per farle entrare in cascata.
       // La regola CSS della parola chiave usa :not(.cogu-w) proprio per questo:
       // senza, colorerebbe di rosa l'intero H1.
+      //
+      // Si fa solo quando l'intro riguarda l'hero: spezzare il titolo e metterlo
+      // a opacita' zero per poi non animarlo significherebbe lasciare invisibile
+      // un titolo che sta in mezzo alla pagina.
       const words: HTMLElement[] = [];
       if (h1) {
         const frag = document.createDocumentFragment();
@@ -134,6 +184,26 @@ import Footer from '../components/Footer.astro';
         utils.set(words, { opacity: 0 });
       }
 
+      // Stato di partenza dell'agenda: lo mette lo script e non il solo gate
+      // CSS, perche' il gate viene rimosso tutto insieme alla fine e la
+      // timeline deve poter partire da zero anche nei frame in cui la classe
+      // non c'e' piu'.
+      bersagliAgenda.forEach((gruppo) => {
+        if (gruppo.length) utils.set(gruppo, { opacity: 0 });
+      });
+
+      if (apreAgenda) {
+        // L'hero non viene animato: il gate CSS lo spegne insieme all'agenda
+        // (vedi il commento sulla regola html.cogu-intro) e lo riaccenderebbe
+        // solo alla fine dell'intro, quattro secondi dopo. Chi scorre subito
+        // troverebbe un blocco di testo invisibile in mezzo alla pagina.
+        // L'opacita' inline batte il gate e lo riaccende adesso.
+        utils.set(
+          '.hero-badge, .hero-content h1, .hero-lead, .hero-desc, .hero-content > .btn-primary',
+          { opacity: 1 }
+        );
+      }
+
       const cleanup = () => {
         if (window.__coguFailsafe) clearTimeout(window.__coguFailsafe);
         if (window.__coguReveal) window.__coguReveal();
@@ -145,10 +215,14 @@ import Footer from '../components/Footer.astro';
         onComplete: cleanup,
       });
 
-      // Il gate CSS html.cogu-intro spegne l'hero, ma le parole del titolo hanno
-      // anche un opacity inline messo qui sopra: se la timeline si blocca (scheda
-      // in background, rAF sospesi, CDN lenta) togliere la classe non basta e il
-      // titolo resta invisibile. Il failsafe in BaseLayout chiama questa funzione.
+      // Il gate CSS html.cogu-intro spegne la prima schermata, ma i suoi
+      // elementi hanno anche un opacity inline messo qui sopra: se la timeline
+      // si blocca (scheda in background, rAF sospesi, modulo lento) togliere la
+      // classe non basta e il contenuto resta invisibile. Il failsafe in
+      // BaseLayout chiama questa funzione.
+      //
+      // Riaccende tutte e due le prime schermate possibili, non solo quella
+      // scelta: il gate CSS le spegne entrambe, quindi entrambe vanno riaccese.
       window.__coguHeroReset = () => {
         try { tl.pause(); } catch (e) {}
         try {
@@ -156,20 +230,37 @@ import Footer from '../components/Footer.astro';
           utils.set('.hero-badge, .hero-lead, .hero-desc, .hero-content > .btn-primary',
                     { opacity: 1, translateY: 0, scale: 1 });
         } catch (e) {}
+        bersagliAgenda.forEach((gruppo) => {
+          if (!gruppo.length) return;
+          try { utils.set(gruppo, { opacity: 1, translateY: 0 }); } catch (e) {}
+        });
       };
 
       tl
         .add('.cogu-intro-brand', { opacity: [0, 1], translateY: [30, 0], duration: 780 })
         .add('.cogu-intro-tag',   { opacity: [0, 1], translateY: [14, 0] }, '-=500')
         .add('.cogu-intro-rule',  { scaleX: [0, 1], duration: 640 }, '-=430')
-        .add('.cogu-intro-overlay', { translateY: ['0%', '-105%'], duration: 900, ease: 'inOutQuart' }, '+=260')
-        .add('.hero-badge', { opacity: [0, 1], scale: [0.82, 1], translateY: [12, 0] }, '-=560')
-        .add(words.length ? words : '.hero-content h1',
-             { opacity: [0, 1], translateY: [32, 0], duration: 760, delay: stagger(42) }, '-=470')
-        .add('.hero-lead',  { opacity: [0, 1], translateY: [16, 0] }, '-=520')
-        .add('.hero-desc',  { opacity: [0, 1], translateY: [16, 0] }, '-=560')
-        .add('.hero-content > .btn-primary',
-             { opacity: [0, 1], scale: [0.9, 1], translateY: [10, 0], ease: 'outBack' }, '-=520');
+        .add('.cogu-intro-overlay', { translateY: ['0%', '-105%'], duration: 900, ease: 'inOutQuart' }, '+=260');
+
+      if (apreAgenda) {
+        // Cascata dell'agenda: titolo, sommario, poi le locandine — che sono la
+        // ragione per cui questa sezione sta in cima, e quindi entrano con il
+        // passo piu' lungo — e infine il pulsante.
+        const [titolo, sommario, carosello, azioni] = bersagliAgenda;
+        if (titolo.length)    tl.add(titolo,    { opacity: [0, 1], translateY: [26, 0], duration: 760 }, '-=560');
+        if (sommario.length)  tl.add(sommario,  { opacity: [0, 1], translateY: [16, 0] }, '-=520');
+        if (carosello.length) tl.add(carosello, { opacity: [0, 1], translateY: [28, 0], duration: 820 }, '-=540');
+        if (azioni.length)    tl.add(azioni,    { opacity: [0, 1], translateY: [10, 0] }, '-=620');
+      } else {
+        tl
+          .add('.hero-badge', { opacity: [0, 1], scale: [0.82, 1], translateY: [12, 0] }, '-=560')
+          .add(words.length ? words : '.hero-content h1',
+               { opacity: [0, 1], translateY: [32, 0], duration: 760, delay: stagger(42) }, '-=470')
+          .add('.hero-lead',  { opacity: [0, 1], translateY: [16, 0] }, '-=520')
+          .add('.hero-desc',  { opacity: [0, 1], translateY: [16, 0] }, '-=560')
+          .add('.hero-content > .btn-primary',
+               { opacity: [0, 1], scale: [0.9, 1], translateY: [10, 0], ease: 'outBack' }, '-=520');
+      }
 
       // Il failsafe di BaseLayout scatta a 3s, ma la timeline completa dura di
       // piu': se anime.js e' partito davvero lo riprogrammiamo oltre la durata
@@ -188,8 +279,8 @@ import Footer from '../components/Footer.astro';
   }
 
   // Con "movimento ridotto" attivo non si parte proprio: nessun pannello, nessuna
-  // animazione, l'hero e' visibile fin dal primo istante (lo script inline in
-  // BaseLayout non ha nemmeno applicato il gate CSS).
+  // animazione, la prima schermata e' visibile fin dal primo istante (lo script
+  // inline in BaseLayout non ha nemmeno applicato il gate CSS).
   const movimentoRidotto =
     window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!movimentoRidotto) avviaIntro();
